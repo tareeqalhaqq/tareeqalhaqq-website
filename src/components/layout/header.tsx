@@ -24,8 +24,8 @@ export default function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
-        <div className="container mx-auto flex h-16 items-center justify-between">
+      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container mx-auto flex h-20 items-center justify-between">
           <Link href="/" className="flex items-center">
             <Logo />
           </Link>
@@ -35,7 +35,7 @@ export default function Header() {
               link.subLinks ? (
                 <DropdownMenu key={link.name}>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="flex items-center gap-1">
+                    <Button variant="ghost" className="text-base font-headline font-semibold flex items-center gap-1 text-foreground/80 hover:text-foreground">
                       {link.name}
                       <ChevronDown className="h-4 w-4" />
                     </Button>
@@ -53,8 +53,8 @@ export default function Header() {
                   key={link.name}
                   href={link.href!}
                   className={cn(
-                    "transition-colors hover:text-primary",
-                    pathname === link.href ? "text-primary" : "text-muted-foreground"
+                    "text-base font-headline font-semibold transition-colors hover:text-foreground",
+                    pathname === link.href ? "text-foreground" : "text-foreground/80"
                   )}
                 >
                   {link.name}

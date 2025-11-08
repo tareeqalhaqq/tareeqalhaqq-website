@@ -17,8 +17,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        body: ['Lora', 'serif'],
-        headline: ['Lora', 'serif'],
+        body: ['var(--font-inter)', 'sans-serif'],
+        headline: ['var(--font-cormorant)', 'serif'],
         code: ['monospace'],
       },
       colors: {
@@ -103,20 +103,22 @@ export default {
       typography: (theme: any) => ({
         DEFAULT: {
           css: {
-            color: theme('colors.foreground'),
-            a: {
-              color: theme('colors.primary.DEFAULT'),
-              '&:hover': {
-                color: theme('colors.primary.DEFAULT'),
-              },
-            },
-            h1: { color: theme('colors.foreground') },
-            h2: { color: theme('colors.foreground') },
-            h3: { color: theme('colors.foreground') },
-            h4: { color: theme('colors.foreground') },
-            strong: { color: theme('colors.foreground') },
-            code: { color: theme('colors.foreground') },
-            blockquote: { color: theme('colors.muted.foreground'), borderLeftColor: theme('colors.border') },
+            '--tw-prose-body': theme('colors.foreground'),
+            '--tw-prose-headings': theme('colors.foreground'),
+            '--tw-prose-lead': theme('colors.foreground'),
+            '--tw-prose-links': theme('colors.primary.DEFAULT'),
+            '--tw-prose-bold': theme('colors.foreground'),
+            '--tw-prose-counters': theme('colors.muted.foreground'),
+            '--tw-prose-bullets': theme('colors.border'),
+            '--tw-prose-hr': theme('colors.border'),
+            '--tw-prose-quotes': theme('colors.muted.foreground'),
+            '--tw-prose-quote-borders': theme('colors.border'),
+            '--tw-prose-captions': theme('colors.muted.foreground'),
+            '--tw-prose-code': theme('colors.foreground'),
+            '--tw-prose-pre-code': theme('colors.foreground'),
+            '--tw-prose-pre-bg': theme('colors.muted.DEFAULT'),
+            '--tw-prose-th-borders': theme('colors.border'),
+            '--tw-prose-td-borders': theme('colors.border'),
           },
         },
       }),

@@ -1,10 +1,25 @@
 import type { SVGProps } from 'react';
 
 export const Logo = (props: SVGProps<SVGSVGElement>) => (
-  <div className="flex items-center justify-center" {...props}>
-    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-primary mr-2">
-      <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  <div className="flex items-center justify-center font-headline" {...props}>
+    <svg
+      width="100"
+      height="40"
+      viewBox="0 0 120 40"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className="mr-2 h-10"
+    >
+      <text
+        x="5"
+        y="30"
+        fontFamily="Cormorant Garamond, serif"
+        fontSize="24"
+        fontWeight="bold"
+        fill="hsl(var(--primary))"
+      >
+        RAHMANIYYAH
+      </text>
     </svg>
-    <span className="text-xl font-bold font-headline text-foreground">Rahmaniyyah</span>
   </div>
 );
