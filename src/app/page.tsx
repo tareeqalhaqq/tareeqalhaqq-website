@@ -20,6 +20,13 @@ export default function Home() {
         <div 
           className="w-full h-full absolute inset-0 bg-no-repeat bg-center bg-cover"
           style={{
+            backgroundImage: "url('https://storage.googleapis.com/static.invertase.io/assets/rahmaniyyah/rahmaniyyah-bg.jpg')",
+            opacity: 0.3
+          }}
+        />
+         <div 
+          className="w-full h-full absolute inset-0 bg-no-repeat bg-center bg-cover"
+          style={{
             backgroundImage: "radial-gradient(ellipse at center, rgba(140, 93, 39, 0.4) 0%, rgba(0,0,0,0.8) 70%, #000 100%)",
             opacity: 0.8
           }}
@@ -44,7 +51,7 @@ export default function Home() {
                 <p className="text-lg md:text-xl text-gray-300" style={{ fontFamily: 'Amiri, serif' }}>
                     وَيُزَكِّيهِمْ وَيُعَلِّمُهُمُ الْكِتَابَ وَالْحِكْمَةَ
                 </p>
-                <p className="text-sm text-gray-400 italic mt-1">
+                <p className="text-sm text-gray-400 italic mt-1 font-serif">
                     "He purifies them and teaches them the Book and wisdom"
                 </p>
             </div>
