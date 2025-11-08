@@ -28,7 +28,7 @@ export default function Home() {
         <div className="relative z-10 text-center flex flex-col items-center max-w-4xl mx-auto">
             <div className="mb-6">
                 <Image
-                    src="https://firebasestudio.ai/_next/image?url=https%3A%2F%2Fstorage.googleapis.com%2Fstatic.invertase.io%2Fassets%2Frahmaniyyah%2Flogo.png&w=256&q=75"
+                    src="https://storage.googleapis.com/static.invertase.io/assets/rahmaniyyah/logo.png"
                     alt="Al-Madrasatu Ar-Rahmaniyyah Logo"
                     width={150}
                     height={150}
@@ -51,7 +51,7 @@ export default function Home() {
             
             <div className="my-8">
                 <Image
-                    src="https://firebasestudio.ai/_next/image?url=https%3A%2F%2Fstorage.googleapis.com%2Fstatic.invertase.io%2Fassets%2Frahmaniyyah%2Fustadh.png&w=256&q=75"
+                    src="https://storage.googleapis.com/static.invertase.io/assets/rahmaniyyah/ustadh.png"
                     alt="Ustadh Abdulrahman Hassan"
                     width={150}
                     height={150}
