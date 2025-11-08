@@ -102,7 +102,7 @@ export default function Header() {
                         ) : (
                           <Link
                             href={link.href!}
-                            className="font-medium text-foreground hover:text-primary"
+                            className={cn("font-medium text-foreground hover:text-primary", pathname === link.href && 'text-primary')}
                             onClick={() => setMobileMenuOpen(false)}
                           >
                             {link.name}

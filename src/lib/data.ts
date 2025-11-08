@@ -17,16 +17,9 @@ function getImage(id: string): ImagePlaceholder {
 
 export const navLinks = [
   { name: 'Home', href: '/' },
-  { name: 'About Us', href: '/about' },
-  { 
-    name: 'Media', 
-    subLinks: [
-      { name: 'Photos', href: '/media/photos' },
-      { name: 'Videos', href: '/media/videos' },
-    ]
-  },
-  { name: 'Events', href: '/events' },
-  { name: 'Contact Us', href: '/contact' },
+  { name: 'About', href: '/about' },
+  { name: 'Academy', href: '/academy' },
+  { name: 'Sign In', href: '/signin' },
 ];
 
 export const socialLinks = [
