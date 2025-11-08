@@ -36,7 +36,7 @@ export default function Home() {
             <div className="mb-6">
                 <Image
                     src="https://storage.googleapis.com/static.invertase.io/assets/rahmaniyyah/logo.png"
-                    alt="Al-Madrasatu Ar-Rahmaniyyah Logo"
+                    alt="Tareeq Al Haqq Logo"
                     width={150}
                     height={150}
                     className="mx-auto"
@@ -44,7 +44,7 @@ export default function Home() {
             </div>
             
             <h1 className="text-4xl md:text-6xl font-bold font-headline text-white drop-shadow-md">
-                Al-Madrasatu Ar-Raḥmāniyyah
+                Tareeq Al Haqq
             </h1>
 
             <div className="my-4">

@@ -1,3 +1,4 @@
+
 import Image from "next/image";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,7 +10,7 @@ export default function AboutPage() {
     <div className="bg-card">
       <div className="container mx-auto py-16 px-4 sm:px-6 lg:px-8">
         <h1 className="text-4xl font-extrabold tracking-tight text-center font-headline lg:text-5xl mb-12">
-          About Rahmaniyyah
+          About Tareeq Al Haqq
         </h1>
 
         {aboutImage && (

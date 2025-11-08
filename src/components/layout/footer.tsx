@@ -1,3 +1,4 @@
+
 import Link from "next/link";
 import { Logo } from "@/components/icons";
 import { socialLinks, navLinks } from "@/lib/data";
@@ -61,7 +62,7 @@ export default function Footer() {
           </div>
         </div>
         <div className="mt-8 border-t pt-8 text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} Rahmaniyyah. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Tareeq Al Haqq. All rights reserved.</p>
         </div>
       </div>
     </footer>

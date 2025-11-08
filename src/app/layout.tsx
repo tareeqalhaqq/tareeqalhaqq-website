@@ -16,7 +16,7 @@ const fontSerif = FontSerif({
 
 
 export const metadata: Metadata = {
-  title: 'Al-Madrasatu Ar-Rahmāniyyah',
+  title: 'Tareeq Al Haqq',
   description: 'The Path to Knowledge Part 2 with Ustadh Abdulrahman Hassan',
 };
 

@@ -1,3 +1,4 @@
+
 import type { SVGProps } from 'react';
 
 export const Logo = (props: SVGProps<SVGSVGElement>) => (
@@ -18,7 +19,7 @@ export const Logo = (props: SVGProps<SVGSVGElement>) => (
         fontWeight="bold"
         fill="hsl(var(--primary))"
       >
-        RAHMANIYYAH
+        TAREEQ AL HAQQ
       </text>
     </svg>
   </div>
