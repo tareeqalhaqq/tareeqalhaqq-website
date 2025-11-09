@@ -8,7 +8,7 @@ export function Logo({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
     <div className={cn("flex items-center gap-4 text-foreground", className)} {...props}>
       <span className="relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl bg-primary/10">
         <Image
-          src="/images/logo-mark.svg"
+          src="/images/logo.png"
           alt="Tareeq Al Haqq crest"
           width={56}
           height={56}

@@ -80,7 +80,7 @@ export default function Header() {
             </Button>
             <Button
               asChild
-              className="hidden rounded-full bg-gradient-to-r from-primary via-amber-400 to-primary px-6 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-primary-foreground shadow-lg shadow-black/30 transition hover:shadow-xl hover:shadow-black/40 md:inline-flex"
+              className="hidden rounded-full bg-primary px-6 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-primary-foreground shadow-lg shadow-black/30 transition hover:shadow-xl hover:shadow-black/40 md:inline-flex"
             >
               <Link href="/contact">Connect</Link>
             </Button>
