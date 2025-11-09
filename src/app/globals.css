@@ -4,6 +4,9 @@
 
 @layer base {
   :root {
+    --font-sans: "Inter", "Helvetica Neue", Arial, sans-serif;
+    --font-serif: "Georgia", "Times New Roman", serif;
+    --font-headline: "Times New Roman", "Georgia", serif;
     --background: 36 33% 96%;
     --foreground: 24 32% 14%;
     --card: 36 33% 100%;
@@ -39,6 +42,9 @@
     --sidebar-ring: 35 92% 52%;
   }
   .dark {
+    --font-sans: "Inter", "Helvetica Neue", Arial, sans-serif;
+    --font-serif: "Georgia", "Times New Roman", serif;
+    --font-headline: "Times New Roman", "Georgia", serif;
     --background: 25 32% 7%;
     --foreground: 46 42% 95%;
     --card: 27 32% 12%;

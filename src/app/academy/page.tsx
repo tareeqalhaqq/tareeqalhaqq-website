@@ -6,10 +6,10 @@ export default function AcademyPage() {
     <section className="page-section">
       <div className="page-section__inner grid gap-12 md:grid-cols-[1.1fr_0.9fr] md:items-center">
         <div className="space-y-6">
-          <p className="eyebrow">Rahmaniyyah Academy</p>
+          <p className="eyebrow">Tareeq Al Haqq Academy</p>
           <h1 className="text-4xl uppercase tracking-[0.2em] text-white md:text-5xl">Dedicated Learning Environment</h1>
           <p className="text-base text-white/70">
-            The Academy is our bespoke learning portal inspired by Rahmaniyyah&apos;s structured curriculum. Dive into on-demand lessons, guided reading plans, and live tutorials with our teaching team.
+            The Academy is our bespoke learning portal shaped by decades of structured scholarship. Dive into on-demand lessons, guided reading plans, and live tutorials with our teaching team.
           </p>
           <div className="grid gap-4 sm:grid-cols-2">
             {["Interactive live sessions", "Classical text syllabi", "Mentorship Q&A", "Resource library"].map((item) => (
@@ -32,7 +32,7 @@ export default function AcademyPage() {
           <p className="eyebrow text-left">Access</p>
           <h2 className="text-2xl font-headline uppercase tracking-[0.2em] text-white">How It Works</h2>
           <p className="text-sm text-white/70">
-            Enrolled students receive secure access through the academy subdomain. Lessons are released weekly and accompanied by live reflections, downloadable notes, and moderated discussion spaces mirroring Rahmaniyyah&apos;s intimate circles.
+            Enrolled students receive secure access through the academy subdomain. Lessons are released weekly and accompanied by live reflections, downloadable notes, and moderated discussion spaces that echo intimate circles of remembrance.
           </p>
           <div className="rounded-2xl border border-white/10 bg-black/50 p-4 text-left text-xs uppercase tracking-[0.3em] text-white/60">
             academy.tareeqalhaqq.org

@@ -1,8 +1,9 @@
-# **App Name**: Tareeq Al Haqq Experience
+# **App Name**: Tareeq Al Haqq
 
 ## Core Features:
 
 - Content Display: Present textual content, imagery, and multimedia in a polished, institute-quality layout that feels refined and immersive.
+- Leadership Highlight: Celebrate the guidance of Mustafa Asif as the voice of Tareeq Al Haqq.
 - Dynamic Content Loading: Load content efficiently to support numerous lessons, articles, and media items without sacrificing performance.
 - Image Gallery: Provide a carefully spaced, elegant gallery that highlights events and community life in a refined grid.
 - Video Embeds: Offer inline video playback with tasteful controls and previews suitable for long-form lectures and devotional media.

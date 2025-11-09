@@ -19,11 +19,11 @@ export default function Footer() {
           <div className="space-y-6">
             <Logo />
             <p className="max-w-sm text-sm text-white/70">
-              A spiritual path rooted in the teachings of the Qur&apos;an and Sunnah, inspired by the luminous gatherings of Rahmaniyyah.
+              A spiritual path rooted in the teachings of the Qur&apos;an and Sunnah, illuminated by gatherings of remembrance and sacred knowledge.
             </p>
             <div className="flex items-center gap-4 text-xs uppercase tracking-[0.3em] text-white/40">
               <span className="h-px flex-1 bg-white/20" />
-              Rahmaniyyah Inspired
+              Guided by Prophetic Tradition
               <span className="h-px flex-1 bg-white/20" />
             </div>
           </div>
@@ -51,7 +51,7 @@ export default function Footer() {
               <h3 className="text-xs font-semibold uppercase tracking-[0.35em] text-white/60">Contact</h3>
               <div className="mt-4 space-y-2 text-white/60">
                 <p>123 Spiritual Path, Knowledge City, 12345</p>
-                <p>contact@rahmaniyyah.com</p>
+                <p>contact@tareeqalhaqq.org</p>
                 <p>(123) 456-7890</p>
               </div>
             </div>

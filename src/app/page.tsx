@@ -19,7 +19,8 @@ export default function Home() {
             <div
               className="absolute inset-0 bg-cover bg-center"
               style={{
-                backgroundImage: "url('https://storage.googleapis.com/static.invertase.io/assets/rahmaniyyah/rahmaniyyah-bg.jpg')",
+                backgroundImage:
+                  "url('https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=2000&q=80')",
               }}
             />
             <div className="absolute inset-0 bg-gradient-to-br from-black/90 via-black/80 to-black/95" />
@@ -27,17 +28,13 @@ export default function Home() {
           </div>
 
           <div className="relative z-10 mx-auto flex w-full max-w-5xl flex-col items-center gap-8 px-6 py-16">
-            <Image
-              src="https://storage.googleapis.com/static.invertase.io/assets/rahmaniyyah/logo.png"
-              alt="Tareeq Al Haqq crest"
-              width={140}
-              height={140}
-              className="h-28 w-28 drop-shadow-[0_15px_40px_rgba(231,178,84,0.45)]"
-              priority
-            />
+            <span className="relative flex h-32 w-32 items-center justify-center overflow-hidden rounded-full border border-white/20 bg-gradient-to-br from-primary/40 via-primary/20 to-transparent shadow-[0_15px_40px_rgba(231,178,84,0.45)]">
+              <span className="absolute inset-[3px] rounded-full bg-gradient-to-br from-white/5 via-transparent to-black/40" />
+              <span className="relative text-lg font-headline uppercase tracking-[0.75em] text-primary-foreground">TAH</span>
+            </span>
 
             <div className="space-y-4">
-              <p className="eyebrow text-primary">Rahmaniyyah Institute</p>
+              <p className="eyebrow text-primary">Tareeq Al Haqq</p>
               <h1 className="text-4xl font-headline uppercase tracking-[0.15em] text-white drop-shadow-md md:text-6xl">
                 The Path to Knowledge
               </h1>
@@ -51,15 +48,15 @@ export default function Home() {
 
             <div className="flex flex-col items-center gap-6 md:flex-row">
               <Image
-                src="https://storage.googleapis.com/static.invertase.io/assets/rahmaniyyah/ustadh.png"
-                alt="Ustadh Abdulrahman Hassan"
+                src="https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=600&q=80"
+                alt="Mustafa Asif portrait"
                 width={170}
                 height={170}
                 className="h-36 w-36 rounded-full border border-white/20 bg-white/5 object-cover shadow-[0_18px_50px_rgba(0,0,0,0.7)]"
               />
               <div className="text-left">
                 <p className="text-sm uppercase tracking-[0.4em] text-primary/70">Led by</p>
-                <p className="text-2xl font-headline text-white">Ustadh Abdulrahman Hassan</p>
+                <p className="text-2xl font-headline text-white">Mustafa Asif</p>
                 <p className="mt-1 max-w-md text-sm text-white/70">
                   A sacred curriculum reviving the classical sciences of Ihsan, tailored for seekers who desire to anchor their hearts in remembrance.
                 </p>
@@ -103,7 +100,7 @@ export default function Home() {
               <p className="eyebrow">Our Tradition</p>
               <h2 className="text-3xl uppercase tracking-[0.2em] text-white md:text-4xl">A Sanctuary for Hearts and Minds</h2>
               <p className="mx-auto max-w-3xl text-base text-white/70">
-                Inspired by Rahmaniyyah, we nurture seekers through a timeless blend of sacred knowledge, devotional practice, and community service.
+                Rooted in the Prophetic path, we nurture seekers through a timeless blend of sacred knowledge, devotional practice, and community service.
               </p>
             </div>
 
@@ -142,7 +139,7 @@ export default function Home() {
               <p className="eyebrow">Retreat Highlights</p>
               <h2 className="text-3xl uppercase tracking-[0.2em] text-white md:text-4xl">Immerse Yourself in a Living Legacy</h2>
               <p className="text-base text-white/70">
-                Over nine nights, delve into tafsir, sirah, and purification of the heart alongside immersive dhikr circles. Experience the grace of companionship and the discipline of sacred knowledge in an atmosphere crafted to mirror Rahmaniyyah&apos;s spiritual elegance.
+                Over nine nights, delve into tafsir, sirah, and purification of the heart alongside immersive dhikr circles. Experience the grace of companionship and the discipline of sacred knowledge in an atmosphere shaped by venerable institutes of remembrance.
               </p>
               <div className="grid gap-4 md:grid-cols-2">
                 {["Daily durus & dhikr", "Mentorship circles", "Community iftar", "Dedicated sisters programme"].map((item) => (
@@ -166,7 +163,7 @@ export default function Home() {
               >
                 <Link href="/contact">Join the Waiting List</Link>
               </Button>
-              <p className="text-xs uppercase tracking-[0.4em] text-white/50">Rahmaniyyah Inspired • London • 2025</p>
+              <p className="text-xs uppercase tracking-[0.4em] text-white/50">Guided by Prophetic Tradition • London • 2025</p>
             </div>
           </div>
         </section>

@@ -9,7 +9,7 @@ export default function SignInPage() {
           <p className="eyebrow">Member Access</p>
           <h1 className="text-4xl uppercase tracking-[0.2em] text-white md:text-5xl">Sign In</h1>
           <p className="text-base text-white/70">
-            Access your Rahmaniyyah-inspired learning portal, track course progress, and join live sessions via the academy dashboard.
+            Access your Tareeq Al Haqq learning portal, track course progress, and join live sessions via the academy dashboard.
           </p>
         </div>
         <div className="glass-panel space-y-6 text-left">
