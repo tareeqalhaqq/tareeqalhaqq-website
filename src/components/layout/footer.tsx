@@ -13,56 +13,71 @@ const iconMap = {
 
 export default function Footer() {
   return (
-    <footer className="bg-card border-t">
-      <div className="container mx-auto py-12 px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div className="space-y-4">
+    <footer className="border-t border-white/10 bg-black/70 text-white">
+      <div className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
+        <div className="grid gap-12 md:grid-cols-[1.4fr_1fr_1fr]">
+          <div className="space-y-6">
             <Logo />
-            <p className="text-muted-foreground text-sm">
-              A spiritual path rooted in the teachings of the Quran and Sunnah.
+            <p className="max-w-sm text-sm text-white/70">
+              A spiritual path rooted in the teachings of the Qur&apos;an and Sunnah, inspired by the luminous gatherings of Rahmaniyyah.
             </p>
-          </div>
-          <div>
-            <h3 className="text-sm font-semibold text-foreground tracking-wider uppercase">Quick Links</h3>
-            <ul className="mt-4 space-y-2">
-              {navLinks.map((link) => (
-                <li key={link.name}>
-                  {link.href ? (
-                    <Link href={link.href} className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                      {link.name}
-                    </Link>
-                  ) : (
-                    <span className="text-sm text-muted-foreground">{link.name}</span>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div>
-            <h3 className="text-sm font-semibold text-foreground tracking-wider uppercase">Contact</h3>
-            <div className="mt-4 space-y-2 text-sm text-muted-foreground">
-              <p>123 Spiritual Path, Knowledge City, 12345</p>
-              <p>Email: contact@rahmaniyyah.com</p>
-              <p>Phone: (123) 456-7890</p>
+            <div className="flex items-center gap-4 text-xs uppercase tracking-[0.3em] text-white/40">
+              <span className="h-px flex-1 bg-white/20" />
+              Rahmaniyyah Inspired
+              <span className="h-px flex-1 bg-white/20" />
             </div>
           </div>
-          <div>
-            <h3 className="text-sm font-semibold text-foreground tracking-wider uppercase">Follow Us</h3>
-            <div className="flex mt-4 space-x-4">
+          <div className="grid gap-6 text-sm sm:grid-cols-2 md:grid-cols-1">
+            <div>
+              <h3 className="text-xs font-semibold uppercase tracking-[0.35em] text-white/60">Quick Links</h3>
+              <ul className="mt-4 space-y-3">
+                {navLinks.map((link) => (
+                  <li key={link.name}>
+                    {link.href ? (
+                      <Link
+                        href={link.href}
+                        className="text-white/60 transition hover:text-primary"
+                      >
+                        {link.name}
+                      </Link>
+                    ) : (
+                      <span className="text-white/40">{link.name}</span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h3 className="text-xs font-semibold uppercase tracking-[0.35em] text-white/60">Contact</h3>
+              <div className="mt-4 space-y-2 text-white/60">
+                <p>123 Spiritual Path, Knowledge City, 12345</p>
+                <p>contact@rahmaniyyah.com</p>
+                <p>(123) 456-7890</p>
+              </div>
+            </div>
+          </div>
+          <div className="space-y-6">
+            <h3 className="text-xs font-semibold uppercase tracking-[0.35em] text-white/60">Follow Us</h3>
+            <div className="flex items-center gap-4">
               {socialLinks.map((social) => {
                 const Icon = iconMap[social.icon as keyof typeof iconMap];
                 return (
-                  <Link key={social.name} href={social.href} className="text-muted-foreground hover:text-primary transition-colors">
-                    {Icon && <Icon className="h-6 w-6" />}
+                  <Link
+                    key={social.name}
+                    href={social.href}
+                    className="flex h-12 w-12 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/70 transition hover:border-primary/60 hover:text-primary"
+                  >
+                    {Icon && <Icon className="h-5 w-5" />}
                     <span className="sr-only">{social.name}</span>
                   </Link>
                 );
               })}
             </div>
+            <p className="text-xs uppercase tracking-[0.35em] text-white/40">Stay connected to the path</p>
           </div>
         </div>
-        <div className="mt-8 border-t pt-8 text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} Tareeq Al Haqq. All rights reserved.</p>
+        <div className="mt-12 border-t border-white/10 pt-8 text-center text-xs uppercase tracking-[0.3em] text-white/40">
+          &copy; {new Date().getFullYear()} Tareeq Al Haqq. All rights reserved.
         </div>
       </div>
     </footer>
