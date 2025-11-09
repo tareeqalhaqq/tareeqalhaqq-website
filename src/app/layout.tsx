@@ -23,7 +23,7 @@ const fontHeadline = FontDisplay({
 
 export const metadata: Metadata = {
   title: 'Tareeq Al Haqq',
-  description: 'The Path to Knowledge Part 2 with Ustadh Abdulrahman Hassan',
+  description: 'The Path to Knowledge with Mustafa Asif and Tareeq Al Haqq',
 };
 
 export default function RootLayout({
