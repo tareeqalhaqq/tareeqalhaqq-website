@@ -1,20 +1,21 @@
-# **App Name**: Rahmaniyyah Replicated
+# **App Name**: Tareeq Al Haqq
 
 ## Core Features:
 
-- Content Display: Display textual content, images, and embedded videos exactly as seen on https://rahmaniyyah.com/.
-- Dynamic Content Loading: Load content dynamically to handle a large number of pages and media assets efficiently, mirroring the behavior of https://rahmaniyyah.com/.
-- Image Gallery: Show a well-formatted photo gallery, replicating the style and functionality of the image galleries on https://rahmaniyyah.com/.
-- Video Embeds: Play videos directly in the browser with good user controls and previews, exactly as implemented on https://rahmaniyyah.com/.
-- Search Functionality: Allow users to search for specific content across all pages using keywords, mirroring the search functionality of https://rahmaniyyah.com/.
-- Contact Form: Implement a contact form identical in appearance and functionality to the one on https://rahmaniyyah.com/.
+- Content Display: Present textual content, imagery, and multimedia in a polished, institute-quality layout that feels refined and immersive.
+- Leadership Highlight: Celebrate the guidance of Mustafa Asif as the voice of Tareeq Al Haqq.
+- Dynamic Content Loading: Load content efficiently to support numerous lessons, articles, and media items without sacrificing performance.
+- Image Gallery: Provide a carefully spaced, elegant gallery that highlights events and community life in a refined grid.
+- Video Embeds: Offer inline video playback with tasteful controls and previews suitable for long-form lectures and devotional media.
+- Search Functionality: Allow visitors to quickly surface resources across events, media, and academy materials through keyword search.
+- Contact Form: Deliver a reliable contact experience that reinforces trust and invites conversation.
 
 ## Style Guidelines:
 
-- Primary color: Light grayish-blue (#B0C4DE) to evoke a sense of serenity and calmness, matching the color scheme of https://rahmaniyyah.com/.
-- Background color: Very light gray (#F5F5F5) for a clean and unobtrusive backdrop, exactly as on https://rahmaniyyah.com/.
-- Accent color: Soft lavender (#E6E6FA) to complement the primary color and provide gentle visual interest, replicating the accent color usage on https://rahmaniyyah.com/.
-- Body and headline font: 'Alegreya', a humanist serif with an elegant, intellectual, contemporary feel; suitable for headlines or body text, identical to the typography on https://rahmaniyyah.com/.
-- Use simple and elegant icons that reflect the spiritual and community focus of the website, mirroring the icons used on https://rahmaniyyah.com/.
-- Maintain a clean, grid-based layout to ensure content is well-organized and easy to navigate, replicating the layout structure of https://rahmaniyyah.com/.
-- Incorporate subtle, non-distracting animations for transitions and interactions, using the same animation effects as seen on https://rahmaniyyah.com/.
+- Primary color: Deep charcoal paired with luminous gold accents to communicate dignity and warmth.
+- Background color: Layered gradients and dark surfaces softened with translucent panels for a contemporary spiritual atmosphere.
+- Accent color: Soft ivory and muted amber highlights for calls to action and interactive states.
+- Body and headline font: Pair an elegant serif for display typography with a clean sans-serif for body copy to balance tradition and clarity.
+- Use simple, line-based icons that reinforce scholarship, devotion, and community.
+- Maintain a clean, grid-based layout to ensure content is well-organized and easy to navigate.
+- Incorporate subtle, non-distracting animations for transitions and interactions to reinforce polish without distraction.

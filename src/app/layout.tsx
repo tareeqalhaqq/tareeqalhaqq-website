@@ -1,23 +1,12 @@
 
 import type { Metadata } from 'next';
 import { Toaster } from "@/components/ui/toaster";
-import './globals.css';
-import { Noto_Sans as FontSans, Noto_Serif as FontSerif } from "next/font/google"
-
-const fontSans = FontSans({
-  subsets: ["latin"],
-  variable: "--font-sans",
-})
-
-const fontSerif = FontSerif({
-  subsets: ["latin"],
-  variable: "--font-serif",
-});
+import "./globals.css";
 
 
 export const metadata: Metadata = {
   title: 'Tareeq Al Haqq',
-  description: 'The Path to Knowledge Part 2 with Ustadh Abdulrahman Hassan',
+  description: 'Guidance from Mustafa Asif through the circles of Tareeq Al Haqq.',
 };
 
 export default function RootLayout({
@@ -26,12 +15,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${fontSans.variable} ${fontSerif.variable} dark`}>
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet" />
-      </head>
+    <html lang="en" className="dark">
       <body className="font-sans antialiased bg-background">
         {children}
         <Toaster />
