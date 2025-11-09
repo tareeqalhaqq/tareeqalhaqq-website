@@ -1,26 +1,17 @@
+import type { HTMLAttributes } from "react";
+import { cn } from "@/lib/utils";
 
-import type { SVGProps } from 'react';
-
-export const Logo = (props: SVGProps<SVGSVGElement>) => (
-  <div className="flex items-center justify-center font-headline" {...props}>
-    <svg
-      width="100"
-      height="40"
-      viewBox="0 0 120 40"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className="mr-2 h-10"
-    >
-      <text
-        x="5"
-        y="30"
-        fontFamily="Cormorant Garamond, serif"
-        fontSize="24"
-        fontWeight="bold"
-        fill="hsl(var(--primary))"
-      >
-        TAREEQ AL HAQQ
-      </text>
-    </svg>
-  </div>
-);
+export function Logo({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div className={cn("flex items-center gap-4 text-foreground", className)} {...props}>
+      <span className="relative flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border border-white/20 bg-gradient-to-br from-primary/30 via-primary/10 to-transparent shadow-lg shadow-black/30">
+        <span className="absolute inset-[2px] rounded-full bg-gradient-to-br from-white/10 via-transparent to-black/40" />
+        <span className="relative text-sm font-headline uppercase tracking-[0.6em] text-primary-foreground">TAH</span>
+      </span>
+      <div className="flex flex-col leading-tight">
+        <span className="text-xs uppercase tracking-[0.45em] text-primary/70">Tareeq Al Haqq</span>
+        <span className="text-2xl font-headline uppercase text-foreground">The Path</span>
+      </div>
+    </div>
+  );
+}

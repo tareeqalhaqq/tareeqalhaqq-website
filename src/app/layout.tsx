@@ -2,7 +2,7 @@
 import type { Metadata } from 'next';
 import { Toaster } from "@/components/ui/toaster";
 import './globals.css';
-import { Noto_Sans as FontSans, Noto_Serif as FontSerif } from "next/font/google"
+import { Noto_Sans as FontSans, Noto_Serif as FontSerif, Playfair_Display as FontDisplay } from "next/font/google"
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -14,10 +14,16 @@ const fontSerif = FontSerif({
   variable: "--font-serif",
 });
 
+const fontHeadline = FontDisplay({
+  subsets: ["latin"],
+  variable: "--font-headline",
+  display: "swap",
+});
+
 
 export const metadata: Metadata = {
   title: 'Tareeq Al Haqq',
-  description: 'The Path to Knowledge Part 2 with Ustadh Abdulrahman Hassan',
+  description: 'The Path to Knowledge with Mustafa Asif and Tareeq Al Haqq',
 };
 
 export default function RootLayout({
@@ -26,7 +32,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${fontSans.variable} ${fontSerif.variable} dark`}>
+    <html lang="en" className={`${fontSans.variable} ${fontSerif.variable} ${fontHeadline.variable} dark`}>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />

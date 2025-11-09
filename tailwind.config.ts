@@ -19,9 +19,9 @@ export default {
       fontFamily: {
         sans: ["var(--font-sans)", "sans-serif"],
         serif: ["var(--font-serif)", "serif"],
-        body: ['var(--font-sans)', 'sans-serif'],
-        headline: ['var(--font-sans)', 'sans-serif'],
-        code: ['monospace'],
+        body: ["var(--font-sans)", "sans-serif"],
+        headline: ["var(--font-headline)", "serif"],
+        code: ["monospace"],
       },
       colors: {
         background: 'hsl(var(--background))',
