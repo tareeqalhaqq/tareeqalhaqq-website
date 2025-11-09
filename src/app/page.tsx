@@ -28,9 +28,15 @@ export default function Home() {
           </div>
 
           <div className="relative z-10 mx-auto flex w-full max-w-5xl flex-col items-center gap-8 px-6 py-16">
-            <span className="relative flex h-32 w-32 items-center justify-center overflow-hidden rounded-full border border-white/20 bg-gradient-to-br from-primary/40 via-primary/20 to-transparent shadow-[0_15px_40px_rgba(231,178,84,0.45)]">
-              <span className="absolute inset-[3px] rounded-full bg-gradient-to-br from-white/5 via-transparent to-black/40" />
-              <span className="relative text-lg font-headline uppercase tracking-[0.75em] text-primary-foreground">TAH</span>
+            <span className="relative flex h-32 w-32 items-center justify-center overflow-hidden rounded-3xl border border-white/20 bg-black/50 shadow-[0_15px_40px_rgba(15,61,63,0.35)]">
+              <Image
+                src="/images/logo-mark.svg"
+                alt="Tareeq Al Haqq crest"
+                width={128}
+                height={128}
+                className="h-full w-full object-contain"
+                priority
+              />
             </span>
 
             <div className="space-y-4">
@@ -48,11 +54,12 @@ export default function Home() {
 
             <div className="flex flex-col items-center gap-6 md:flex-row">
               <Image
-                src="https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=600&q=80"
-                alt="Mustafa Asif portrait"
+                src="/images/logo-mark.svg"
+                alt="Portrait of Mustafa Asif"
                 width={170}
                 height={170}
-                className="h-36 w-36 rounded-full border border-white/20 bg-white/5 object-cover shadow-[0_18px_50px_rgba(0,0,0,0.7)]"
+                className="h-36 w-36 rounded-full border border-white/20 bg-white/5 object-contain p-3 shadow-[0_18px_50px_rgba(0,0,0,0.7)]"
+                priority
               />
               <div className="text-left">
                 <p className="text-sm uppercase tracking-[0.4em] text-primary/70">Led by</p>
