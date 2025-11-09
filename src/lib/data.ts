@@ -77,9 +77,26 @@ export const photoGalleries = [
   { id: 'community-iftar-2024', name: 'Community Iftar 2024', description: 'Sharing blessings and breaking bread together during the holy month of Ramadan.', coverImage: getImage('gallery3cover'), images: [getImage('event1'), getImage('event2'), getImage('event3')] },
 ];
 
+export type PhotoGallery = (typeof photoGalleries)[number];
+
 // For search functionality
 export const allContent = [
-    ...upcomingEvents.map(e => ({ type: 'Event', title: e.title, description: e.description, href: `/events`})),
-    ...videoPlaceholders.map(v => ({ type: 'Video', title: v.title, description: v.description, href: `/media/videos`})),
-    ...photoGalleries.map(g => ({ type: 'Gallery', title: g.name, description: g.description, href: `/media/photos/${g.id}`}))
+  ...upcomingEvents.map((event) => ({
+    type: 'Event',
+    title: event.title,
+    description: event.description,
+    href: '/events',
+  })),
+  ...videoPlaceholders.map((video) => ({
+    type: 'Video',
+    title: video.title,
+    description: video.description,
+    href: '/media/videos',
+  })),
+  ...photoGalleries.map((gallery) => ({
+    type: 'Gallery',
+    title: gallery.name,
+    description: gallery.description,
+    href: `/media/photos/${gallery.id}`,
+  })),
 ];

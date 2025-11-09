@@ -3,12 +3,6 @@ import type { Metadata } from 'next';
 import { Toaster } from "@/components/ui/toaster";
 import "./globals.css";
 
-const fontHeadline = FontDisplay({
-  subsets: ["latin"],
-  variable: "--font-headline",
-  display: "swap",
-});
-
 
 export const metadata: Metadata = {
   title: 'Tareeq Al Haqq',
