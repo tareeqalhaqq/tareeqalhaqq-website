@@ -10,7 +10,7 @@ export default function ContactPage() {
             <p className="eyebrow">Connect</p>
             <h1 className="text-4xl uppercase tracking-[0.2em] text-white md:text-5xl">Contact Us</h1>
             <p className="text-base text-white/70">
-              Reach out to our team for event enquiries, academy access, or spiritual guidance. Our doors remain open with warmth and sincerity for every seeker.
+              Reach out to our team for event enquiries, academy access, or spiritual guidance. We reflect Rahmaniyyah&apos;s ethos of warmth and open doors.
             </p>
           </div>
 
@@ -27,8 +27,8 @@ export default function ContactPage() {
                 <span className="rounded-full border border-white/10 bg-black/50 p-2">
                   <Mail className="h-5 w-5 text-primary" />
                 </span>
-                <a href="mailto:contact@tareeqalhaqq.org" className="text-primary hover:underline">
-                  contact@tareeqalhaqq.org
+                <a href="mailto:contact@rahmaniyyah.com" className="text-primary hover:underline">
+                  contact@rahmaniyyah.com
                 </a>
               </div>
               <div className="flex items-center gap-4">

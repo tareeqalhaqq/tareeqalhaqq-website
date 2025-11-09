@@ -1,16 +1,23 @@
+import Image from "next/image";
 import type { HTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 
 export function Logo({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={cn("flex items-center gap-4 text-foreground", className)} {...props}>
-      <span className="relative flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border border-white/20 bg-gradient-to-br from-primary/30 via-primary/10 to-transparent shadow-lg shadow-black/30">
-        <span className="absolute inset-[2px] rounded-full bg-gradient-to-br from-white/10 via-transparent to-black/40" />
-        <span className="relative text-sm font-headline uppercase tracking-[0.6em] text-primary-foreground">TAH</span>
+    <div className={cn("flex items-center gap-4", className)} {...props}>
+      <span className="relative flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border border-white/20 bg-white/10 shadow-lg shadow-black/30">
+        <Image
+          src="https://storage.googleapis.com/static.invertase.io/assets/rahmaniyyah/logo.png"
+          alt="Tareeq Al Haqq crest"
+          width={48}
+          height={48}
+          className="h-10 w-10 object-contain"
+          priority
+        />
       </span>
-      <div className="flex flex-col leading-tight">
+      <div className="flex flex-col">
         <span className="text-xs uppercase tracking-[0.45em] text-primary/70">Tareeq Al Haqq</span>
-        <span className="text-2xl font-headline uppercase text-foreground">The Path</span>
+        <span className="text-2xl font-headline uppercase text-foreground">Rahmaniyyah Path</span>
       </div>
     </div>
   );
