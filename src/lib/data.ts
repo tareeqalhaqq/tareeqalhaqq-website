@@ -41,45 +41,98 @@ export const socialLinks = [
 export const upcomingEvents = [
   {
     id: 1,
-    title: 'Weekly Dhikr Gathering',
+    title: 'Foundations of Fiqh Workshop',
     date: '2024-08-10T19:00:00Z',
-    location: 'Main Prayer Hall',
-    description: 'Join us for our weekly session of dhikr and spiritual remembrance, a time for reflection and community connection.',
+    location: 'Learning Studio, Knowledge City',
+    description:
+      'An interactive session that walks through essential rulings for everyday worship with practical case studies and references.',
     image: getImage('event1'),
   },
   {
     id: 2,
-    title: 'Lecture by Shaykh Muhammad',
+    title: 'Curating Your Digital Library',
     date: '2024-08-17T20:00:00Z',
-    location: 'Online via Zoom',
-    description: 'An inspiring lecture on the life of the Prophet Muhammad (PBUH) and its relevance in our modern lives.',
+    location: 'Online Webinar',
+    description:
+      'Learn how to organise research notes, track reading goals, and make the most of the Tareeq Al Haqq app tools.',
     image: getImage('event2'),
   },
   {
     id: 3,
-    title: 'Family Day & BBQ',
-    date: '2024-08-25T13:00:00Z',
-    location: 'Community Park',
-    description: 'A fun day for the whole family with games, food, and good company. All are welcome!',
+    title: 'Evening of Classical Texts',
+    date: '2024-08-25T18:30:00Z',
+    location: 'Community Hub Library',
+    description:
+      'Discover recommended commentaries, curated book lists, and guided reading plans for seekers at every stage.',
     image: getImage('event3'),
   },
 ];
 
 export const videoPlaceholders = [
-  { id: 'O32b3i-aRdA', title: 'Spiritual Guidance Series: Part 1', description: 'An introduction to the path of spiritual purification.', thumbnail: getImage('video1') },
-  { id: '3tmd-ClafbY', title: 'The Beauty of Recitation', description: 'A soul-stirring Quran recitation by a world-renowned Qari.', thumbnail: getImage('video2') },
-  { id: 'OQdAZ26-9iI', title: 'Community Q&A Session', description: 'Answers to common spiritual questions from the community, with Shaykh Abdullah.', thumbnail: getImage('video3') },
+  {
+    id: 'O32b3i-aRdA',
+    title: 'How to Build a Reading Routine',
+    description: 'Tips on establishing consistent study habits using the in-app library and note-taking features.',
+    thumbnail: getImage('video1'),
+  },
+  {
+    id: '3tmd-ClafbY',
+    title: 'Exploring Authentic Athkar',
+    description: 'A walkthrough of verified daily supplications and how the platform sources each reference.',
+    thumbnail: getImage('video2'),
+  },
+  {
+    id: 'OQdAZ26-9iI',
+    title: 'Ask a Teacher: Practical Fiqh',
+    description: 'A moderated session on common fiqh scenarios answered by qualified teachers.',
+    thumbnail: getImage('video3'),
+  },
 ];
 
 export const photoGalleries = [
-  { id: 'mawlid-celebration-2024', name: 'Mawlid Celebration 2024', description: 'Photos from our annual Mawlid event, celebrating the birth of the Prophet (PBUH).', coverImage: getImage('gallery1cover'), images: [getImage('gallery1_1'), getImage('gallery1_2'), getImage('gallery1_3'), getImage('gallery1_4')] },
-  { id: 'spiritual-retreat-2023', name: 'Spiritual Retreat 2023', description: 'A journey of reflection and peace in the serene countryside.', coverImage: getImage('gallery2cover'), images: [getImage('gallery2_1'), getImage('gallery2_2')] },
-  { id: 'community-iftar-2024', name: 'Community Iftar 2024', description: 'Sharing blessings and breaking bread together during the holy month of Ramadan.', coverImage: getImage('gallery3cover'), images: [getImage('event1'), getImage('event2'), getImage('event3')] },
+  {
+    id: 'library-launch-2024',
+    name: 'Library Launch 2024',
+    description: 'Highlights from introducing the curated digital and print collection to the community.',
+    coverImage: getImage('gallery1cover'),
+    images: [getImage('gallery1_1'), getImage('gallery1_2'), getImage('gallery1_3'), getImage('gallery1_4')],
+  },
+  {
+    id: 'study-retreat-2023',
+    name: 'Study Retreat 2023',
+    description: 'A focused weekend dedicated to reading, research, and collaborative learning.',
+    coverImage: getImage('gallery2cover'),
+    images: [getImage('gallery2_1'), getImage('gallery2_2')],
+  },
+  {
+    id: 'community-seminar-2024',
+    name: 'Community Seminar 2024',
+    description: 'Scenes from our annual seminar exploring prophetic guidance through authenticated sources.',
+    coverImage: getImage('gallery3cover'),
+    images: [getImage('event1'), getImage('event2'), getImage('event3')],
+  },
 ];
+
+export type PhotoGallery = (typeof photoGalleries)[number];
 
 // For search functionality
 export const allContent = [
-    ...upcomingEvents.map(e => ({ type: 'Event', title: e.title, description: e.description, href: `/events`})),
-    ...videoPlaceholders.map(v => ({ type: 'Video', title: v.title, description: v.description, href: `/media/videos`})),
-    ...photoGalleries.map(g => ({ type: 'Gallery', title: g.name, description: g.description, href: `/media/photos/${g.id}`}))
+  ...upcomingEvents.map((event) => ({
+    type: 'Event',
+    title: event.title,
+    description: event.description,
+    href: '/events',
+  })),
+  ...videoPlaceholders.map((video) => ({
+    type: 'Video',
+    title: video.title,
+    description: video.description,
+    href: '/media/videos',
+  })),
+  ...photoGalleries.map((gallery) => ({
+    type: 'Gallery',
+    title: gallery.name,
+    description: gallery.description,
+    href: `/media/photos/${gallery.id}`,
+  })),
 ];
