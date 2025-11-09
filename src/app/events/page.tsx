@@ -10,7 +10,7 @@ export default function EventsPage() {
           <p className="eyebrow">Gatherings</p>
           <h1 className="text-4xl uppercase tracking-[0.2em] text-white md:text-5xl">Upcoming Events</h1>
           <p className="mx-auto max-w-3xl text-base text-white/70">
-            Join us for evenings of remembrance, community, and scholarship carefully curated to reflect the ambience of our most cherished gatherings.
+            Join us for workshops and seminars focused on practical learning, research skills, and applying authentic guidance in everyday life.
           </p>
         </div>
 
@@ -28,7 +28,7 @@ export default function EventsPage() {
                     className="h-full w-full object-cover"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                  <p className="absolute bottom-4 left-4 text-xs uppercase tracking-[0.4em] text-white/60">Tareeq Al Haqq Gathering</p>
+                  <p className="absolute bottom-4 left-4 text-xs uppercase tracking-[0.4em] text-white/60">Tareeq Al Haqq Event</p>
                 </div>
                 <div className="flex flex-col justify-between space-y-6 p-8">
                   <div className="space-y-4">

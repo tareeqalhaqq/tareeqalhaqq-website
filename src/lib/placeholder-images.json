@@ -32,15 +32,15 @@
     },
     {
       "id": "video1",
-      "description": "Video thumbnail of a religious lecture",
+      "description": "Video thumbnail of a knowledge lecture",
       "imageUrl": "https://images.unsplash.com/photo-1664836617619-c889de3d241e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxsZWN0dXJlJTIwdmlkZW98ZW58MHx8fHwxNzYyNjAzMzI4fDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "lecture video"
     },
     {
       "id": "video2",
-      "description": "Video thumbnail of a spiritual song",
+      "description": "Video thumbnail of a study tutorial",
       "imageUrl": "https://images.unsplash.com/photo-1550096975-29c34914c5e3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8c3Bpcml0dWFsJTIwbXVzaWN8ZW58MHx8fHwxNzYyNjAzMzI5fDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "spiritual music"
+      "imageHint": "study tutorial"
     },
     {
       "id": "video3",
@@ -50,21 +50,21 @@
     },
     {
       "id": "gallery1cover",
-      "description": "Cover for a gallery of a Mawlid event",
+      "description": "Cover for a gallery of a library launch",
       "imageUrl": "https://images.unsplash.com/photo-1646620472050-2cf138bacd34?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxjZWxlYnJhdGlvbiUyMGV2ZW50fGVufDB8fHx8MTc2MjYwMzMyOXww&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "celebration event"
+      "imageHint": "library launch event"
     },
     {
       "id": "gallery2cover",
-      "description": "Cover for a gallery of a trip to a holy site",
+      "description": "Cover for a gallery of a study retreat",
       "imageUrl": "https://images.unsplash.com/photo-1668678347877-82832c30fb5f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxob2x5JTIwc2l0ZXxlbnwwfHx8fDE3NjI2MDMzMjh8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "holy site"
+      "imageHint": "study retreat location"
     },
     {
       "id": "gallery3cover",
-      "description": "Cover for a gallery of community work",
+      "description": "Cover for a gallery of a knowledge seminar",
       "imageUrl": "https://images.unsplash.com/photo-1515187029135-18ee286d815b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxjb21tdW5pdHklMjB3b3JrfGVufDB8fHx8MTc2MjYwMzMyOHww&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "community work"
+      "imageHint": "knowledge seminar"
     },
     {
       "id": "about-main",
@@ -74,39 +74,39 @@
     },
     {
       "id": "gallery1_1",
-      "description": "Photo from Mawlid event",
+      "description": "Photo from library launch",
       "imageUrl": "https://images.unsplash.com/photo-1656283384093-1e227e621fad?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxjZWxlYnJhdGlvbiUyMGNyb3dkfGVufDB8fHx8MTc2MjYwMzMyOXww&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "celebration crowd"
+      "imageHint": "library audience"
     },
     {
       "id": "gallery1_2",
-      "description": "Photo from Mawlid event",
+      "description": "Photo from library launch",
       "imageUrl": "https://images.unsplash.com/photo-1653821355168-144695e5c0e6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxldmVudCUyMGRlY29yYXRpb25zfGVufDB8fHx8MTc2MjYwMzMyOHww&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "event decorations"
     },
     {
       "id": "gallery1_3",
-      "description": "Photo from Mawlid event",
+      "description": "Photo from library launch",
       "imageUrl": "https://images.unsplash.com/photo-1667216487856-fd318be2a7f0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxwZW9wbGUlMjBwcmF5aW5nfGVufDB8fHx8MTc2MjUzODE5Nnww&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "people praying"
+      "imageHint": "focused reading"
     },
     {
       "id": "gallery1_4",
-      "description": "Photo from Mawlid event",
+      "description": "Photo from library launch",
       "imageUrl": "https://images.unsplash.com/photo-1591597807298-b7e575552882?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8Y2hpbGRyZW4lMjBzbWlsaW5nfGVufDB8fHx8MTc2MjUyODMxMXww&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "children smiling"
     },
     {
       "id": "gallery2_1",
-      "description": "Photo from trip",
+      "description": "Photo from study retreat",
       "imageUrl": "https://images.unsplash.com/photo-1717518214599-0b73fee48284?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxhbmNpZW50JTIwcnVpbnN8ZW58MHx8fHwxNzYyNTY0NTI2fDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "ancient ruins"
+      "imageHint": "study retreat site"
     },
     {
       "id": "gallery2_2",
-      "description": "Photo from trip",
+      "description": "Photo from study retreat",
       "imageUrl": "https://images.unsplash.com/photo-1601281426795-9fedf41df8d1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxtb3VudGFpbiUyMGxhbmRzY2FwZXxlbnwwfHx8fDE3NjI1OTA5Njh8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "mountain landscape"
+      "imageHint": "retreat landscape"
     }
   ]
 }

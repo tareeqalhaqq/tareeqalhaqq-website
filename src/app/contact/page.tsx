@@ -10,7 +10,7 @@ export default function ContactPage() {
             <p className="eyebrow">Connect</p>
             <h1 className="text-4xl uppercase tracking-[0.2em] text-white md:text-5xl">Contact Us</h1>
             <p className="text-base text-white/70">
-              Reach out to our team for event enquiries, academy access, or spiritual guidance. Our doors remain open with warmth and sincerity for every seeker.
+              Contact our team for platform support, partnership opportunities, or to learn more about upcoming releases. We aim to reply within two working days.
             </p>
           </div>
 
@@ -41,10 +41,10 @@ export default function ContactPage() {
           </div>
 
           <div className="rounded-3xl border border-white/10 bg-black/40 p-6 text-sm text-white/70">
-            <h3 className="text-base font-headline uppercase tracking-[0.2em] text-white">Visiting Hours</h3>
-            <p className="mt-3">Daily: 9:00 AM – 9:00 PM</p>
-            <p>Jumu&apos;ah Prayer: 1:00 PM</p>
-            <p className="mt-4 text-xs uppercase tracking-[0.3em] text-white/50">Please call ahead for special events or holidays.</p>
+            <h3 className="text-base font-headline uppercase tracking-[0.2em] text-white">Support Hours</h3>
+            <p className="mt-3">Monday – Friday: 9:00 AM – 6:00 PM (GMT)</p>
+            <p>Weekends: Limited coverage</p>
+            <p className="mt-4 text-xs uppercase tracking-[0.3em] text-white/50">Use the form for detailed queries or to request press materials.</p>
           </div>
         </div>
         <div>
