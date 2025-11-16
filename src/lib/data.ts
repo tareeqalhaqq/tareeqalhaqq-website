@@ -62,6 +62,45 @@ export const upcomingEvents = [
 ];
 
 // For search functionality
+export type AcademyCourse = {
+  id: string;
+  title: string;
+  level: 'Beginner' | 'Intermediate' | 'Advanced';
+  duration: string;
+  description: string;
+  format: string;
+};
+
+export const academyCourses: AcademyCourse[] = [
+  {
+    id: 'intro-hadith',
+    title: 'Hadith Foundations',
+    level: 'Beginner',
+    duration: '4 weeks',
+    description:
+      'Learn the core terminology, major collections, and practical study habits for approaching narrations with confidence.',
+    format: 'Live sessions + reference library',
+  },
+  {
+    id: 'fiqh-pathways',
+    title: 'Practical Fiqh Pathways',
+    level: 'Intermediate',
+    duration: '6 weeks',
+    description:
+      'A structured walkthrough of worship rulings with guided case studies, juristic maxims, and curated reading plans.',
+    format: 'Guided cohorts + weekly labs',
+  },
+  {
+    id: 'textual-precision',
+    title: 'Textual Precision Lab',
+    level: 'Advanced',
+    duration: '8 weeks',
+    description:
+      'Develop research-grade note-taking workflows that connect scans, translations, and classical commentaries inside the app.',
+    format: 'Project-based mentorship',
+  },
+];
+
 export const allContent = [
   ...upcomingEvents.map((event) => ({
     type: 'Event',
@@ -72,4 +111,10 @@ export const allContent = [
   { type: 'About', title: 'About Tareeq Al Haqq', description: 'Learn about our mission, vision, and values.', href: '/about' },
   { type: 'Academy', title: 'Academy Overview', description: 'Discover courses and structured learning tracks.', href: '/academy' },
   { type: 'Contact', title: 'Connect with Us', description: 'Reach out for guidance, support, or collaboration.', href: '/contact' },
+  ...academyCourses.map((course) => ({
+    type: 'Course',
+    title: course.title,
+    description: course.description,
+    href: '/signin',
+  })),
 ];
