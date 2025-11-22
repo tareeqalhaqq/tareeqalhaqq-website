@@ -15,8 +15,11 @@ import { auth } from '@/lib/firebase';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   createUserWithEmailAndPassword,
+  GoogleAuthProvider,
+  OAuthProvider,
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
+  signInWithPopup,
   signOut,
   onAuthStateChanged,
 } from 'firebase/auth';
@@ -38,6 +41,9 @@ const firebaseErrorMap: Record<string, string> = {
   'auth/too-many-requests': 'Too many attempts. Please wait a moment and try again.',
   'auth/email-already-in-use': 'This email is already associated with an account. Please sign in instead.',
   'auth/weak-password': 'Please choose a stronger password (at least 6 characters).',
+  'auth/popup-closed-by-user': 'The sign-in window was closed before completing the process.',
+  'auth/cancelled-popup-request': 'Another sign-in request is already in progress.',
+  'auth/popup-blocked': 'Your browser blocked the sign-in popup. Please enable popups and try again.',
 };
 
 export default function SignInPage() {
@@ -92,6 +98,29 @@ export default function SignInPage() {
     } catch (error) {
       const code = (error as { code?: string }).code;
       setErrorMessage(firebaseErrorMap[code ?? ''] ?? 'Unable to sign in. Please verify your details and try again.');
+      setStatus('idle');
+    }
+  };
+
+  const handleProviderSignIn = async (providerType: 'google' | 'apple') => {
+    setStatus('loading');
+    setErrorMessage(null);
+
+    try {
+      const provider = providerType === 'google' ? new GoogleAuthProvider() : new OAuthProvider('apple.com');
+
+      if (providerType === 'apple') {
+        provider.addScope('email');
+        provider.addScope('name');
+      }
+
+      await signInWithPopup(auth, provider);
+      setStatus('success');
+    } catch (error) {
+      const code = (error as { code?: string }).code;
+      setErrorMessage(
+        firebaseErrorMap[code ?? ''] ?? 'Unable to sign in with the selected provider. Please try again.',
+      );
       setStatus('idle');
     }
   };
@@ -176,6 +205,30 @@ export default function SignInPage() {
               ) : (
                 <Form {...form}>
                   <form className="space-y-5" onSubmit={form.handleSubmit(handleSubmit)}>
+                    <div className="space-y-3">
+                      <Button
+                        type="button"
+                        className="w-full bg-white text-slate-900 hover:bg-white/90"
+                        disabled={status === 'loading'}
+                        onClick={() => handleProviderSignIn('google')}
+                      >
+                        Continue with Google
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        className="w-full border border-white/10 bg-white/5 text-white hover:bg-white/10"
+                        disabled={status === 'loading'}
+                        onClick={() => handleProviderSignIn('apple')}
+                      >
+                        Continue with Apple
+                      </Button>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-white/60">
+                      <span className="h-px flex-1 bg-white/10" aria-hidden />
+                      <span>Or continue with email</span>
+                      <span className="h-px flex-1 bg-white/10" aria-hidden />
+                    </div>
                     <FormField
                       control={form.control}
                       name="email"
