@@ -1,5 +1,7 @@
 import { requireStudent } from '@/lib/auth';
 
+export const dynamic = 'force-dynamic';
+
 export default async function AcademyPortalPage() {
   const { profile, user } = await requireStudent();
   const displayName = profile?.full_name ?? user?.email ?? 'Student';

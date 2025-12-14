@@ -1,6 +1,8 @@
 import { requireRole } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
 
+export const dynamic = 'force-dynamic';
+
 export default async function StudentDashboardPage() {
   const { profile } = await requireRole('student');
 
