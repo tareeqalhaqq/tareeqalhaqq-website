@@ -18,6 +18,7 @@ export type Profile = {
 export type AuthContext = {
   user: User | null;
   profile: Profile | null;
+  isAdmin: boolean;
 };
 
 export async function getUserAndProfile(): Promise<AuthContext> {
@@ -34,7 +35,7 @@ export async function getUserAndProfile(): Promise<AuthContext> {
   }
 
   if (!user) {
-    return { user: null, profile: null };
+    return { user: null, profile: null, isAdmin: false };
   }
 
   const { data: profile, error: profileError } = await supabase
@@ -47,7 +48,7 @@ export async function getUserAndProfile(): Promise<AuthContext> {
     throw profileError;
   }
 
-  return { user, profile };
+  return { user, profile, isAdmin: profile.role === 'admin' };
 }
 
 export async function requireAuth(): Promise<AuthContext> {
@@ -57,7 +58,7 @@ export async function requireAuth(): Promise<AuthContext> {
     redirect('/login');
   }
 
-  return { user, profile };
+  return { user, profile, isAdmin: profile?.role === 'admin' };
 }
 
 export async function requireRole(role: Role, redirectPath: string = '/dashboard'): Promise<AuthContext> {
@@ -67,5 +68,15 @@ export async function requireRole(role: Role, redirectPath: string = '/dashboard
     redirect(redirectPath);
   }
 
-  return { user, profile };
+  return { user, profile, isAdmin: profile.role === 'admin' };
+}
+
+export async function requireStudent(redirectPath: string = '/login'): Promise<AuthContext> {
+  const { user, profile } = await requireAuth();
+
+  if (!profile || (profile.role !== 'student' && profile.role !== 'admin')) {
+    redirect(redirectPath);
+  }
+
+  return { user, profile, isAdmin: profile.role === 'admin' };
 }

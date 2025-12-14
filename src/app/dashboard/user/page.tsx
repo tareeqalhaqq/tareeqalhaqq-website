@@ -3,6 +3,8 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { requireAuth } from '@/lib/auth';
 
+export const dynamic = 'force-dynamic';
+
 export default async function UserDashboardPage() {
   const { profile, user, isAdmin } = await requireAuth();
   const displayName = profile?.full_name ?? user?.email ?? 'there';
