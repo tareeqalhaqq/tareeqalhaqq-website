@@ -1,23 +1,49 @@
+'use client';
+
 import Link from 'next/link';
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
-import { createClient } from '@/utils/supabase/server';
+import { createClient } from '@/utils/supabase/clients';
 
-export const dynamic = 'force-dynamic';
+export default function DashboardPage() {
+  const router = useRouter();
+  const supabase = useMemo(() => createClient(), []);
+  const [displayName, setDisplayName] = useState<string>('there');
+  const [checkedAuth, setCheckedAuth] = useState(false);
 
-export default async function DashboardPage() {
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  useEffect(() => {
+    const hydrateUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-  const displayName = user?.user_metadata?.full_name ?? user?.email ?? 'there';
+      if (!user) {
+        router.replace('/signin');
+        return;
+      }
 
-  if (!user) {
-    redirect('/signin');
+      const name = user.user_metadata?.full_name ?? user.email ?? 'there';
+      setDisplayName(name);
+      setCheckedAuth(true);
+    };
+
+    hydrateUser();
+  }, [router, supabase]);
+
+  if (!checkedAuth) {
+    return (
+      <section className="page-section">
+        <div className="page-section__inner space-y-8">
+          <div className="glass-panel space-y-3 p-8 text-white">
+            <p className="eyebrow">Dashboard</p>
+            <h1 className="text-3xl font-semibold">Loading your dashboard...</h1>
+            <p className="text-sm text-white/70">We&apos;re checking your session and preferences.</p>
+          </div>
+        </div>
+      </section>
+    );
   }
 
   return (
