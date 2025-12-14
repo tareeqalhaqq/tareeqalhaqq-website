@@ -1,0 +1,8 @@
+{
+  "name": "@supabase/ssr",
+  "version": "0.5.2",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "description": "Local stub for Supabase SSR client",
+  "license": "MIT"
+}
