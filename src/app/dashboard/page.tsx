@@ -2,12 +2,20 @@ import { redirect } from 'next/navigation';
 
 import { requireAuth } from '@/lib/auth';
 
-export default async function DashboardPage() {
-  const context = await requireAuth();
+export default async function DashboardRouter() {
+  const { profile } = await requireAuth();
 
-  if (context.isAdmin) {
+  if (!profile) {
+    redirect('/login');
+  }
+
+  if (profile.role === 'admin') {
     redirect('/dashboard/admin');
   }
 
-  redirect('/dashboard/user');
+  if (profile.role === 'student') {
+    redirect('/dashboard/student');
+  }
+
+  redirect('/login');
 }

@@ -1,57 +1,43 @@
-import Link from 'next/link';
-
+import { requireRole } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
-import { requireAdmin } from '@/lib/auth';
 
 export default async function AdminDashboardPage() {
-  const { profile, user } = await requireAdmin();
-  const displayName = profile?.full_name ?? user?.email ?? 'Admin';
+  const { profile } = await requireRole('admin');
 
   return (
     <section className="page-section">
-      <div className="page-section__inner space-y-8">
+      <div className="page-section__inner space-y-6">
         <div className="glass-panel space-y-3 p-8 text-white">
-          <p className="eyebrow">Admin</p>
-          <h1 className="text-3xl font-semibold">Welcome back, {displayName}.</h1>
+          <p className="eyebrow">Dashboard</p>
+          <h1 className="text-3xl font-semibold">Admin overview</h1>
           <p className="text-sm text-white/70">
-            You have administrator access. Use the quick links below to review members and manage the academy.
+            Welcome back{profile?.full_name ? `, ${profile.full_name}` : ''}. Manage the academy experience and keep
+            everything running smoothly.
           </p>
           <div className="flex flex-wrap gap-3 pt-2">
             <Button asChild>
-              <Link href="/dashboard/user">View user view</Link>
-            </Button>
-            <Button asChild variant="secondary">
-              <Link href="/academy/portal">Academy portal</Link>
+              <a href="/academy">View academy site</a>
             </Button>
             <Button asChild variant="outline">
-              <Link href="/logout">Sign out</Link>
+              <a href="/logout">Sign out</a>
             </Button>
           </div>
         </div>
-        <div className="grid gap-4 md:grid-cols-3">
-          <div className="glass-panel space-y-3 p-6 text-white">
-            <p className="text-sm uppercase tracking-[0.18em] text-white/60">Membership</p>
-            <p className="text-lg font-semibold">Admin membership confirmed</p>
-            <p className="text-sm text-white/70">
-              This account is registered in <code>admin_users</code>. Access to protected admin routes is enforced server-side.
-            </p>
+        <div className="glass-panel grid gap-4 p-6 text-white md:grid-cols-3">
+          <div className="space-y-2">
+            <p className="text-sm uppercase tracking-[0.18em] text-white/60">Members</p>
+            <p className="text-lg font-semibold">Monitor enrollment</p>
+            <p className="text-sm text-white/70">Track how students are engaging across lessons and resources.</p>
           </div>
-          <div className="glass-panel space-y-3 p-6 text-white">
-            <p className="text-sm uppercase tracking-[0.18em] text-white/60">Profiles</p>
-            <p className="text-lg font-semibold">Manage member records</p>
-            <p className="text-sm text-white/70">
-              Review profile rows and keep key contact information up to date across admin and student tables.
-            </p>
+          <div className="space-y-2">
+            <p className="text-sm uppercase tracking-[0.18em] text-white/60">Content</p>
+            <p className="text-lg font-semibold">Curate learning</p>
+            <p className="text-sm text-white/70">Review course material and keep your community up to date.</p>
           </div>
-          <div className="glass-panel space-y-3 p-6 text-white">
-            <p className="text-sm uppercase tracking-[0.18em] text-white/60">Sessions</p>
-            <p className="text-lg font-semibold">Log out securely</p>
-            <p className="text-sm text-white/70">
-              Signing out clears the session cookies refreshed through the Supabase server client.
-            </p>
-            <Button asChild variant="destructive" className="w-full">
-              <Link href="/logout">Log out</Link>
-            </Button>
+          <div className="space-y-2">
+            <p className="text-sm uppercase tracking-[0.18em] text-white/60">Account</p>
+            <p className="text-lg font-semibold">Secure access</p>
+            <p className="text-sm text-white/70">Manage profile details, billing preferences, and sign-in options.</p>
           </div>
         </div>
       </div>

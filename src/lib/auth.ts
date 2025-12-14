@@ -1,85 +1,71 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+import type { User } from '@supabase/supabase-js';
 
-import { createClient } from '@/utils/supabase/server';
+import { createClient as createSupabaseServerClient } from '@/utils/supabase/server';
+
+type Role = 'admin' | 'student';
 
 export type Profile = {
   id: string;
   email: string | null;
+  role: Role;
   full_name: string | null;
   avatar_url: string | null;
-  created_at: string | null;
+  created_at: string;
 };
 
-export async function getUserContext() {
+export type AuthContext = {
+  user: User | null;
+  profile: Profile | null;
+};
+
+export async function getUserAndProfile(): Promise<AuthContext> {
   const cookieStore = cookies();
-  const supabase = createClient(cookieStore);
+  const supabase = createSupabaseServerClient(cookieStore);
 
   const {
     data: { user },
+    error: userError,
   } = await supabase.auth.getUser();
 
-  if (!user) {
-    return {
-      user: null,
-      profile: null,
-      isAdmin: false,
-      isStudent: false,
-    };
+  if (userError) {
+    throw userError;
   }
 
-  const { data: profile } = await supabase
-    .from<Profile>('profiles')
-    .select('*')
+  if (!user) {
+    return { user: null, profile: null };
+  }
+
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('id, email, role, full_name, avatar_url, created_at')
     .eq('id', user.id)
-    .maybeSingle();
+    .single();
 
-  const { data: adminMembership } = await supabase
-    .from<{ user_id: string }>('admin_users')
-    .select('user_id')
-    .eq('user_id', user.id)
-    .maybeSingle();
+  if (profileError) {
+    throw profileError;
+  }
 
-  const { data: studentMembership } = await supabase
-    .from<{ user_id: string }>('student_users')
-    .select('user_id')
-    .eq('user_id', user.id)
-    .maybeSingle();
-
-  return {
-    user,
-    profile: profile ?? null,
-    isAdmin: Boolean(adminMembership),
-    isStudent: Boolean(studentMembership),
-  };
+  return { user, profile };
 }
 
-export async function requireAuth() {
-  const context = await getUserContext();
+export async function requireAuth(): Promise<AuthContext> {
+  const { user, profile } = await getUserAndProfile();
 
-  if (!context.user) {
+  if (!user) {
     redirect('/login');
   }
 
-  return context;
+  return { user, profile };
 }
 
-export async function requireAdmin() {
-  const context = await getUserContext();
+export async function requireRole(role: Role, redirectPath: string = '/dashboard'): Promise<AuthContext> {
+  const { user, profile } = await requireAuth();
 
-  if (!context.isAdmin) {
-    redirect('/dashboard');
+  if (!profile || profile.role !== role) {
+    redirect(redirectPath);
   }
 
-  return context;
-}
-
-export async function requireStudent() {
-  const context = await getUserContext();
-
-  if (!context.isStudent && !context.isAdmin) {
-    redirect('/academy');
-  }
-
-  return context;
+  return { user, profile };
 }
