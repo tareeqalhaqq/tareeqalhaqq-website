@@ -11,17 +11,11 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { academyCourses } from '@/lib/data';
-import { auth } from '@/lib/firebase';
+import { createClient } from '@/utils/supabase/clients';
 import { zodResolver } from '@hookform/resolvers/zod';
-import {
-  createUserWithEmailAndPassword,
-  sendPasswordResetEmail,
-  signInWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged,
-} from 'firebase/auth';
 import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useRouter } from 'next/navigation';
 import { z } from 'zod';
 
 const formSchema = z.object({
@@ -32,33 +26,45 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-const firebaseErrorMap: Record<string, string> = {
-  'auth/invalid-credential': 'The email and password do not match our records.',
-  'auth/user-disabled': 'This account has been disabled. Please contact support.',
-  'auth/too-many-requests': 'Too many attempts. Please wait a moment and try again.',
-  'auth/email-already-in-use': 'This email is already associated with an account. Please sign in instead.',
-  'auth/weak-password': 'Please choose a stronger password (at least 6 characters).',
-};
-
 export default function SignInPage() {
   const [status, setStatus] = useState<'idle' | 'loading' | 'success'>('idle');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
+  const router = useRouter();
+  const supabase = useMemo(() => createClient(), []);
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: { email: '', password: '', confirmPassword: '' },
   });
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (user) => {
-      setUserEmail(user?.email ?? null);
-      if (!user) {
+    const fetchSession = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      setUserEmail(session?.user.email ?? null);
+    };
+
+    fetchSession();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      setUserEmail(session?.user.email ?? null);
+
+      if (event === 'SIGNED_IN') {
+        setStatus('success');
+        router.push('/dashboard');
+      }
+
+      if (event === 'SIGNED_OUT') {
         setStatus('idle');
       }
     });
-    return () => unsub();
-  }, []);
+
+    return () => subscription.unsubscribe();
+  }, [router, supabase]);
 
   const availableCourses = useMemo(() => academyCourses, []);
 
@@ -84,21 +90,39 @@ export default function SignInPage() {
           setStatus('idle');
           return;
         }
-        await createUserWithEmailAndPassword(auth, values.email, values.password);
+        const { error } = await supabase.auth.signUp({
+          email: values.email,
+          password: values.password,
+        });
+
+        if (error) {
+          throw error;
+        }
       } else {
-        await signInWithEmailAndPassword(auth, values.email, values.password);
+        const { error } = await supabase.auth.signInWithPassword({
+          email: values.email,
+          password: values.password,
+        });
+
+        if (error) {
+          throw error;
+        }
       }
       setStatus('success');
+      router.push('/dashboard');
     } catch (error) {
-      const code = (error as { code?: string }).code;
-      setErrorMessage(firebaseErrorMap[code ?? ''] ?? 'Unable to sign in. Please verify your details and try again.');
+      const message = (error as { message?: string }).message;
+      setErrorMessage(message ?? 'Unable to sign in. Please verify your details and try again.');
       setStatus('idle');
     }
   };
 
   const handleSignOut = async () => {
-    await signOut(auth);
+    setStatus('loading');
+    await supabase.auth.signOut();
     form.reset();
+    setUserEmail(null);
+    setStatus('idle');
   };
 
   const handleResetPassword = async () => {
@@ -107,11 +131,16 @@ export default function SignInPage() {
       return;
     }
     try {
-      await sendPasswordResetEmail(auth, form.getValues('email'));
+      const { error } = await supabase.auth.resetPasswordForEmail(form.getValues('email'));
+
+      if (error) {
+        throw error;
+      }
+
       setErrorMessage('Password reset link sent. Please check your inbox.');
     } catch (error) {
-      const code = (error as { code?: string }).code;
-      setErrorMessage(firebaseErrorMap[code ?? ''] ?? 'Unable to send reset email. Please try again later.');
+      const message = (error as { message?: string }).message;
+      setErrorMessage(message ?? 'Unable to send reset email. Please try again later.');
     }
   };
 
