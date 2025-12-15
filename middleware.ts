@@ -1,23 +1,22 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
-const DEFAULT_ACADEMY_DOMAIN = 'academy.tareeqalhaqq.org';
-
 function isAcademyHost(hostname: string, academyDomain: string) {
   if (!hostname) return false;
+  if (!academyDomain) return false;
   if (hostname === academyDomain) return true;
   return hostname.startsWith(`${academyDomain}:`);
 }
 
 export function middleware(request: NextRequest) {
-  const hostname = request.headers.get('host') ?? '';
-  const academyDomain = process.env.ACADEMY_DOMAIN ?? DEFAULT_ACADEMY_DOMAIN;
+  const hostname = request.headers.get('host')?.toLowerCase();
+  const academyDomain = process.env.ACADEMY_DOMAIN?.toLowerCase();
 
-  if (!academyDomain) {
+  if (!hostname || !academyDomain) {
     return NextResponse.next();
   }
 
-  if (!isAcademyHost(hostname.toLowerCase(), academyDomain.toLowerCase())) {
+  if (!isAcademyHost(hostname, academyDomain)) {
     return NextResponse.next();
   }
 
