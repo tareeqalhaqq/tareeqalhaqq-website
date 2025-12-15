@@ -2,7 +2,6 @@
   "name": "tareeqalhaqq",
   "compatibility_date": "2025-11-23",
   "assets": {
-    "directory": "./.next",
-    "exclude": ["**/cache/**"]
+    "directory": "./.next"
   }
 }
