@@ -12,6 +12,13 @@ export function middleware(request: NextRequest) {
   const hostname = request.headers.get('host')?.toLowerCase();
   const academyDomain = process.env.ACADEMY_DOMAIN?.toLowerCase();
 
+  // Gracefully handle index.html requests that may be served by upstream hosts
+  if (request.nextUrl.pathname === '/index.html') {
+    const url = request.nextUrl.clone();
+    url.pathname = '/';
+    return NextResponse.rewrite(url);
+  }
+
   if (!hostname || !academyDomain) {
     return NextResponse.next();
   }
