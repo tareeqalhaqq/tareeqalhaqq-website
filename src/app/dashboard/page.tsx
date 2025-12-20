@@ -1,23 +1,47 @@
-import { redirect } from 'next/navigation';
+'use client';
 
-import { requireAuth } from '@/lib/auth';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
-export const dynamic = 'force-dynamic';
+import { useAuthProfile } from '@/hooks/use-auth-profile';
 
-export default async function DashboardRouter() {
-  const { profile } = await requireAuth();
+export default function DashboardRouter() {
+  const router = useRouter();
+  const { status, profile } = useAuthProfile();
 
-  if (!profile) {
-    redirect('/login');
-  }
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.replace('/login');
+      return;
+    }
 
-  if (profile.role === 'admin') {
-    redirect('/dashboard/admin');
-  }
+    if (status === 'authenticated') {
+      if (profile?.role === 'admin') {
+        router.replace('/dashboard/admin');
+        return;
+      }
 
-  if (profile.role === 'student') {
-    redirect('/dashboard/student');
-  }
+      if (profile?.role === 'student') {
+        router.replace('/dashboard/student');
+        return;
+      }
 
-  redirect('/login');
+      router.replace('/dashboard/user');
+    }
+  }, [profile, router, status]);
+
+  return (
+    <section className="page-section">
+      <div className="page-section__inner">
+        <div className="glass-panel space-y-3 p-8 text-white">
+          <p className="eyebrow">Dashboard</p>
+          <h1 className="text-2xl font-semibold">Loading your dashboard</h1>
+          <p className="text-sm text-white/70">
+            We&apos;re preparing the best view for your account. If you&apos;re not signed in, you&apos;ll be redirected to the
+            login screen.
+          </p>
+        </div>
+      </div>
+    </section>
+  );
 }
