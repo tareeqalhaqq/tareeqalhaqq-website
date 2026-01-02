@@ -1,11 +1,14 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import type { User } from '@supabase/supabase-js';
-
 import { createClient } from '@/utils/supabase/clients';
 
 type Role = 'admin' | 'student';
+
+type User = {
+  id: string;
+  email: string | null;
+};
 
 export type Profile = {
   id: string;
