@@ -1,7 +1,12 @@
 
 import type { Metadata } from 'next';
-import { Toaster } from "@/components/ui/toaster";
+import dynamic from "next/dynamic";
 import "./globals.css";
+
+const Toaster = dynamic(
+  () => import("@/components/ui/toaster").then((mod) => mod.Toaster),
+  { ssr: false }
+);
 
 
 export const metadata: Metadata = {
