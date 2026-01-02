@@ -22,3 +22,21 @@ for (const pkgName of packagesToLink) {
   fs.mkdirSync(path.dirname(target), { recursive: true });
   fs.symlinkSync(source, target, "junction");
 }
+
+// Handle styled-jsx which is required by Next.js
+// Check root node_modules first, then fall back to next/node_modules
+const styledJsxName = "styled-jsx";
+const styledJsxTarget = path.join(workspaceNodeModules, styledJsxName);
+let styledJsxSource = path.join(rootNodeModules, styledJsxName);
+
+if (!fs.existsSync(styledJsxSource)) {
+  // Fall back to next/node_modules if not in root
+  const nextNodeModules = path.join(workspaceNodeModules, "next", "node_modules");
+  styledJsxSource = path.join(nextNodeModules, styledJsxName);
+}
+
+if (fs.existsSync(styledJsxSource)) {
+  fs.rmSync(styledJsxTarget, { recursive: true, force: true });
+  fs.mkdirSync(path.dirname(styledJsxTarget), { recursive: true });
+  fs.symlinkSync(styledJsxSource, styledJsxTarget, "junction");
+}
