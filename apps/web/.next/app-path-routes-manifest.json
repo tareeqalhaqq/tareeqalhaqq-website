@@ -1,0 +1,20 @@
+{
+  "/favicon.ico/route": "/favicon.ico",
+  "/_not-found/page": "/_not-found",
+  "/404/page": "/404",
+  "/500/page": "/500",
+  "/dashboard/admin/page": "/dashboard/admin",
+  "/dashboard/page": "/dashboard",
+  "/dashboard/student/page": "/dashboard/student",
+  "/dashboard/user/page": "/dashboard/user",
+  "/login/page": "/login",
+  "/logout/page": "/logout",
+  "/page": "/",
+  "/signup/page": "/signup",
+  "/academy/page": "/academy",
+  "/contact/page": "/contact",
+  "/academy/portal/page": "/academy/portal",
+  "/about/page": "/about",
+  "/signin/page": "/signin",
+  "/events/page": "/events"
+}
