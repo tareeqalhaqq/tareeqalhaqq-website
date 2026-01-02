@@ -44,3 +44,18 @@ next-env.d.ts
 # firebase
 firebase-debug.log
 firestore-debug.log
+
+# Codex mobile required ignores
+node_modules/
+.next/
+.expo/
+dist/
+build/
+.idea/
+.DS_Store
+*.apk
+*.aab
+*.png
+*.jpg
+*.jpeg
+*.svg
