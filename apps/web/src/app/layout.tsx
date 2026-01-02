@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
+import dynamic from "next/dynamic";
 import "./globals.css";
 
-import ToasterClient from "@/components/ToasterClient";
+const ToasterClient = dynamic(() => import("@/components/ToasterClient"), {
+  ssr: false,
+});
 
 export const metadata: Metadata = {
   title: "Tareeq Al Haqq",
