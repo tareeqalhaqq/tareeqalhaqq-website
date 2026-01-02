@@ -15,7 +15,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Menu, Search, ChevronDown } from "lucide-react";
-import { SearchDialog } from "@/components/search-dialog";
+import dynamic from "next/dynamic";
+
+const SearchDialog = dynamic(
+  () => import("@/components/search-dialog").then((mod) => mod.SearchDialog),
+  { ssr: false }
+);
 
 export default function Header() {
   const pathname = usePathname();
