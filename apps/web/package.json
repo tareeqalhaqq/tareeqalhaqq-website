@@ -18,7 +18,7 @@
     "aria-hidden": "^1.2.3",
     "@radix-ui/react-dialog": "^1.0.5",
     "@radix-ui/react-dropdown-menu": "^2.0.6",
-    "@radix-ui/react-menu": "^2.0.6"
+    "@radix-ui/react-menu": "^2.0.6",
 
     "@floating-ui/dom": "^1.6.1",
     "@genkit-ai/google-genai": "^1.20.0",
