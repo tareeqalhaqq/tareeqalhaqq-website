@@ -29,6 +29,6 @@ export async function requireUser() {
 
 export async function requireAdmin() {
   const { user, profile } = await requireUser();
-  if (profile?.app_role !== "admin") redirect("/not-authorized");
+  if (!profile || profile.app_role !== "admin") redirect("/not-authorized");
   return { user, profile };
 }
