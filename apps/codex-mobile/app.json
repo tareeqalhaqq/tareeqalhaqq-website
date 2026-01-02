@@ -1,0 +1,20 @@
+{
+  "expo": {
+    "name": "Tareeq Al Haqq",
+    "slug": "codex-mobile",
+    "scheme": "tareeqalhaqq",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true
+    },
+    "plugins": ["expo-router"],
+    "extra": {
+      "eas": {
+        "projectId": ""
+      }
+    }
+  }
+}
