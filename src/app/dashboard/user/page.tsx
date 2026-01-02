@@ -8,6 +8,7 @@ import { useAuthProfile } from '@/hooks/use-auth-profile';
 export default function UserDashboardPage() {
   const { status, profile, user, isAdmin } = useAuthProfile();
   const displayName = profile?.full_name ?? user?.email ?? 'there';
+  const memberSince = profile?.created_at ? new Date(profile.created_at).toLocaleDateString() : null;
 
   return (
     <section className="page-section">
@@ -35,10 +36,10 @@ export default function UserDashboardPage() {
           <>
             <div className="glass-panel space-y-3 p-8 text-white">
               <p className="eyebrow">Dashboard</p>
-              <h1 className="text-3xl font-semibold">Welcome, {displayName}!</h1>
+              <h1 className="text-3xl font-semibold">Assalamu Alaikum, {displayName}!</h1>
               <p className="text-sm text-white/70">
-                You&apos;re signed in to your Tareeq Al Haqq account. Use the quick links below to manage your profile,
-                handle billing details, or sign out securely.
+                You&apos;re signed in to your Tareeq Al Haqq account. We&apos;ve tailored this space using the profile details
+                stored in your account so your experience feels personal and intentional.
               </p>
               <div className="flex flex-wrap gap-3 pt-2">
                 <Button asChild>
@@ -55,6 +56,36 @@ export default function UserDashboardPage() {
                     <Link href="/dashboard/admin">Admin view</Link>
                   </Button>
                 )}
+              </div>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
+              <div className="glass-panel space-y-4 p-6 text-white">
+                <p className="text-sm uppercase tracking-[0.18em] text-white/60">Your greeting</p>
+                <p className="text-lg font-semibold">
+                  {profile?.full_name ? profile.full_name : 'Your profile name is ready to be completed.'}
+                </p>
+                <p className="text-sm text-white/70">
+                  {profile?.full_name
+                    ? 'This name comes from your profile record in Supabase and will be used across your dashboard.'
+                    : 'Add your full name in your profile to personalize your dashboard experience.'}
+                </p>
+                <div className="flex flex-wrap gap-3 text-xs text-white/60">
+                  <span className="rounded-full bg-white/5 px-3 py-1">Email: {user?.email ?? 'Unavailable'}</span>
+                  <span className="rounded-full bg-white/5 px-3 py-1">Role: {profile?.role ?? 'member'}</span>
+                  {memberSince && <span className="rounded-full bg-white/5 px-3 py-1">Member since {memberSince}</span>}
+                </div>
+              </div>
+              <div className="glass-panel space-y-4 p-6 text-white">
+                <p className="text-sm uppercase tracking-[0.18em] text-white/60">Next steps</p>
+                <p className="text-lg font-semibold">Complete your profile journey</p>
+                <p className="text-sm text-white/70">
+                  Add your preferred name, upload a photo, and select your learning track to keep everything aligned
+                  with your studies.
+                </p>
+                <Button asChild variant="outline" className="w-full">
+                  <Link href="/profile">Update profile</Link>
+                </Button>
               </div>
             </div>
 
