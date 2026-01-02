@@ -29,13 +29,13 @@ export default function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-black/60 backdrop-blur-xl">
-        <div className="mx-auto flex h-20 w-full max-w-6xl items-center justify-between px-4">
+      <header className="sticky top-3 z-50 w-full px-3 sm:px-4">
+        <div className="group relative mx-auto flex w-full max-w-6xl items-center justify-between gap-3 rounded-full border border-white/10 bg-black/60 px-4 py-2.5 shadow-[0_18px_50px_rgba(0,0,0,0.35)] backdrop-blur-2xl transition duration-300 before:absolute before:inset-0 before:-z-10 before:rounded-full before:bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.18),transparent_55%)] before:opacity-70 before:blur-2xl after:absolute after:-inset-px after:-z-10 after:rounded-full after:bg-gradient-to-r after:from-white/15 after:via-transparent after:to-white/15 after:opacity-0 after:transition after:duration-300 group-hover:border-white/20 group-hover:after:opacity-100 sm:px-6 sm:py-3">
           <Link href="/" className="flex items-center transition-transform hover:scale-[1.01]">
             <Logo />
           </Link>
 
-          <nav className="hidden items-center space-x-6 text-sm font-medium uppercase tracking-[0.2em] md:flex">
+          <nav className="hidden items-center space-x-4 text-sm font-medium uppercase tracking-[0.2em] md:flex lg:space-x-6">
             {navLinks.map((link) =>
               link.subLinks ? (
                 <DropdownMenu key={link.name}>
@@ -73,11 +73,11 @@ export default function Header() {
             )}
           </nav>
 
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <Button
               variant="ghost"
               size="icon"
-              className="h-10 w-10 rounded-full border border-white/10 bg-white/5 text-foreground/80 hover:bg-white/10 hover:text-foreground"
+              className="h-9 w-9 rounded-full border border-white/10 bg-white/5 text-foreground/80 transition hover:bg-white/10 hover:text-foreground sm:h-10 sm:w-10"
               onClick={() => setSearchOpen(true)}
             >
               <Search className="h-5 w-5" />
