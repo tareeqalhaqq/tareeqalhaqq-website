@@ -4,6 +4,11 @@ const nextConfig: NextConfig = {
   /* config options here */
   output: 'export',
   trailingSlash: true,
+  transpilePackages: [
+    "@radix-ui/react-dialog",
+    "@radix-ui/react-dropdown-menu",
+    "react-remove-scroll",
+  ],
   typescript: {
     ignoreBuildErrors: true,
   },
