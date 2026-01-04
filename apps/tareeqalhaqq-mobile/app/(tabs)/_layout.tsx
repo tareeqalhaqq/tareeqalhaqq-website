@@ -34,35 +34,36 @@ export default function TabsLayout() {
   const effectiveRole = role ?? cachedRole;
   const isAdmin = effectiveRole === "admin";
 
-  const tabBarStyle = useMemo(
-    () =>
-      isDesktop
-        ? {
-            position: "absolute" as const,
-            left: 16,
-            top: 96,
-            width: 220,
-            height: "70%",
-            paddingVertical: 12,
-            paddingHorizontal: 8,
-            backgroundColor: theme.colors.surface,
-            borderColor: theme.colors.border,
-            borderWidth: 1,
-            borderRadius: theme.radii.lg,
-            alignSelf: "flex-start",
-            gap: 8
-          }
-        : {
-            backgroundColor: theme.colors.surface,
-            borderTopColor: theme.colors.border,
-            borderTopWidth: 1,
-            elevation: 12,
-            height: 72,
-            paddingTop: 8,
-            paddingBottom: 14
-          },
-    [isDesktop]
-  );
+  const tabBarStyle = useMemo(() => {
+    if (isDesktop) {
+      return {
+        position: "absolute" as const,
+        left: 16,
+        top: 16,
+        bottom: 16,
+        width: 220,
+        paddingVertical: 12,
+        paddingHorizontal: 8,
+        backgroundColor: theme.colors.surface,
+        borderColor: theme.colors.border,
+        borderWidth: 1,
+        borderRadius: theme.radii.lg,
+        alignSelf: "flex-start",
+        gap: 8,
+        shadowOpacity: 0.15,
+        shadowRadius: 18
+      };
+    }
+    return {
+      backgroundColor: theme.colors.surface,
+      borderTopColor: theme.colors.border,
+      borderTopWidth: 1,
+      elevation: 12,
+      height: 72,
+      paddingTop: 8,
+      paddingBottom: 14
+    };
+  }, [isDesktop]);
 
   return (
     <Tabs
@@ -89,7 +90,10 @@ export default function TabsLayout() {
               paddingVertical: 8
             }
           : undefined,
-        tabBarStyle
+        tabBarStyle,
+        sceneContainerStyle: isDesktop
+          ? { paddingLeft: 248, paddingTop: 16, paddingRight: 16 }
+          : undefined
       })}
     >
       <Tabs.Screen name="index" options={{ title: "Dashboard" }} />

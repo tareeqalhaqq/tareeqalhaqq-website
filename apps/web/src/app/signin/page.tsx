@@ -149,7 +149,7 @@ export default function SignInPage() {
       }
       const role = (data?.app_role ?? data?.role) || 'user';
       if (role === 'admin') {
-        router.replace('/dashboard');
+        router.replace('/admin');
       } else {
         router.replace('/mobile');
       }

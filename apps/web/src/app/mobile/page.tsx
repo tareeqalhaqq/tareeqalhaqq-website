@@ -1,6 +1,8 @@
 'use client';
 
-import { useEffect, useMemo, useRef } from 'react';
+/* eslint-disable react-hooks/exhaustive-deps */
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/clients';
 
 const EXPO_WEB_URL =
@@ -8,8 +10,10 @@ const EXPO_WEB_URL =
 const EXPO_ORIGIN = new URL(EXPO_WEB_URL).origin;
 
 export default function MobileBridgePage() {
+  const router = useRouter();
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const supabase = useMemo(() => createClient(), []);
+  const [allowed, setAllowed] = useState(false);
 
   const sendSession = async () => {
     const {
@@ -30,6 +34,35 @@ export default function MobileBridgePage() {
 
   useEffect(() => {
     let mounted = true;
+    const checkRole = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      const userId = session?.user?.id;
+      if (!userId) {
+        router.replace('/signin');
+        return;
+      }
+      const { data } = await supabase
+        .from('profiles')
+        .select('app_role, role')
+        .eq('id', userId)
+        .maybeSingle();
+      const role = data?.app_role ?? data?.role ?? 'user';
+      if (role === 'admin') {
+        router.replace('/admin');
+        return;
+      }
+      if (mounted) setAllowed(true);
+    };
+    checkRole();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let mounted = true;
 
     const sendIfMounted = async () => {
       if (!mounted) return;
@@ -47,6 +80,10 @@ export default function MobileBridgePage() {
       authListener?.subscription.unsubscribe();
     };
   }, [supabase]);
+
+  if (!allowed) {
+    return null;
+  }
 
   return (
     <main className="min-h-screen bg-slate-950">
