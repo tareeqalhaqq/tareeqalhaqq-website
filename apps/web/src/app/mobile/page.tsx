@@ -50,7 +50,7 @@ export default function MobileBridgePage() {
         .maybeSingle();
       const role = data?.app_role ?? data?.role ?? 'user';
       if (role === 'admin') {
-        router.replace('/admin');
+        router.replace('/dashboard');
         return;
       }
       if (mounted) setAllowed(true);

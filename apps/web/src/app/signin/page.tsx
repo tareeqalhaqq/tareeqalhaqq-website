@@ -148,11 +148,7 @@ export default function SignInPage() {
         throw error;
       }
       const role = (data?.app_role ?? data?.role) || 'user';
-      if (role === 'admin') {
-        router.replace('/admin');
-      } else {
-        router.replace('/mobile');
-      }
+      router.replace(role === 'admin' ? '/dashboard' : '/mobile');
     } catch (err) {
       console.warn('role lookup failed, defaulting to mobile', err);
       router.replace('/mobile');
