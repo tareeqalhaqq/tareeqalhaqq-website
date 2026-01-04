@@ -6,11 +6,13 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { supabase } from "@/services/supabaseClient";
 import { clearUserRole, fetchUserRole, saveUserRole } from "@/services/profiles";
 import { useAuthStore } from "@/state/authStore";
+import { getSetupCompleted } from "@/services/setup";
 
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const [ready, setReady] = useState(false);
+  const [setupComplete, setSetupComplete] = useState<boolean | null>(null);
   const queryClient = useMemo(() => new QueryClient(), []);
   const segments = useSegments();
   const router = useRouter();
@@ -61,17 +63,60 @@ export default function RootLayout() {
   }, [session?.user?.id, setRole]);
 
   useEffect(() => {
+    let active = true;
+    if (!session?.user?.id) {
+      setSetupComplete(null);
+      return () => {
+        active = false;
+      };
+    }
+    getSetupCompleted().then((flag) => {
+      if (!active) return;
+      setSetupComplete(flag);
+    });
+    return () => {
+      active = false;
+    };
+  }, [session?.user?.id]);
+
+  useEffect(() => {
+    // Web SSO via postMessage from parent (main site embedding the app)
+    if (typeof window === "undefined") return;
+    const handler = (event: MessageEvent) => {
+      const data = event.data as any;
+      if (data?.type === "SUPABASE_SESSION" && data?.session?.access_token) {
+        const { access_token, refresh_token } = data.session;
+        supabase.auth.setSession({ access_token, refresh_token });
+      }
+    };
+    window.addEventListener("message", handler);
+    return () => window.removeEventListener("message", handler);
+  }, []);
+
+  useEffect(() => {
     if (!ready) return;
     const inAuthGroup = segments[0] === "(auth)";
+    const inSetup = segments[0] === "setup";
 
     if (!session && !inAuthGroup) {
       router.replace("/(auth)/sign-in");
+      return;
+    }
+
+    if (session && setupComplete === false && !inSetup) {
+      router.replace("/setup");
+      return;
     }
 
     if (session && inAuthGroup) {
       router.replace("/");
+      return;
     }
-  }, [ready, router, segments, session]);
+
+    if (session && setupComplete && inSetup) {
+      router.replace("/");
+    }
+  }, [ready, router, segments, session, setupComplete]);
 
   if (!ready) {
     return null;

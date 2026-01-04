@@ -13,6 +13,8 @@ import { fetchBooks } from "@/services/books";
 import { fetchAthkarCategories } from "@/services/athkar";
 import { useAuthStore } from "@/state/authStore";
 import { theme } from "@/theme/theme";
+import { Button } from "@/components/Button";
+import * as Linking from "expo-linking";
 
 export const AdminScreen = () => {
   const router = useRouter();
@@ -100,6 +102,11 @@ export const AdminScreen = () => {
             <Text variant="title">{athkar?.length ?? 0}</Text>
           </View>
         </View>
+        <Button
+          label="Open main admin console"
+          onPress={() => Linking.openURL("https://tareeqalhaqq.org/dashboard")}
+          variant="primary"
+        />
       </Card>
 
       <Section title="Platform Overview">
@@ -119,27 +126,43 @@ export const AdminScreen = () => {
         </View>
       </Section>
 
-      <Section title="Manage Content" subtitle="Live controls connected to Supabase.">
+      <Section
+        title="Manage Content"
+        subtitle="Admin actions are managed on the main site."
+      >
         <Card style={styles.actionCard}>
           <ListItem
             title="Manage Books & Resources"
-            subtitle="Add, edit, and retire library assets."
-            onPress={() => {}}
+            subtitle="Add, edit, and retire library assets on the main site."
+            onPress={() => Linking.openURL("https://tareeqalhaqq.org/dashboard")}
           />
           <ListItem
             title="Update Library Metadata"
-            subtitle="Refresh categories, tags, and metadata."
-            onPress={() => {}}
+            subtitle="Refresh categories, tags, and metadata on the main site."
+            onPress={() => Linking.openURL("https://tareeqalhaqq.org/dashboard")}
           />
           <ListItem
             title="Edit Athkar"
-            subtitle="Curate and reorder athkar content."
-            onPress={() => {}}
+            subtitle="Curate and reorder athkar content from the main site."
+            onPress={() => Linking.openURL("https://tareeqalhaqq.org/dashboard")}
           />
           <ListItem
             title="Manage Notes Categories"
-            subtitle="Define the structure for user notes."
-            onPress={() => {}}
+            subtitle="Define the structure for user notes on the main site."
+            onPress={() => Linking.openURL("https://tareeqalhaqq.org/dashboard")}
+          />
+        </Card>
+      </Section>
+
+      <Section title="Academy" subtitle="Redirect to the academy experience.">
+        <Card style={styles.actionCard}>
+          <Text variant="body" muted>
+            Markaz Al Haqq Academy delivers structured learning cohorts.
+          </Text>
+          <Button
+            label="Go to Academy"
+            variant="secondary"
+            onPress={() => Linking.openURL("https://markazalhaqq.org")}
           />
         </Card>
       </Section>
