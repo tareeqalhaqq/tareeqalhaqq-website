@@ -44,6 +44,9 @@ export default function SignInPage() {
         data: { session },
       } = await supabase.auth.getSession();
       setUserEmail(session?.user.email ?? null);
+      if (session) {
+        router.replace('/mobile');
+      }
     };
 
     fetchSession();
@@ -55,7 +58,7 @@ export default function SignInPage() {
 
       if (event === 'SIGNED_IN') {
         setStatus('success');
-        router.push('/dashboard');
+        router.push('/mobile');
       }
 
       if (event === 'SIGNED_OUT') {
@@ -109,7 +112,7 @@ export default function SignInPage() {
         }
       }
       setStatus('success');
-      router.push('/dashboard');
+      router.push('/mobile');
     } catch (error) {
       const message = (error as { message?: string }).message;
       setErrorMessage(message ?? 'Unable to sign in. Please verify your details and try again.');

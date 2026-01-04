@@ -7,7 +7,7 @@
   ],
   "scripts": {
     "dev:web": "npm --workspace apps/web run dev",
-    "dev:mobile": "npm --workspace apps/codex-mobile run dev",
+    "dev:mobile": "npm --workspace apps/tareeqalhaqq-mobile run dev",
     "build": "npm run build:web",
     "build:web": "npm --workspace apps/web run build",
     "lint:web": "npm --workspace apps/web run lint",

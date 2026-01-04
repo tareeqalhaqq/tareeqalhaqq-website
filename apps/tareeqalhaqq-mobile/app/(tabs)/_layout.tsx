@@ -25,12 +25,19 @@ export default function TabsLayout() {
         headerShown: false,
         tabBarActiveTintColor: theme.colors.accent,
         tabBarInactiveTintColor: theme.colors.textMuted,
-        tabBarLabelStyle: { fontWeight: "600", letterSpacing: 0.3 },
+        tabBarLabelStyle: {
+          fontWeight: "700",
+          letterSpacing: 0.4,
+          fontSize: 12
+        },
         tabBarStyle: {
           backgroundColor: theme.colors.surface,
           borderTopColor: theme.colors.border,
           borderTopWidth: 1,
-          elevation: 0
+          elevation: 12,
+          height: 72,
+          paddingTop: 8,
+          paddingBottom: 14
         }
       }}
     >
