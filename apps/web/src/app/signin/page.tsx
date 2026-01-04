@@ -45,7 +45,7 @@ export default function SignInPage() {
       } = await supabase.auth.getSession();
       setUserEmail(session?.user.email ?? null);
       if (session) {
-        router.replace('/mobile');
+        await handleRedirect(session.user.id);
       }
     };
 
@@ -58,7 +58,9 @@ export default function SignInPage() {
 
       if (event === 'SIGNED_IN') {
         setStatus('success');
-        router.push('/mobile');
+        if (session?.user?.id) {
+          handleRedirect(session.user.id);
+        }
       }
 
       if (event === 'SIGNED_OUT') {
@@ -112,7 +114,14 @@ export default function SignInPage() {
         }
       }
       setStatus('success');
-      router.push('/mobile');
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (session?.user?.id) {
+        await handleRedirect(session.user.id);
+      } else {
+        router.push('/mobile');
+      }
     } catch (error) {
       const message = (error as { message?: string }).message;
       setErrorMessage(message ?? 'Unable to sign in. Please verify your details and try again.');
@@ -126,6 +135,28 @@ export default function SignInPage() {
     form.reset();
     setUserEmail(null);
     setStatus('idle');
+  };
+
+  const handleRedirect = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('app_role, role')
+        .eq('id', userId)
+        .single();
+      if (error) {
+        throw error;
+      }
+      const role = (data?.app_role ?? data?.role) || 'user';
+      if (role === 'admin') {
+        router.replace('/dashboard');
+      } else {
+        router.replace('/mobile');
+      }
+    } catch (err) {
+      console.warn('role lookup failed, defaulting to mobile', err);
+      router.replace('/mobile');
+    }
   };
 
   const handleResetPassword = async () => {
