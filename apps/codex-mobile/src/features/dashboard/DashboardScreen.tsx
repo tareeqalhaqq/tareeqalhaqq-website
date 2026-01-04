@@ -18,7 +18,7 @@ import { theme } from "@/theme/theme";
 
 export const DashboardScreen = () => {
   const router = useRouter();
-  const { user } = useAuthStore();
+  const { user, role } = useAuthStore();
   const { data: recent } = useQuery({
     queryKey: ["reading", user?.id],
     queryFn: () => fetchRecentReading(user?.id ?? ""),
@@ -27,12 +27,16 @@ export const DashboardScreen = () => {
 
   const prayerTimes = useMemo(() => getPrayerTimes(), []);
   const nextPrayer = prayerTimes.find((item) => item.time > new Date());
+  const displayName =
+    user?.user_metadata?.full_name ??
+    user?.email?.split("@")[0] ??
+    "Friend";
 
   return (
     <Screen scroll>
       <View style={styles.header}>
         <View style={styles.headerRow}>
-          <Text variant="heading">Assalamu Alaikum</Text>
+          <Text variant="heading">Assalamu Alaikum, {displayName}</Text>
           <Button label="Sign out" variant="ghost" onPress={signOut} />
         </View>
         <Text variant="body" muted>
@@ -59,16 +63,27 @@ export const DashboardScreen = () => {
         </View>
       </Card>
 
-      <Section
-        title="Quick Actions"
-        trailing={<Button label="Library" onPress={() => router.push("/library")} />}
-      >
+      <Section title="Quick Actions">
         <View style={styles.actions}>
-          <Button label="My Collection" variant="secondary" onPress={() => router.push("/collection")} />
+          <Button label="Library" variant="secondary" onPress={() => router.push("/library")} />
           <Button label="Athkar" variant="secondary" onPress={() => router.push("/athkar")} />
           <Button label="Notes" variant="secondary" onPress={() => router.push("/notes")} />
         </View>
       </Section>
+
+      {role === "admin" ? (
+        <Card>
+          <Text variant="title">Admin Access</Text>
+          <Text variant="body" muted>
+            Manage content, metadata, and platform updates.
+          </Text>
+          <Button
+            label="Go to Admin Panel"
+            onPress={() => router.push("/admin")}
+            variant="secondary"
+          />
+        </Card>
+      ) : null}
 
       <Section title="Recently Opened">
         {recent && recent.length > 0 ? (

@@ -4,6 +4,7 @@ import { Stack, useRouter, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { supabase } from "@/services/supabaseClient";
+import { clearUserRole, fetchUserRole, saveUserRole } from "@/services/profiles";
 import { useAuthStore } from "@/state/authStore";
 
 SplashScreen.preventAutoHideAsync();
@@ -13,7 +14,7 @@ export default function RootLayout() {
   const queryClient = useMemo(() => new QueryClient(), []);
   const segments = useSegments();
   const router = useRouter();
-  const { session, setSession } = useAuthStore();
+  const { session, setSession, setRole } = useAuthStore();
 
   useEffect(() => {
     let isMounted = true;
@@ -36,6 +37,28 @@ export default function RootLayout() {
       listener.subscription.unsubscribe();
     };
   }, [setSession]);
+
+  useEffect(() => {
+    let active = true;
+
+    if (!session?.user?.id) {
+      setRole("user");
+      clearUserRole();
+      return () => {
+        active = false;
+      };
+    }
+
+    fetchUserRole(session.user.id).then((role) => {
+      if (!active) return;
+      setRole(role);
+      saveUserRole(role);
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [session?.user?.id, setRole]);
 
   useEffect(() => {
     if (!ready) return;
