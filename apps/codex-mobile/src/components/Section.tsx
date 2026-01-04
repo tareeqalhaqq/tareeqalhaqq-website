@@ -7,13 +7,21 @@ type Props = {
   title: string;
   children: ReactNode;
   trailing?: ReactNode;
+  subtitle?: string;
 };
 
-export const Section = ({ title, children, trailing }: Props) => {
+export const Section = ({ title, children, trailing, subtitle }: Props) => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text variant="title">{title}</Text>
+        <View style={styles.titleBlock}>
+          <Text variant="title">{title}</Text>
+          {subtitle ? (
+            <Text variant="body" muted>
+              {subtitle}
+            </Text>
+          ) : null}
+        </View>
         {trailing}
       </View>
       {children}
@@ -29,5 +37,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between"
+  },
+  titleBlock: {
+    gap: theme.spacing.xs,
+    flex: 1
   }
 });
