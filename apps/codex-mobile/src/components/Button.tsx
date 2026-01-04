@@ -10,6 +10,8 @@ type Props = PressableProps & {
 };
 
 export const Button = ({ label, variant = "primary", style, ...props }: Props) => {
+  const isPrimary = variant === "primary";
+
   return (
     <Pressable
       style={({ pressed }) => [
@@ -22,7 +24,11 @@ export const Button = ({ label, variant = "primary", style, ...props }: Props) =
     >
       <Text
         variant="body"
-        style={[styles.label, variant === "ghost" && styles.labelGhost]}
+        style={[
+          styles.label,
+          isPrimary ? styles.labelOnPrimary : styles.labelOnSurface,
+          variant === "ghost" && styles.labelGhost
+        ]}
       >
         {label}
       </Text>
@@ -36,13 +42,20 @@ const styles = StyleSheet.create({
     paddingVertical: theme.spacing.sm,
     paddingHorizontal: theme.spacing.lg,
     alignItems: "center",
-    justifyContent: "center"
+    justifyContent: "center",
+    flexDirection: "row",
+    gap: theme.spacing.xs
   },
   pressed: {
     opacity: 0.8
   },
   primary: {
-    backgroundColor: theme.colors.accent
+    backgroundColor: theme.colors.accent,
+    shadowColor: theme.colors.accent,
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 3
   },
   secondary: {
     backgroundColor: theme.colors.cardElevated,
@@ -53,8 +66,13 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent"
   },
   label: {
-    color: "#1C160B",
     fontWeight: "600"
+  },
+  labelOnPrimary: {
+    color: "#0A0C0F"
+  },
+  labelOnSurface: {
+    color: theme.colors.textPrimary
   },
   labelGhost: {
     color: theme.colors.accent

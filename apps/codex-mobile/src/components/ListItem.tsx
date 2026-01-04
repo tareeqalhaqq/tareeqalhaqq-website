@@ -12,7 +12,7 @@ type Props = {
 
 export const ListItem = ({ title, subtitle, trailing, onPress }: Props) => {
   return (
-    <Pressable onPress={onPress} style={styles.container}>
+    <Pressable onPress={onPress} style={({ pressed }) => [styles.container, pressed && styles.pressed]}>
       <View style={styles.body}>
         <Text variant="body" style={styles.title}>
           {title}
@@ -39,6 +39,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center"
+  },
+  pressed: {
+    backgroundColor: theme.colors.card
   },
   body: {
     flex: 1,

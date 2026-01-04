@@ -34,23 +34,42 @@ export const DashboardScreen = () => {
 
   return (
     <Screen scroll>
-      <View style={styles.header}>
-        <View style={styles.headerRow}>
-          <Text variant="heading">Assalamu Alaikum, {displayName}</Text>
+      <Card style={styles.hero}>
+        <View style={styles.heroHeader}>
+          <Text variant="caption" muted>
+            Today
+          </Text>
           <Button label="Sign out" variant="ghost" onPress={signOut} />
         </View>
-        <Text variant="body" muted>
-          Continue your path with clarity and focus.
+        <Text variant="heading" style={styles.heroTitle}>
+          Assalamu Alaikum, {displayName}
         </Text>
-      </View>
+        <Text variant="body" muted>
+          Curated knowledge, athkar, and tools to keep you on the path.
+        </Text>
+        <View style={styles.heroActions}>
+          <Button
+            label="Continue Reading"
+            onPress={() => router.push("/library")}
+            variant="primary"
+          />
+          <Button
+            label="View Athkar"
+            onPress={() => router.push("/athkar")}
+            variant="secondary"
+          />
+        </View>
+      </Card>
 
       <Card>
-        <Text variant="title">Prayer Times</Text>
-        {nextPrayer ? (
-          <Text variant="body" style={styles.nextPrayer}>
-            Next: {nextPrayer.name} · {formatTime(nextPrayer.time)}
-          </Text>
-        ) : null}
+        <View style={styles.sectionHeader}>
+          <Text variant="title">Prayer Times</Text>
+          {nextPrayer ? (
+            <Text variant="body" style={styles.nextPrayer}>
+              Next: {nextPrayer.name} · {formatTime(nextPrayer.time)}
+            </Text>
+          ) : null}
+        </View>
         <View style={styles.prayerGrid}>
           {prayerTimes.map((item) => (
             <View key={item.name} style={styles.prayerItem}>
@@ -68,19 +87,23 @@ export const DashboardScreen = () => {
           <Button label="Library" variant="secondary" onPress={() => router.push("/library")} />
           <Button label="Athkar" variant="secondary" onPress={() => router.push("/athkar")} />
           <Button label="Notes" variant="secondary" onPress={() => router.push("/notes")} />
+          <Button label="Collections" variant="ghost" onPress={() => router.push("/collection")} />
         </View>
       </Section>
 
       {role === "admin" ? (
-        <Card>
-          <Text variant="title">Admin Access</Text>
+        <Card style={styles.adminCard}>
+          <Text variant="caption" muted>
+            Admin
+          </Text>
+          <Text variant="title">Platform Controls</Text>
           <Text variant="body" muted>
-            Manage content, metadata, and platform updates.
+            Manage resources, metadata, athkar, and categories securely.
           </Text>
           <Button
             label="Go to Admin Panel"
             onPress={() => router.push("/admin")}
-            variant="secondary"
+            variant="primary"
           />
         </Card>
       ) : null}
@@ -109,32 +132,51 @@ export const DashboardScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  header: {
-    gap: theme.spacing.xs
+  hero: {
+    gap: theme.spacing.sm,
+    backgroundColor: theme.colors.cardElevated,
+    position: "relative"
   },
-  headerRow: {
+  heroHeader: {
     flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between"
+    justifyContent: "space-between",
+    alignItems: "center"
+  },
+  heroTitle: {
+    letterSpacing: 0.3
+  },
+  heroActions: {
+    flexDirection: "row",
+    gap: theme.spacing.sm,
+    flexWrap: "wrap"
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "baseline"
   },
   nextPrayer: {
-    marginTop: theme.spacing.xs,
     color: theme.colors.textPrimary
   },
   prayerGrid: {
-    marginTop: theme.spacing.sm,
+    marginTop: theme.spacing.md,
     flexDirection: "row",
     flexWrap: "wrap",
     gap: theme.spacing.sm
   },
   prayerItem: {
     width: "30%",
-    gap: 4
+    gap: 4,
+    paddingVertical: theme.spacing.xs
   },
   actions: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: theme.spacing.sm
+  },
+  adminCard: {
+    gap: theme.spacing.xs,
+    borderColor: theme.colors.accentSoft
   },
   list: {
     gap: theme.spacing.sm

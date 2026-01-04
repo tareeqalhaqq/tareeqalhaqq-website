@@ -5,14 +5,18 @@ import { useAuthStore } from "@/state/authStore";
 import { theme } from "@/theme/theme";
 
 export default function TabsLayout() {
-  const { user, setRole } = useAuthStore();
+  const { user, role: cachedRole, setRole } = useAuthStore();
+
   const { data: role } = useQuery({
     queryKey: ["role", user?.id],
     queryFn: () => fetchUserRole(user?.id ?? ""),
     enabled: !!user?.id,
-    onSuccess: (value) => setRole(value)
+    onSuccess: (value) => setRole(value),
+    onError: () => setRole("user")
   });
-  const isAdmin = role === "admin";
+
+  const effectiveRole = role ?? cachedRole;
+  const isAdmin = effectiveRole === "admin";
 
   return (
     <Tabs
@@ -21,9 +25,12 @@ export default function TabsLayout() {
         headerShown: false,
         tabBarActiveTintColor: theme.colors.accent,
         tabBarInactiveTintColor: theme.colors.textMuted,
+        tabBarLabelStyle: { fontWeight: "600", letterSpacing: 0.3 },
         tabBarStyle: {
           backgroundColor: theme.colors.surface,
-          borderTopColor: theme.colors.border
+          borderTopColor: theme.colors.border,
+          borderTopWidth: 1,
+          elevation: 0
         }
       }}
     >

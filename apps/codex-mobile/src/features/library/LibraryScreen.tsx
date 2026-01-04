@@ -10,6 +10,7 @@ import { ListItem } from "@/components/ListItem";
 import { EmptyState } from "@/components/EmptyState";
 import { Card } from "@/components/Card";
 import { Section } from "@/components/Section";
+import { Button } from "@/components/Button";
 import { fetchBooks } from "@/services/books";
 import { fetchCollection } from "@/services/collection";
 import { useAuthStore } from "@/state/authStore";
@@ -41,12 +42,37 @@ export const LibraryScreen = () => {
 
   return (
     <Screen scroll>
-      <View style={styles.header}>
-        <Text variant="heading">Library</Text>
-        <Text variant="body" muted>
-          Explore the full knowledge repository.
+      <Card style={styles.hero}>
+        <Text variant="caption" muted>
+          Library
         </Text>
-      </View>
+        <Text variant="heading">Explore the archive</Text>
+        <Text variant="body" muted>
+          Search curated texts, lectures, and guided notes built for focus.
+        </Text>
+        <View style={styles.stats}>
+          <View style={styles.statCard}>
+            <Text variant="caption" muted>
+              My books
+            </Text>
+            <Text variant="title">{collection?.length ?? 0}</Text>
+          </View>
+          <View style={styles.statCard}>
+            <Text variant="caption" muted>
+              All resources
+            </Text>
+            <Text variant="title">{books?.length ?? 0}</Text>
+          </View>
+          <View style={styles.statCard}>
+            <Text variant="caption" muted>
+              Categories
+            </Text>
+            <Text variant="title">
+              {Math.max(categories.length - 1, 0)}
+            </Text>
+          </View>
+        </View>
+      </Card>
 
       <Section title="My Books" subtitle="Your saved and pinned readings.">
         {collection && collection.length > 0 ? (
@@ -111,17 +137,20 @@ export const LibraryScreen = () => {
             {
               title: "Premium Tafsir Pack",
               subtitle: "Curated commentaries",
-              price: "$19"
+              price: "$19",
+              cta: "View pack"
             },
             {
               title: "Guided Journals",
               subtitle: "Reflection templates",
-              price: "$9"
+              price: "$9",
+              cta: "Preview pages"
             },
             {
               title: "Audio Bundle",
               subtitle: "Scholarly lectures",
-              price: "$29"
+              price: "$29",
+              cta: "See details"
             }
           ].map((item) => (
             <Card key={item.title} style={styles.storeCard}>
@@ -129,7 +158,10 @@ export const LibraryScreen = () => {
               <Text variant="body" muted>
                 {item.subtitle}
               </Text>
-              <Text variant="heading">{item.price}</Text>
+              <View style={styles.storeRow}>
+                <Text variant="heading">{item.price}</Text>
+                <Button label={item.cta} variant="secondary" />
+              </View>
             </Card>
           ))}
         </View>
@@ -139,8 +171,22 @@ export const LibraryScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  header: {
-    gap: theme.spacing.xs
+  hero: {
+    gap: theme.spacing.sm,
+    backgroundColor: theme.colors.cardElevated
+  },
+  stats: {
+    flexDirection: "row",
+    gap: theme.spacing.sm
+  },
+  statCard: {
+    flex: 1,
+    backgroundColor: theme.colors.card,
+    borderRadius: theme.radii.md,
+    padding: theme.spacing.sm,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    gap: 4
   },
   chips: {
     flexDirection: "row",
@@ -155,5 +201,12 @@ const styles = StyleSheet.create({
   },
   storeCard: {
     gap: theme.spacing.xs
+  },
+  storeRow: {
+    marginTop: theme.spacing.sm,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: theme.spacing.sm
   }
 });

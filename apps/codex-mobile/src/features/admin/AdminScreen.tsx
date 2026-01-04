@@ -78,26 +78,43 @@ export const AdminScreen = () => {
 
   return (
     <Screen scroll>
-      <View style={styles.header}>
-        <Text variant="heading">Admin Dashboard</Text>
-        <Text variant="body" muted>
-          Control the platform experience and content quality.
+      <Card style={styles.hero}>
+        <Text variant="caption" muted>
+          Admin
         </Text>
-      </View>
+        <Text variant="heading">Platform command center</Text>
+        <Text variant="body" muted>
+          Manage resources, athkar, and metadata with RLS-safe controls.
+        </Text>
+        <View style={styles.heroStats}>
+          <View style={styles.statCard}>
+            <Text variant="caption" muted>
+              Resources
+            </Text>
+            <Text variant="title">{books?.length ?? 0}</Text>
+          </View>
+          <View style={styles.statCard}>
+            <Text variant="caption" muted>
+              Athkar categories
+            </Text>
+            <Text variant="title">{athkar?.length ?? 0}</Text>
+          </View>
+        </View>
+      </Card>
 
       <Section title="Platform Overview">
         <View style={styles.stats}>
           <Card style={styles.statCard}>
             <Text variant="caption" muted>
-              Resources
+              Live controls
             </Text>
-            <Text variant="heading">{books?.length ?? 0}</Text>
+            <Text variant="heading">Library</Text>
           </Card>
           <Card style={styles.statCard}>
             <Text variant="caption" muted>
-              Athkar Categories
+              Data source
             </Text>
-            <Text variant="heading">{athkar?.length ?? 0}</Text>
+            <Text variant="heading">Supabase (RLS)</Text>
           </Card>
         </View>
       </Section>
@@ -156,8 +173,14 @@ export const AdminScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  header: {
-    gap: theme.spacing.xs
+  hero: {
+    gap: theme.spacing.sm,
+    backgroundColor: theme.colors.cardElevated,
+    borderColor: theme.colors.accentSoft
+  },
+  heroStats: {
+    flexDirection: "row",
+    gap: theme.spacing.sm
   },
   loading: {
     gap: theme.spacing.sm,
