@@ -76,7 +76,10 @@ export function EventsManager({ adminName }: EventsManagerProps) {
   const loadEvents = useCallback(async () => {
     setStatus('loading');
     try {
-      const response = await fetch('/api/admin/events', { credentials: 'include' });
+      const response = await fetch('/api/admin/events', {
+        credentials: 'include',
+        cache: 'no-store',
+      });
       if (!response.ok) {
         throw new Error('Unable to load events.');
       }
@@ -246,6 +249,7 @@ export function EventsManager({ adminName }: EventsManagerProps) {
         title: 'Event deleted',
         description: 'The event has been removed.',
       });
+      setEvents((prev) => prev.filter((event) => event.id !== deleteTarget.id));
       setDeleteTarget(null);
       setIsDialogOpen(false);
       await loadEvents();
@@ -264,7 +268,9 @@ export function EventsManager({ adminName }: EventsManagerProps) {
     () =>
       events.map((event) => ({
         ...event,
-        formattedDate: event.date ? new Date(event.date).toLocaleDateString('en-GB', { dateStyle: 'medium' }) : '—',
+        formattedDate: event.date
+          ? new Date(event.date).toLocaleDateString('en-GB', { dateStyle: 'medium' })
+          : 'To be announced',
         formattedTime: event.time || 'To be announced',
         formattedLocation: event.location || 'To be announced',
       })),

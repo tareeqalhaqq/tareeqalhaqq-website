@@ -4,6 +4,7 @@ import { cookies } from 'next/headers';
 import { createClient } from '@/utils/supabase/server';
 
 const selectFields = 'id, title, description, location, date, time, image_url, created_at';
+const defaultEventImage = '/images/logo.png';
 
 const assertAdmin = async () => {
   const cookieStore = cookies();
@@ -47,7 +48,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   const normalizedLocation = payload.location?.trim() || null;
   const normalizedDate = payload.date || null;
   const normalizedTime = payload.time || null;
-  const normalizedImage = payload.image_url || null;
+  const normalizedImage = payload.image_url?.trim() || defaultEventImage;
 
   const { data, error } = await supabase
     .from('events')
