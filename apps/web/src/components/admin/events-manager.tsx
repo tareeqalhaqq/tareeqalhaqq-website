@@ -43,6 +43,12 @@ const emptyForm = {
 };
 
 type FormState = typeof emptyForm;
+type TBAState = {
+  location: boolean;
+  date: boolean;
+  time: boolean;
+  image_url: boolean;
+};
 
 type EventsManagerProps = {
   adminName?: string;
@@ -53,15 +59,24 @@ export function EventsManager({ adminName }: EventsManagerProps) {
   const [events, setEvents] = useState<EventRecord[]>([]);
   const [status, setStatus] = useState<'loading' | 'ready'>('loading');
   const [formState, setFormState] = useState<FormState>(emptyForm);
+  const [tbaState, setTbaState] = useState<TBAState>({
+    location: false,
+    date: false,
+    time: false,
+    image_url: false,
+  });
   const [editingEvent, setEditingEvent] = useState<EventRecord | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<EventRecord | null>(null);
+  const [locationQuery, setLocationQuery] = useState('');
+  const [locationSuggestions, setLocationSuggestions] = useState<string[]>([]);
+  const [isFetchingLocations, setIsFetchingLocations] = useState(false);
 
   const loadEvents = useCallback(async () => {
     setStatus('loading');
     try {
-      const response = await fetch('/api/admin/events');
+      const response = await fetch('/api/admin/events', { credentials: 'include' });
       if (!response.ok) {
         throw new Error('Unable to load events.');
       }
@@ -85,6 +100,12 @@ export function EventsManager({ adminName }: EventsManagerProps) {
   const openCreateDialog = () => {
     setEditingEvent(null);
     setFormState(emptyForm);
+    setTbaState({
+      location: false,
+      date: false,
+      time: false,
+      image_url: false,
+    });
     setIsDialogOpen(true);
   };
 
@@ -98,11 +119,62 @@ export function EventsManager({ adminName }: EventsManagerProps) {
       time: event.time ?? '',
       image_url: event.image_url ?? '',
     });
+    setTbaState({
+      location: event.location.toLowerCase() === 'to be announced',
+      date: !event.date,
+      time: !event.time,
+      image_url: !event.image_url,
+    });
+    setLocationQuery(event.location || '');
+    setLocationSuggestions([]);
     setIsDialogOpen(true);
   };
 
   const handleChange = (field: keyof FormState, value: string) => {
     setFormState((prev) => ({ ...prev, [field]: value }));
+    if (field === 'location') {
+      setLocationQuery(value);
+    }
+  };
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const query = locationQuery.trim();
+    if (tbaState.location || query.length < 3) {
+      setLocationSuggestions([]);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      try {
+        setIsFetchingLocations(true);
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`,
+          {
+            headers: { 'Accept-Language': 'en' },
+            signal: controller.signal,
+          },
+        );
+        if (!response.ok) return;
+        const results = (await response.json()) as { display_name: string }[];
+        setLocationSuggestions(results.map((item) => item.display_name));
+      } catch {
+        // ignore network errors, keep UX quiet
+      } finally {
+        setIsFetchingLocations(false);
+      }
+    }, 300);
+
+    return () => {
+      controller.abort();
+      clearTimeout(timer);
+    };
+  }, [locationQuery, tbaState.location]);
+
+  const applyLocationSuggestion = (value: string) => {
+    setFormState((prev) => ({ ...prev, location: value }));
+    setLocationQuery(value);
+    setLocationSuggestions([]);
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -113,10 +185,13 @@ export function EventsManager({ adminName }: EventsManagerProps) {
       const response = await fetch(editingEvent ? `/api/admin/events/${editingEvent.id}` : '/api/admin/events', {
         method: editingEvent ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           ...formState,
-          time: formState.time || null,
-          image_url: formState.image_url || null,
+          location: tbaState.location ? 'To be announced' : formState.location,
+          date: tbaState.date ? null : formState.date || null,
+          time: tbaState.time ? null : formState.time || null,
+          image_url: tbaState.image_url ? null : formState.image_url || null,
         }),
       });
 
@@ -132,6 +207,12 @@ export function EventsManager({ adminName }: EventsManagerProps) {
       setIsDialogOpen(false);
       setEditingEvent(null);
       setFormState(emptyForm);
+      setTbaState({
+        location: false,
+        date: false,
+        time: false,
+        image_url: false,
+      });
       await loadEvents();
     } catch (error) {
       toast({
@@ -151,6 +232,7 @@ export function EventsManager({ adminName }: EventsManagerProps) {
     try {
       const response = await fetch(`/api/admin/events/${deleteTarget.id}`, {
         method: 'DELETE',
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -163,6 +245,7 @@ export function EventsManager({ adminName }: EventsManagerProps) {
         description: 'The event has been removed.',
       });
       setDeleteTarget(null);
+      setIsDialogOpen(false);
       await loadEvents();
     } catch (error) {
       toast({
@@ -180,6 +263,8 @@ export function EventsManager({ adminName }: EventsManagerProps) {
       events.map((event) => ({
         ...event,
         formattedDate: event.date ? new Date(event.date).toLocaleDateString('en-GB', { dateStyle: 'medium' }) : '—',
+        formattedTime: event.time || 'To be announced',
+        formattedLocation: event.location || 'To be announced',
       })),
     [events],
   );
@@ -217,40 +302,131 @@ export function EventsManager({ adminName }: EventsManagerProps) {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="event-location">Location</Label>
+                  <div className="flex items-center justify-between gap-3">
+                    <Label htmlFor="event-location">Location</Label>
+                    <label className="flex items-center gap-2 text-xs text-white/60">
+                      <input
+                        type="checkbox"
+                        checked={tbaState.location}
+                        onChange={(event) => {
+                          const checked = event.target.checked;
+                          setTbaState((prev) => ({ ...prev, location: checked }));
+                          if (checked) {
+                            setFormState((prev) => ({ ...prev, location: '' }));
+                            setLocationSuggestions([]);
+                          }
+                        }}
+                      />
+                      To be announced
+                    </label>
+                  </div>
                   <Input
                     id="event-location"
                     value={formState.location}
                     onChange={(event) => handleChange('location', event.target.value)}
-                    required
+                    placeholder={tbaState.location ? 'To be announced' : 'Search for a venue or address'}
+                    disabled={tbaState.location}
+                    required={!tbaState.location}
                   />
+                  {!tbaState.location && (
+                    <div className="space-y-1">
+                      {isFetchingLocations && (
+                        <p className="text-xs text-white/50">Searching maps for addresses…</p>
+                      )}
+                      {locationSuggestions.length > 0 && (
+                        <div className="rounded-lg border border-white/10 bg-black/50">
+                          {locationSuggestions.map((suggestion) => (
+                            <button
+                              key={suggestion}
+                              type="button"
+                              className="block w-full px-3 py-2 text-left text-sm text-white/80 hover:bg-white/5"
+                              onClick={() => applyLocationSuggestion(suggestion)}
+                            >
+                              {suggestion}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="event-date">Date</Label>
+                  <div className="flex items-center justify-between gap-3">
+                    <Label htmlFor="event-date">Date</Label>
+                    <label className="flex items-center gap-2 text-xs text-white/60">
+                      <input
+                        type="checkbox"
+                        checked={tbaState.date}
+                        onChange={(event) => {
+                          const checked = event.target.checked;
+                          setTbaState((prev) => ({ ...prev, date: checked }));
+                          if (checked) {
+                            setFormState((prev) => ({ ...prev, date: '' }));
+                          }
+                        }}
+                      />
+                      To be announced
+                    </label>
+                  </div>
                   <Input
                     id="event-date"
                     type="date"
                     value={formState.date}
                     onChange={(event) => handleChange('date', event.target.value)}
-                    required
+                    required={!tbaState.date}
+                    disabled={tbaState.date}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="event-time">Time</Label>
+                  <div className="flex items-center justify-between gap-3">
+                    <Label htmlFor="event-time">Time</Label>
+                    <label className="flex items-center gap-2 text-xs text-white/60">
+                      <input
+                        type="checkbox"
+                        checked={tbaState.time}
+                        onChange={(event) => {
+                          const checked = event.target.checked;
+                          setTbaState((prev) => ({ ...prev, time: checked }));
+                          if (checked) {
+                            setFormState((prev) => ({ ...prev, time: '' }));
+                          }
+                        }}
+                      />
+                      To be announced
+                    </label>
+                  </div>
                   <Input
                     id="event-time"
                     type="time"
                     value={formState.time}
                     onChange={(event) => handleChange('time', event.target.value)}
+                    disabled={tbaState.time}
                   />
                 </div>
                 <div className="space-y-2 md:col-span-2">
-                  <Label htmlFor="event-image">Image URL</Label>
+                  <div className="flex items-center justify-between gap-3">
+                    <Label htmlFor="event-image">Image URL</Label>
+                    <label className="flex items-center gap-2 text-xs text-white/60">
+                      <input
+                        type="checkbox"
+                        checked={tbaState.image_url}
+                        onChange={(event) => {
+                          const checked = event.target.checked;
+                          setTbaState((prev) => ({ ...prev, image_url: checked }));
+                          if (checked) {
+                            setFormState((prev) => ({ ...prev, image_url: '' }));
+                          }
+                        }}
+                      />
+                      To be announced
+                    </label>
+                  </div>
                   <Input
                     id="event-image"
                     value={formState.image_url}
                     onChange={(event) => handleChange('image_url', event.target.value)}
                     placeholder="https://"
+                    disabled={tbaState.image_url}
                   />
                 </div>
               </div>
@@ -313,14 +489,19 @@ export function EventsManager({ adminName }: EventsManagerProps) {
                     </div>
                   </TableCell>
                   <TableCell className="align-top text-sm text-white/70">{event.formattedDate}</TableCell>
-                  <TableCell className="align-top text-sm text-white/70">{event.time || '—'}</TableCell>
-                  <TableCell className="align-top text-sm text-white/70">{event.location}</TableCell>
+                  <TableCell className="align-top text-sm text-white/70">{event.formattedTime}</TableCell>
+                  <TableCell className="align-top text-sm text-white/70">{event.formattedLocation}</TableCell>
                   <TableCell className="align-top text-right">
                     <div className="flex flex-wrap justify-end gap-2">
                       <Button type="button" variant="outline" onClick={() => openEditDialog(event)}>
                         Edit
                       </Button>
-                      <AlertDialog>
+                      <AlertDialog
+                        open={deleteTarget?.id === event.id}
+                        onOpenChange={(open) => {
+                          if (!open) setDeleteTarget(null);
+                        }}
+                      >
                         <AlertDialogTrigger asChild>
                           <Button type="button" variant="destructive" onClick={() => setDeleteTarget(event)}>
                             Delete
