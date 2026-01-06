@@ -32,9 +32,11 @@ const assertAdmin = async () => {
   return { supabase };
 };
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { supabase, errorResponse } = await assertAdmin();
   if (errorResponse) return errorResponse;
+
+  const { id } = await params;
 
   const payload = (await request.json()) as {
     title: string;
@@ -60,7 +62,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       time: normalizedTime,
       image_url: normalizedImage,
     })
-    .eq('id', params.id)
+    .eq('id', id)
     .select(selectFields)
     .single();
 
@@ -71,11 +73,13 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   return NextResponse.json({ event: data });
 }
 
-export async function DELETE(_request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { supabase, errorResponse } = await assertAdmin();
   if (errorResponse) return errorResponse;
 
-  const { error } = await supabase.from('events').delete().eq('id', params.id);
+  const { id } = await params;
+
+  const { error } = await supabase.from('events').delete().eq('id', id);
 
   if (error) {
     return NextResponse.json({ error: 'Unable to delete event.' }, { status: 500 });
