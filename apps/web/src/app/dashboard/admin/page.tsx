@@ -1,13 +1,23 @@
 'use client';
 
 import Link from 'next/link';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
 import { useAuthProfile } from '@/hooks/use-auth-profile';
+import { EventsManager } from '@/components/admin/events-manager';
 
 export default function AdminDashboardPage() {
-  const { status, profile } = useAuthProfile();
-  const isAuthorized = status === 'authenticated' && profile?.role === 'admin';
+  const router = useRouter();
+  const { status, profile, isAdmin } = useAuthProfile();
+  const isAuthorized = status === 'authenticated' && isAdmin;
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.replace('/login');
+    }
+  }, [router, status]);
 
   return (
     <section className="page-section">
@@ -78,6 +88,7 @@ export default function AdminDashboardPage() {
                 <p className="text-sm text-white/70">Manage profile details, billing preferences, and sign-in options.</p>
               </div>
             </div>
+            <EventsManager adminName={profile?.full_name ?? undefined} />
           </>
         )}
       </div>

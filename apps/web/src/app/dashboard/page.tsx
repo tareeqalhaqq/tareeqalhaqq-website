@@ -7,7 +7,7 @@ import { useAuthProfile } from '@/hooks/use-auth-profile';
 
 export default function DashboardRouter() {
   const router = useRouter();
-  const { status, profile } = useAuthProfile();
+  const { status, profile, isAdmin } = useAuthProfile();
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -16,7 +16,7 @@ export default function DashboardRouter() {
     }
 
     if (status === 'authenticated') {
-      if (profile?.role === 'admin') {
+      if (isAdmin) {
         router.replace('/dashboard/admin');
         return;
       }

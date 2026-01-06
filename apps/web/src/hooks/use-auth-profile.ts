@@ -13,7 +13,8 @@ type User = {
 export type Profile = {
   id: string;
   email: string | null;
-  role: Role;
+  role: Role | null;
+  app_role: string | null;
   full_name: string | null;
   avatar_url: string | null;
   created_at: string;
@@ -38,7 +39,7 @@ export function useAuthProfile() {
   const loadProfile = async (user: User) => {
     const { data, error } = await supabase
       .from('profiles')
-      .select('id, email, role, full_name, avatar_url, created_at')
+      .select('id, email, role, app_role, full_name, avatar_url, created_at')
       .eq('id', user.id)
       .single();
 
@@ -90,6 +91,6 @@ export function useAuthProfile() {
 
   return {
     ...state,
-    isAdmin: state.profile?.role === 'admin',
+    isAdmin: state.profile?.app_role === 'admin',
   };
 }
