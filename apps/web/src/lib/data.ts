@@ -18,7 +18,7 @@ function getImage(id: string): ImagePlaceholder {
 export const navLinks = [
   { name: 'Home', href: '/' },
   { name: 'About', href: '/about' },
-  { name: 'Academy', href: '/academy' },
+  { name: 'Academy', href: 'https://markazalhaqq.org' },
   { name: 'Events', href: '/events' },
   { name: 'Contact', href: '/contact' },
   { name: 'Sign In', href: '/signin' },
@@ -109,7 +109,12 @@ export const allContent = [
     href: '/events',
   })),
   { type: 'About', title: 'About Tareeq Al Haqq', description: 'Learn about our mission, vision, and values.', href: '/about' },
-  { type: 'Academy', title: 'Academy Overview', description: 'Discover courses and structured learning tracks.', href: '/academy' },
+  {
+    type: 'Academy',
+    title: 'Academy Overview',
+    description: 'Discover courses and structured learning tracks.',
+    href: 'https://markazalhaqq.org',
+  },
   { type: 'Contact', title: 'Connect with Us', description: 'Reach out for guidance, support, or collaboration.', href: '/contact' },
   ...academyCourses.map((course) => ({
     type: 'Course',

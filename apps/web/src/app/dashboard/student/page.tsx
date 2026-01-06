@@ -6,8 +6,8 @@ import { Button } from '@/components/ui/button';
 import { useAuthProfile } from '@/hooks/use-auth-profile';
 
 export default function StudentDashboardPage() {
-  const { status, profile } = useAuthProfile();
-  const isAuthorized = status === 'authenticated' && profile?.role === 'student';
+  const { status, profile, role } = useAuthProfile();
+  const isAuthorized = status === 'authenticated' && role === 'student';
 
   return (
     <section className="page-section">
@@ -54,7 +54,7 @@ export default function StudentDashboardPage() {
               </p>
               <div className="flex flex-wrap gap-3 pt-2">
                 <Button asChild>
-                  <a href="/academy">Continue learning</a>
+                  <a href="https://markazalhaqq.org">Continue learning</a>
                 </Button>
                 <Button asChild variant="outline">
                   <a href="/logout">Sign out</a>

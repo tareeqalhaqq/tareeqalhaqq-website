@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useAuthProfile } from '@/hooks/use-auth-profile';
 
 export default function UserDashboardPage() {
-  const { status, profile, user, isAdmin } = useAuthProfile();
+  const { status, profile, user, isAdmin, role } = useAuthProfile();
   const displayName = profile?.full_name ?? user?.email ?? 'there';
   const memberSince = profile?.created_at ? new Date(profile.created_at).toLocaleDateString() : null;
 
@@ -72,7 +72,7 @@ export default function UserDashboardPage() {
                 </p>
                 <div className="flex flex-wrap gap-3 text-xs text-white/60">
                   <span className="rounded-full bg-white/5 px-3 py-1">Email: {user?.email ?? 'Unavailable'}</span>
-                  <span className="rounded-full bg-white/5 px-3 py-1">Role: {profile?.role ?? 'member'}</span>
+                  <span className="rounded-full bg-white/5 px-3 py-1">Role: {role ?? 'member'}</span>
                   {memberSince && <span className="rounded-full bg-white/5 px-3 py-1">Member since {memberSince}</span>}
                 </div>
               </div>

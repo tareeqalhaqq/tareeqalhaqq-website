@@ -17,14 +17,14 @@ const assertAdmin = async () => {
     return { supabase, errorResponse: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) };
   }
 
-  const { data: profile, error } = await supabase
-    .from('profiles')
-    .select('app_role, role')
-    .eq('id', user.id)
-    .single();
+  const [profileResult, membershipResult] = await Promise.all([
+    supabase.from('profiles').select('app_role').eq('id', user.id).maybeSingle(),
+    supabase.from('academy_memberships').select('academy_role').eq('user_id', user.id).maybeSingle(),
+  ]);
 
-  const isAdmin = profile?.app_role === 'admin' || profile?.role === 'admin';
-  if (error || !isAdmin) {
+  const isAdmin =
+    profileResult.data?.app_role === 'admin' || membershipResult.data?.academy_role === 'admin';
+  if (profileResult.error || membershipResult.error || !isAdmin) {
     return { supabase, errorResponse: NextResponse.json({ error: 'Forbidden' }, { status: 403 }) };
   }
 

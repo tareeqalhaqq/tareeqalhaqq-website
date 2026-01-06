@@ -30,10 +30,10 @@ export default function AcademyPage() {
             <p className="eyebrow text-left">Access</p>
             <h2 className="text-2xl font-headline uppercase tracking-[0.2em] text-white">Getting Ready</h2>
             <p className="text-sm text-white/70">
-              Academy accounts will open in 2026. To access the academy, go here once the portal is live: academy.tareeqalhaqq.org.
+              Academy accounts will open in 2026. To access the academy, go here once the portal is live: markazalhaqq.org.
             </p>
             <div className="rounded-2xl border border-white/10 bg-black/50 p-4 text-left text-xs uppercase tracking-[0.3em] text-white/60">
-              academy.tareeqalhaqq.org
+              markazalhaqq.org
             </div>
             <p className="text-xs uppercase tracking-[0.3em] text-white/50">
               Join the mailing list for launch updates and early onboarding.

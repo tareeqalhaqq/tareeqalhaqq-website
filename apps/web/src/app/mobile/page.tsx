@@ -43,14 +43,14 @@ export default function MobileBridgePage() {
         router.replace('/signin');
         return;
       }
-      const { data } = await supabase
-        .from('profiles')
-        .select('app_role, role')
-        .eq('id', userId)
-        .maybeSingle();
-      const role = data?.app_role ?? data?.role ?? 'user';
-      if (role === 'admin') {
-        router.replace('/dashboard');
+      const [profileResult, membershipResult] = await Promise.all([
+        supabase.from('profiles').select('app_role').eq('id', userId).maybeSingle(),
+        supabase.from('academy_memberships').select('academy_role').eq('user_id', userId).maybeSingle(),
+      ]);
+      const isAdmin =
+        profileResult.data?.app_role === 'admin' || membershipResult.data?.academy_role === 'admin';
+      if (isAdmin) {
+        router.replace('/dashboard/admin');
         return;
       }
       if (mounted) setAllowed(true);

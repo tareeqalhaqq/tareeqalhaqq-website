@@ -64,7 +64,7 @@ export default function AdminDashboardPage() {
               </p>
               <div className="flex flex-wrap gap-3 pt-2">
                 <Button asChild>
-                  <a href="/academy">View academy site</a>
+                  <a href="https://markazalhaqq.org">View academy site</a>
                 </Button>
                 <Button asChild variant="outline">
                   <a href="/logout">Sign out</a>
