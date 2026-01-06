@@ -60,8 +60,14 @@ export default async function EventsPage() {
                     </>
                   ) : (
                     <>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src="/images/logo.png" alt="Tareeq Al Haqq logo" className="h-full w-full object-contain p-10" />
+                      <div className="flex h-full w-full items-center justify-center bg-black/20">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src="/images/logo1.png"
+                          alt="Tareeq Al Haqq logo"
+                          className="h-24 w-24 object-contain md:h-32 md:w-32"
+                        />
+                      </div>
                       <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent" />
                       <p className="absolute bottom-4 left-4 text-xs uppercase tracking-[0.4em] text-white/60">
                         Tareeq Al Haqq Event

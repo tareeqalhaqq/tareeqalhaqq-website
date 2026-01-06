@@ -4,7 +4,7 @@ import { cookies } from 'next/headers';
 import { createClient } from '@/utils/supabase/server';
 
 const selectFields = 'id, title, description, location, date, time, image_url, created_at';
-const defaultEventImage = '/images/logo.png';
+const defaultEventImage = '/images/logo1.png';
 
 const assertAdmin = async () => {
   const cookieStore = cookies();

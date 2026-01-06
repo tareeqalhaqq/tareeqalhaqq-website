@@ -25,6 +25,21 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
+const ensureDefaultProfile = async (supabase: ReturnType<typeof createClient>, userId: string, email: string | null) => {
+  const { error } = await supabase.from('profiles').upsert(
+    {
+      id: userId,
+      email,
+      app_role: 'member',
+    },
+    { onConflict: 'id' },
+  );
+
+  if (error) {
+    throw new Error('We created your account, but could not finish your profile. Please contact support.');
+  }
+};
+
 export default function SignInPage() {
   const [status, setStatus] = useState<'idle' | 'loading' | 'success'>('idle');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -92,13 +107,17 @@ export default function SignInPage() {
           setStatus('idle');
           return;
         }
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email: values.email,
           password: values.password,
         });
 
         if (error) {
           throw error;
+        }
+
+        if (data.user) {
+          await ensureDefaultProfile(supabase, data.user.id, data.user.email ?? values.email);
         }
       } else {
         const { error } = await supabase.auth.signInWithPassword({
