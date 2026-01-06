@@ -7,16 +7,21 @@ type EventRecord = {
   id: string;
   title: string;
   description: string;
-  location: string;
-  date: string;
+  location: string | null;
+  date: string | null;
   time: string | null;
   image_url: string | null;
 };
 
-const formatDate = (date: string) =>
-  new Date(date).toLocaleDateString('en-GB', {
+const formatDate = (date: string | null) => {
+  if (!date) {
+    return 'Date TBA';
+  }
+
+  return new Date(date).toLocaleDateString('en-GB', {
     dateStyle: 'full',
   });
+};
 
 export default async function EventsPage() {
   const supabase = createClient(cookies());
@@ -75,7 +80,7 @@ export default async function EventsPage() {
                       <span className="hidden h-1 w-1 rounded-full bg-primary/60 md:inline-block" />
                       <span className="flex items-center gap-2">
                         <MapPin className="h-4 w-4 text-primary" />
-                        {event.location}
+                        {event.location ?? 'Location TBA'}
                       </span>
                     </div>
                   </div>

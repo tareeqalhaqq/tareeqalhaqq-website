@@ -26,8 +26,8 @@ type EventRecord = {
   id: string;
   title: string;
   description: string;
-  location: string;
-  date: string;
+  location: string | null;
+  date: string | null;
   time: string | null;
   image_url: string | null;
   created_at: string;
@@ -110,17 +110,19 @@ export function EventsManager({ adminName }: EventsManagerProps) {
   };
 
   const openEditDialog = (event: EventRecord) => {
+    const normalizedTime = event.time ? event.time.slice(0, 5) : '';
+    const isTbaLocation = !event.location || event.location.toLowerCase() === 'to be announced';
     setEditingEvent(event);
     setFormState({
       title: event.title,
       description: event.description,
-      location: event.location,
-      date: event.date,
-      time: event.time ?? '',
+      location: event.location ?? '',
+      date: event.date ?? '',
+      time: normalizedTime,
       image_url: event.image_url ?? '',
     });
     setTbaState({
-      location: event.location.toLowerCase() === 'to be announced',
+      location: isTbaLocation,
       date: !event.date,
       time: !event.time,
       image_url: !event.image_url,
