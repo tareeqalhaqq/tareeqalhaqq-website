@@ -29,7 +29,7 @@ type AuthState = {
 };
 
 export function useAuthProfile() {
-  const supabase = useMemo(() => createClient(), []);
+  const supabase = useMemo(() => (typeof window === 'undefined' ? null : createClient()), []);
   const [state, setState] = useState<AuthState>({
     status: 'loading',
     user: null,
@@ -37,6 +37,7 @@ export function useAuthProfile() {
   });
 
   const loadProfile = async (user: User) => {
+    if (!supabase) return;
     const { data, error } = await supabase
       .from('profiles')
       .select('id, email, role, app_role, full_name, avatar_url, created_at')
@@ -52,9 +53,14 @@ export function useAuthProfile() {
   };
 
   useEffect(() => {
+    if (!supabase) {
+      return;
+    }
+
     let isMounted = true;
 
     const init = async () => {
+      if (!supabase) return;
       const {
         data: { user },
       } = await supabase.auth.getUser();
@@ -91,6 +97,6 @@ export function useAuthProfile() {
 
   return {
     ...state,
-    isAdmin: state.profile?.app_role === 'admin',
+    isAdmin: state.profile?.app_role === 'admin' || state.profile?.role === 'admin',
   };
 }

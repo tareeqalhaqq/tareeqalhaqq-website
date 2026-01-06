@@ -19,11 +19,12 @@ const assertAdmin = async () => {
 
   const { data: profile, error } = await supabase
     .from('profiles')
-    .select('app_role')
+    .select('app_role, role')
     .eq('id', user.id)
     .single();
 
-  if (error || profile?.app_role !== 'admin') {
+  const isAdmin = profile?.app_role === 'admin' || profile?.role === 'admin';
+  if (error || !isAdmin) {
     return { supabase, errorResponse: NextResponse.json({ error: 'Forbidden' }, { status: 403 }) };
   }
 
