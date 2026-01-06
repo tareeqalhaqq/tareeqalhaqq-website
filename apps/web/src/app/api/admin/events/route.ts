@@ -52,21 +52,26 @@ export async function POST(request: Request) {
   const payload = (await request.json()) as {
     title: string;
     description: string;
-    location: string;
-    date: string;
+    location: string | null;
+    date: string | null;
     time?: string | null;
     image_url?: string | null;
   };
 
+  const normalizedLocation = payload.location?.trim() || null;
+  const normalizedDate = payload.date || null;
+  const normalizedTime = payload.time || null;
+  const normalizedImage = payload.image_url || null;
+
   const { data, error } = await supabase
     .from('events')
     .insert({
-      title: payload.title,
-      description: payload.description,
-      location: payload.location,
-      date: payload.date,
-      time: payload.time ?? null,
-      image_url: payload.image_url ?? null,
+      title: payload.title.trim(),
+      description: payload.description.trim(),
+      location: normalizedLocation,
+      date: normalizedDate,
+      time: normalizedTime,
+      image_url: normalizedImage,
     })
     .select(selectFields)
     .single();
