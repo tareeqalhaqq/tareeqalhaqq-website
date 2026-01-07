@@ -4,7 +4,7 @@ import { cookies } from 'next/headers';
 import { createClient } from '@/utils/supabase/server';
 
 const selectFields = 'id, title, description, location, date, time, image_url, created_at';
-const defaultEventImage = '/images/logo.png';
+const defaultEventImage = '/images/logo1.png';
 
 const assertAdmin = async () => {
   const cookieStore = cookies();
@@ -79,10 +79,14 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
 
   const { id } = await params;
 
-  const { error } = await supabase.from('events').delete().eq('id', id);
+  const { data, error } = await supabase.from('events').delete().eq('id', id).select('id');
 
   if (error) {
     return NextResponse.json({ error: 'Unable to delete event.' }, { status: 500 });
+  }
+
+  if (!data?.length) {
+    return NextResponse.json({ error: 'Event not found.' }, { status: 404 });
   }
 
   return NextResponse.json({ success: true });
