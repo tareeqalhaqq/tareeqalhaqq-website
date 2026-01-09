@@ -136,7 +136,7 @@ export default function SignInPage() {
       if (session?.user?.id) {
         await handleRedirect(session.user.id);
       } else {
-        router.push('/mobile');
+        router.push('/dashboard/user');
       }
     } catch (error) {
       const message = (error as { message?: string }).message;
@@ -177,10 +177,10 @@ export default function SignInPage() {
         return;
       }
 
-      router.replace('/mobile');
+      router.replace('/dashboard/user');
     } catch (err) {
-      console.warn('role lookup failed, defaulting to mobile', err);
-      router.replace('/mobile');
+      console.warn('role lookup failed, defaulting to dashboard', err);
+      router.replace('/dashboard/user');
     }
   };
 
