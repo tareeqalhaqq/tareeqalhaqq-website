@@ -188,12 +188,14 @@ export function EventsManager({ adminName }: EventsManagerProps) {
     setIsSubmitting(true);
 
     try {
+      const normalizedDate = tbaState.date ? null : formState.date || null;
+      const normalizedTime = tbaState.time ? null : formState.time || null;
       const payload = {
         title: formState.title,
         description: formState.description,
         location: tbaState.location ? 'To be announced' : formState.location,
-        date: tbaState.date ? null : formState.date || null,
-        time: tbaState.time ? null : formState.time || null,
+        date: normalizedDate,
+        time: normalizedTime,
       };
 
       if (editingEvent) {
