@@ -14,7 +14,9 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/supabaseClient";
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -43,8 +45,29 @@ export function ContactForm() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    setSubmitError(null);
+
+    const { error } = await supabase.from("contact_messages").insert({
+      name: values.name,
+      email: values.email,
+      subject: values.subject,
+      message: values.message,
+      status: "unread",
+    });
+
+    if (error) {
+      setSubmitError("We could not send your message. Please try again.");
+      toast({
+        title: "Message Failed",
+        description: "We could not send your message. Please try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     toast({
       title: "Message Sent!",
       description: "Thank you for contacting us. We will get back to you shortly.",
@@ -116,11 +139,13 @@ export function ContactForm() {
               </FormItem>
             )}
           />
+          {submitError && <p className="text-sm text-red-200">{submitError}</p>}
           <Button
             type="submit"
+            disabled={form.formState.isSubmitting}
             className="w-full rounded-full bg-gradient-to-r from-primary via-amber-400 to-primary text-sm font-semibold uppercase tracking-[0.35em] text-primary-foreground shadow-lg shadow-black/40 transition hover:scale-[1.01]"
           >
-            Send Message
+            {form.formState.isSubmitting ? "Sending..." : "Send Message"}
           </Button>
         </form>
       </Form>

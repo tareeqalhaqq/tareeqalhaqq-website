@@ -66,6 +66,9 @@ export default function AdminDashboardPage() {
                 <Button asChild>
                   <a href="https://markazalhaqq.org">View academy site</a>
                 </Button>
+                <Button asChild variant="secondary">
+                  <Link href="/admin/contact">Contact inbox</Link>
+                </Button>
                 <Button asChild variant="outline">
                   <a href="/logout">Sign out</a>
                 </Button>

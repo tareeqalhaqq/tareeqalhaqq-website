@@ -59,6 +59,33 @@ export default function UserDashboardPage() {
               </div>
             </div>
 
+            <div className="grid gap-4 md:grid-cols-3">
+              <div className="glass-panel space-y-3 p-6 text-white">
+                <p className="text-sm uppercase tracking-[0.18em] text-white/60">Dashboard</p>
+                <p className="text-lg font-semibold">Your account overview</p>
+                <p className="text-sm text-white/70">Review your profile, billing, and account settings.</p>
+                <Button asChild variant="outline" className="w-full">
+                  <Link href="/dashboard/user">Open dashboard</Link>
+                </Button>
+              </div>
+              <div className="glass-panel space-y-3 p-6 text-white">
+                <p className="text-sm uppercase tracking-[0.18em] text-white/60">Messages</p>
+                <p className="text-lg font-semibold">Your contact updates</p>
+                <p className="text-sm text-white/70">View guidance on replies to the messages you send.</p>
+                <Button asChild variant="outline" className="w-full">
+                  <Link href="/dashboard/messages">View messages</Link>
+                </Button>
+              </div>
+              <div className="glass-panel space-y-3 p-6 text-white">
+                <p className="text-sm uppercase tracking-[0.18em] text-white/60">App</p>
+                <p className="text-lg font-semibold">Continue learning</p>
+                <p className="text-sm text-white/70">Launch the learning experience and pick up where you left off.</p>
+                <Button asChild className="w-full">
+                  <Link href="/mobile">Open the app</Link>
+                </Button>
+              </div>
+            </div>
+
             <div className="grid gap-4 md:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
               <div className="glass-panel space-y-4 p-6 text-white">
                 <p className="text-sm uppercase tracking-[0.18em] text-white/60">Your greeting</p>
