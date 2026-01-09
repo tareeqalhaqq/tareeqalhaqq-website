@@ -1,14 +1,11 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-
-import { createClient } from '@/utils/supabase/server';
+import { createClient } from '@/lib/supabase/server';
 
 const selectFields = 'id, title, description, location, date, time, image_url, created_at';
 const defaultEventImage = '/images/logo1.png';
 
 const assertAdmin = async () => {
-  const cookieStore = cookies();
-  const supabase = createClient(cookieStore);
+  const supabase = createClient();
 
   const {
     data: { user },

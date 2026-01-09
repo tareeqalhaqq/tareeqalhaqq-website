@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { createClient } from '@/utils/supabase/clients';
+import { createBrowserClient } from '@/lib/supabase/client';
 
 type Role = 'admin' | 'student' | 'member';
 
@@ -44,7 +44,7 @@ const deriveRole = (profile: Profile | null, membership: AcademyMembership | nul
 };
 
 export function useAuthProfile() {
-  const supabase = useMemo(() => (typeof window === 'undefined' ? null : createClient()), []);
+  const supabase = useMemo(() => (typeof window === 'undefined' ? null : createBrowserClient()), []);
   const [state, setState] = useState<AuthState>({
     status: 'loading',
     user: null,

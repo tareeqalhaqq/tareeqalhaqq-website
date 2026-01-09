@@ -1,7 +1,5 @@
 import { Calendar, Clock, MapPin } from 'lucide-react';
-import { cookies } from 'next/headers';
-
-import { createClient } from '@/utils/supabase/server';
+import { createClient } from '@/lib/supabase/server';
 
 type EventRecord = {
   id: string;
@@ -24,7 +22,7 @@ const formatDate = (date: string | null) => {
 };
 
 export default async function EventsPage() {
-  const supabase = createClient(cookies());
+  const supabase = createClient();
   const { data: events } = await supabase
     .from('events')
     .select('id, title, description, location, date, time, image_url')

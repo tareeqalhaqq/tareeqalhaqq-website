@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
-
-import { createClient } from "@/utils/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 
 type ReplyPayload = {
   messageId: string;
@@ -15,7 +13,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
 
-  const supabase = createClient(cookies());
+  const supabase = createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

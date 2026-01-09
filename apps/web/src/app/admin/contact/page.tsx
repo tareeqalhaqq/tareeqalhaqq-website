@@ -1,11 +1,10 @@
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-import { createClient } from "@/utils/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import { ContactInbox, type ContactMessage } from "@/components/admin/contact-inbox";
 
 const getAdminMessages = async () => {
-  const supabase = createClient(cookies());
+  const supabase = createClient();
 
   const {
     data: { user },

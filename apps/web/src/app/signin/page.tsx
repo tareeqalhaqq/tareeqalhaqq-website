@@ -10,7 +10,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { createClient } from '@/utils/supabase/clients';
+import { createBrowserClient } from '@/lib/supabase/client';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -25,7 +25,11 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-const ensureDefaultProfile = async (supabase: ReturnType<typeof createClient>, userId: string, email: string | null) => {
+const ensureDefaultProfile = async (
+  supabase: ReturnType<typeof createBrowserClient>,
+  userId: string,
+  email: string | null,
+) => {
   const { error } = await supabase.from('profiles').upsert(
     {
       id: userId,
@@ -46,7 +50,7 @@ export default function SignInPage() {
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
   const router = useRouter();
-  const supabase = useMemo(() => createClient(), []);
+  const supabase = useMemo(() => createBrowserClient(), []);
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: { email: '', password: '', confirmPassword: '' },
