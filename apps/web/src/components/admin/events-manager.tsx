@@ -21,6 +21,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { createClient } from '@/utils/supabase/clients';
 
 type EventRecord = {
   id: string;
@@ -56,6 +57,7 @@ type EventsManagerProps = {
 
 export function EventsManager({ adminName }: EventsManagerProps) {
   const { toast } = useToast();
+  const supabase = useMemo(() => createClient(), []);
   const [events, setEvents] = useState<EventRecord[]>([]);
   const [status, setStatus] = useState<'loading' | 'ready'>('loading');
   const [formState, setFormState] = useState<FormState>(emptyForm);
@@ -76,15 +78,14 @@ export function EventsManager({ adminName }: EventsManagerProps) {
   const loadEvents = useCallback(async () => {
     setStatus('loading');
     try {
-      const response = await fetch('/api/admin/events', {
-        credentials: 'include',
-        cache: 'no-store',
-      });
-      if (!response.ok) {
-        throw new Error('Unable to load events.');
+      const { data, error } = await supabase
+        .from('events')
+        .select('id, title, description, location, date, time, image_url, created_at')
+        .order('date', { ascending: true });
+      if (error) {
+        throw new Error(error.message);
       }
-      const payload = (await response.json()) as { events: EventRecord[] };
-      setEvents(payload.events ?? []);
+      setEvents(data ?? []);
     } catch (error) {
       toast({
         title: 'Unable to load events',
@@ -94,7 +95,7 @@ export function EventsManager({ adminName }: EventsManagerProps) {
     } finally {
       setStatus('ready');
     }
-  }, [toast]);
+  }, [supabase, toast]);
 
   useEffect(() => {
     loadEvents();
@@ -187,22 +188,35 @@ export function EventsManager({ adminName }: EventsManagerProps) {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(editingEvent ? `/api/admin/events/${editingEvent.id}` : '/api/admin/events', {
-        method: editingEvent ? 'PUT' : 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          ...formState,
-          location: tbaState.location ? 'To be announced' : formState.location,
-          date: tbaState.date ? null : formState.date || null,
-          time: tbaState.time ? null : formState.time || null,
-          image_url: tbaState.image_url ? null : formState.image_url || null,
-        }),
-      });
+      const payload = {
+        title: formState.title,
+        description: formState.description,
+        location: tbaState.location ? 'To be announced' : formState.location,
+        date: tbaState.date ? null : formState.date || null,
+        time: tbaState.time ? null : formState.time || null,
+      };
 
-      if (!response.ok) {
-        const payload = (await response.json()) as { error?: string };
-        throw new Error(payload.error || 'Unable to save the event.');
+      if (editingEvent) {
+        const { error } = await supabase.from('events').update(payload).eq('id', editingEvent.id);
+        if (error) {
+          throw new Error(error.message);
+        }
+      } else {
+        const {
+          data: { user },
+          error: userError,
+        } = await supabase.auth.getUser();
+        if (userError || !user) {
+          throw new Error(userError?.message || 'You must be signed in to create an event.');
+        }
+        const { error } = await supabase.from('events').insert({
+          ...payload,
+          image_url: tbaState.image_url ? null : formState.image_url || null,
+          created_by: user.id,
+        });
+        if (error) {
+          throw new Error(error.message);
+        }
       }
 
       toast({
@@ -235,14 +249,9 @@ export function EventsManager({ adminName }: EventsManagerProps) {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(`/api/admin/events/${deleteTarget.id}`, {
-        method: 'DELETE',
-        credentials: 'include',
-      });
-
-      if (!response.ok) {
-        const payload = (await response.json()) as { error?: string };
-        throw new Error(payload.error || 'Unable to delete the event.');
+      const { error } = await supabase.from('events').delete().eq('id', deleteTarget.id);
+      if (error) {
+        throw new Error(error.message);
       }
 
       toast({
