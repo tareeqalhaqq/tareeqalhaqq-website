@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { useAuthProfile } from "@/hooks/use-auth-profile";
-import { supabase } from "@/lib/supabaseClient";
+import { createBrowserClient } from "@/lib/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 export type ContactMessage = {
@@ -40,6 +40,7 @@ export function ContactInbox({ initialMessages }: ContactInboxProps) {
   const { toast } = useToast();
   const [messages, setMessages] = useState<ContactMessage[]>(initialMessages);
   const isAdmin = profile?.app_role === "admin";
+  const supabase = useMemo(() => createBrowserClient(), []);
 
   useEffect(() => {
     if (status === "unauthenticated") {

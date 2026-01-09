@@ -1,7 +1,6 @@
-import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 
-import { createClient } from "@/utils/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import { ContactMessageView } from "@/components/admin/contact-message-view";
 import type { ContactMessage } from "@/components/admin/contact-inbox";
 
@@ -10,7 +9,7 @@ type AdminContactMessagePageProps = {
 };
 
 const getMessage = async (messageId: string) => {
-  const supabase = createClient(cookies());
+  const supabase = createClient();
 
   const {
     data: { user },

@@ -14,9 +14,10 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/lib/supabaseClient";
+import { useAuthProfile } from "@/hooks/use-auth-profile";
+import { createBrowserClient } from "@/lib/supabase/client";
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -35,11 +36,13 @@ const formSchema = z.object({
 
 export function ContactForm() {
   const { toast } = useToast();
+  const { status, user, profile } = useAuthProfile();
+  const supabase = useMemo(() => createBrowserClient(), []);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
-      email: "",
+      name: profile?.full_name ?? "",
+      email: user?.email ?? "",
       subject: "",
       message: "",
     },
@@ -47,8 +50,28 @@ export function ContactForm() {
 
   const [submitError, setSubmitError] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (status !== "authenticated") return;
+    if (profile?.full_name && !form.getValues("name")) {
+      form.setValue("name", profile.full_name);
+    }
+    if (user?.email && !form.getValues("email")) {
+      form.setValue("email", user.email);
+    }
+  }, [form, profile?.full_name, status, user?.email]);
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setSubmitError(null);
+
+    if (status !== "authenticated") {
+      setSubmitError("Please sign in to send a message.");
+      toast({
+        title: "Sign in required",
+        description: "Please sign in before sending a message.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     const { error } = await supabase.from("contact_messages").insert({
       name: values.name,
@@ -81,6 +104,15 @@ export function ContactForm() {
         <h2 className="text-2xl font-headline uppercase tracking-[0.2em] text-white">Send us a Message</h2>
         <p className="text-sm text-white/70">We would love to hear from you. Please fill out the form and our team will respond shortly.</p>
       </div>
+      {status === "unauthenticated" && (
+        <div className="rounded-3xl border border-white/10 bg-black/40 p-6 text-sm text-white/70">
+          <p className="text-base font-semibold text-white">Sign in to continue</p>
+          <p className="mt-1 text-white/70">Please sign in to send a message to the team.</p>
+          <Button asChild className="mt-4 w-full">
+            <a href="/login">Sign in</a>
+          </Button>
+        </div>
+      )}
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <FormField
@@ -142,7 +174,7 @@ export function ContactForm() {
           {submitError && <p className="text-sm text-red-200">{submitError}</p>}
           <Button
             type="submit"
-            disabled={form.formState.isSubmitting}
+            disabled={form.formState.isSubmitting || status !== "authenticated"}
             className="w-full rounded-full bg-gradient-to-r from-primary via-amber-400 to-primary text-sm font-semibold uppercase tracking-[0.35em] text-primary-foreground shadow-lg shadow-black/40 transition hover:scale-[1.01]"
           >
             {form.formState.isSubmitting ? "Sending..." : "Send Message"}

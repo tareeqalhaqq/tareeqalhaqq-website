@@ -3,13 +3,13 @@
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
-import { createClient } from '@/utils/supabase/clients';
+import { createBrowserClient } from '@/lib/supabase/client';
 
 export default function LogoutPage() {
   const router = useRouter();
 
   useEffect(() => {
-    const supabase = createClient();
+    const supabase = createBrowserClient();
 
     supabase.auth.signOut().finally(() => {
       router.replace('/signin');

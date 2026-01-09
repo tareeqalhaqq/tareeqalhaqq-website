@@ -3,7 +3,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@/utils/supabase/clients';
+import { createBrowserClient } from '@/lib/supabase/client';
 
 const EXPO_WEB_URL =
   process.env.NEXT_PUBLIC_EXPO_WEB_URL || 'http://localhost:8081';
@@ -12,7 +12,7 @@ const EXPO_ORIGIN = new URL(EXPO_WEB_URL).origin;
 export default function MobileBridgePage() {
   const router = useRouter();
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  const supabase = useMemo(() => createClient(), []);
+  const supabase = useMemo(() => createBrowserClient(), []);
   const [allowed, setAllowed] = useState(false);
 
   const sendSession = async () => {

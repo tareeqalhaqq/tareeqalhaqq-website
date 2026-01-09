@@ -21,7 +21,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { createClient } from '@/utils/supabase/clients';
+import { createBrowserClient } from '@/lib/supabase/client';
 
 type EventRecord = {
   id: string;
@@ -57,7 +57,7 @@ type EventsManagerProps = {
 
 export function EventsManager({ adminName }: EventsManagerProps) {
   const { toast } = useToast();
-  const supabase = useMemo(() => createClient(), []);
+  const supabase = useMemo(() => createBrowserClient(), []);
   const [events, setEvents] = useState<EventRecord[]>([]);
   const [status, setStatus] = useState<'loading' | 'ready'>('loading');
   const [formState, setFormState] = useState<FormState>(emptyForm);
