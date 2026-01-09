@@ -50,9 +50,8 @@ export default function Footer() {
             <div>
               <h3 className="text-xs font-semibold uppercase tracking-[0.35em] text-white/60">Contact</h3>
               <div className="mt-4 space-y-2 text-white/60">
-                <p>123 Spiritual Path, Knowledge City, 12345</p>
                 <p>contact@tareeqalhaqq.org</p>
-                <p>(123) 456-7890</p>
+                <p>6468832517</p>
               </div>
             </div>
           </div>

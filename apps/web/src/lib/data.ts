@@ -28,7 +28,7 @@ export const socialLinks = [
   { name: 'Facebook', href: '#', icon: 'Facebook' },
   { name: 'Twitter', href: '#', icon: 'Twitter' },
   { name: 'Youtube', href: '#', icon: 'Youtube' },
-  { name: 'Instagram', href: '#', icon: 'Instagram' },
+  { name: 'Instagram', href: 'https://www.instagram.com/tareeqalhaqq__/', icon: 'Instagram' },
 ];
 
 export const upcomingEvents = [
