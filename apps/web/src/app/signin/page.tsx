@@ -77,7 +77,17 @@ export default function SignInPage() {
       if (event === 'SIGNED_IN') {
         setStatus('success');
         if (session?.user?.id) {
-          handleRedirect(session.user.id);
+          void (async () => {
+            try {
+              await ensureDefaultProfile(supabase, session.user.id, session.user.email ?? null);
+            } catch (error) {
+              const message = (error as { message?: string }).message;
+              setErrorMessage(
+                message ?? 'We created your account, but could not finish your profile. Please contact support.',
+              );
+            }
+            await handleRedirect(session.user.id);
+          })();
         }
       }
 
@@ -145,6 +155,26 @@ export default function SignInPage() {
     } catch (error) {
       const message = (error as { message?: string }).message;
       setErrorMessage(message ?? 'Unable to sign in. Please verify your details and try again.');
+      setStatus('idle');
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setStatus('loading');
+    setErrorMessage(null);
+    try {
+      const redirectTo = `${window.location.origin}/signin`;
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo },
+      });
+
+      if (error) {
+        throw error;
+      }
+    } catch (error) {
+      const message = (error as { message?: string }).message;
+      setErrorMessage(message ?? 'Unable to connect your Google account. Please try again.');
       setStatus('idle');
     }
   };
@@ -267,6 +297,22 @@ export default function SignInPage() {
             ) : (
               <Form {...form}>
                 <form className="space-y-5" onSubmit={form.handleSubmit(handleSubmit)}>
+                  <div className="space-y-4">
+                    <Button
+                      className="w-full"
+                      type="button"
+                      variant="secondary"
+                      disabled={status === 'loading'}
+                      onClick={handleGoogleSignIn}
+                    >
+                      Continue with Google
+                    </Button>
+                    <div className="flex items-center gap-3 text-xs uppercase tracking-[0.3em] text-white/50">
+                      <span className="h-px flex-1 bg-white/10" />
+                      or
+                      <span className="h-px flex-1 bg-white/10" />
+                    </div>
+                  </div>
                   <FormField
                     control={form.control}
                     name="email"
