@@ -1,5 +1,5 @@
 import { ContactForm } from "@/components/contact-form";
-import { Mail, Phone, MapPin } from "lucide-react";
+import { Mail, Phone, Instagram } from "lucide-react";
 
 export default function ContactPage() {
   return (
@@ -17,12 +17,6 @@ export default function ContactPage() {
           <div className="glass-panel space-y-6 text-white/80">
             <h2 className="text-lg font-headline uppercase tracking-[0.2em] text-white">Get in Touch</h2>
             <div className="space-y-4 text-sm">
-              <div className="flex items-start gap-4">
-                <span className="rounded-full border border-white/10 bg-black/50 p-2">
-                  <MapPin className="h-5 w-5 text-primary" />
-                </span>
-                <span>123 Spiritual Path, Knowledge City, 12345</span>
-              </div>
               <div className="flex items-center gap-4">
                 <span className="rounded-full border border-white/10 bg-black/50 p-2">
                   <Mail className="h-5 w-5 text-primary" />
@@ -33,9 +27,17 @@ export default function ContactPage() {
               </div>
               <div className="flex items-center gap-4">
                 <span className="rounded-full border border-white/10 bg-black/50 p-2">
+                  <Instagram className="h-5 w-5 text-primary" />
+                </span>
+                <a href="https://www.instagram.com/tareeqalhaqq__/" className="text-primary hover:underline">
+                  @tareeqalhaqq__
+                </a>
+              </div>
+              <div className="flex items-center gap-4">
+                <span className="rounded-full border border-white/10 bg-black/50 p-2">
                   <Phone className="h-5 w-5 text-primary" />
                 </span>
-                <span>(123) 456-7890</span>
+                <span>6468832517</span>
               </div>
             </div>
           </div>
