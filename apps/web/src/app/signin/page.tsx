@@ -49,6 +49,7 @@ export default function SignInPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
+  const [isRedirecting, setIsRedirecting] = useState(false);
   const router = useRouter();
   const supabase = useMemo(() => createBrowserClient(), []);
   const form = useForm<FormValues>({
@@ -76,6 +77,7 @@ export default function SignInPage() {
 
       if (event === 'SIGNED_IN') {
         setStatus('success');
+        setIsRedirecting(true);
         if (session?.user?.id) {
           void (async () => {
             try {
@@ -93,6 +95,7 @@ export default function SignInPage() {
 
       if (event === 'SIGNED_OUT') {
         setStatus('idle');
+        setIsRedirecting(false);
       }
     });
 
@@ -104,6 +107,7 @@ export default function SignInPage() {
     setErrorMessage(null);
     form.setValue('password', '');
     form.setValue('confirmPassword', '');
+    setIsRedirecting(false);
   }, [authMode, form]);
 
   const handleSubmit = async (values: FormValues) => {
@@ -149,13 +153,14 @@ export default function SignInPage() {
       } = await supabase.auth.getSession();
       if (session?.user?.id) {
         await handleRedirect(session.user.id);
-      } else {
-        router.push('/dashboard/user');
+      } else if (authMode === 'signup') {
+        setErrorMessage('Check your email to confirm your account. Sign-in will be available once confirmed.');
       }
     } catch (error) {
       const message = (error as { message?: string }).message;
       setErrorMessage(message ?? 'Unable to sign in. Please verify your details and try again.');
       setStatus('idle');
+      setIsRedirecting(false);
     }
   };
 
@@ -163,7 +168,7 @@ export default function SignInPage() {
     setStatus('loading');
     setErrorMessage(null);
     try {
-      const redirectTo = `${window.location.origin}/signin`;
+      const redirectTo = `${window.location.origin}/signin?oauth=google`;
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: { redirectTo },
@@ -185,10 +190,12 @@ export default function SignInPage() {
     form.reset();
     setUserEmail(null);
     setStatus('idle');
+    setIsRedirecting(false);
   };
 
   const handleRedirect = async (userId: string) => {
     try {
+      setIsRedirecting(true);
       const [profileResult, membershipResult] = await Promise.all([
         supabase.from('profiles').select('app_role').eq('id', userId).maybeSingle(),
         supabase.from('academy_memberships').select('academy_role, active').eq('user_id', userId).maybeSingle(),
@@ -247,7 +254,34 @@ export default function SignInPage() {
             Access your personalised Academy dashboard and pick up where you left off with our curated learning tracks.
           </p>
         </div>
-        <div className="space-y-6">
+        <div className="grid gap-6 lg:grid-cols-[1.05fr_1fr]">
+          <div className="glass-panel space-y-6 p-8">
+            <div className="space-y-3">
+              <p className="text-xs uppercase tracking-[0.3em] text-primary/80">Member benefits</p>
+              <h2 className="text-2xl font-semibold text-white">Everything stays in sync</h2>
+              <p className="text-sm text-white/70">
+                Your reading history, notes, and saved collections follow you across devices. Sign in to keep your
+                studies organised and secure.
+              </p>
+              <ul className="space-y-2 text-sm text-white/70">
+                <li className="flex items-center gap-3">
+                  <span className="h-2 w-2 rounded-full bg-primary" />
+                  Resume lessons with progress saved automatically.
+                </li>
+                <li className="flex items-center gap-3">
+                  <span className="h-2 w-2 rounded-full bg-primary" />
+                  Track reading streaks and revisit key highlights.
+                </li>
+                <li className="flex items-center gap-3">
+                  <span className="h-2 w-2 rounded-full bg-primary" />
+                  Access member-only learning tracks.
+                </li>
+              </ul>
+            </div>
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-xs uppercase tracking-[0.3em] text-white/60">
+              Secure access. Gentle experience. Built for calm study.
+            </div>
+          </div>
           <div className="glass-panel space-y-6 p-8">
             <div>
               <div className="flex flex-wrap items-center justify-between gap-3">
@@ -291,6 +325,11 @@ export default function SignInPage() {
                   <Button onClick={handleSignOut} variant="secondary">
                     Sign Out
                   </Button>
+                  {isRedirecting && (
+                    <span className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-xs uppercase tracking-[0.25em] text-white/60">
+                      Redirecting…
+                    </span>
+                  )}
                 </div>
                 <p className="text-xs uppercase tracking-[0.3em] text-emerald-400">Authenticated</p>
               </div>
@@ -382,6 +421,9 @@ export default function SignInPage() {
             )}
             {status === 'success' && !userEmail && (
               <p className="text-sm text-emerald-400">Successfully authenticated.</p>
+            )}
+            {isRedirecting && !userEmail && (
+              <p className="text-xs uppercase tracking-[0.3em] text-white/60">Redirecting to your dashboard…</p>
             )}
           </div>
         </div>

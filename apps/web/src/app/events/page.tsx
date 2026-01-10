@@ -45,12 +45,17 @@ export default async function EventsPage() {
           )}
           {(events ?? []).map((event: EventRecord) => (
             <div key={event.id} className="glass-panel overflow-hidden p-0">
-              <div className="grid gap-0 md:grid-cols-[1.1fr_1.2fr]">
-                <div className="relative h-full min-h-[240px]">
+              <div className="grid gap-0 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] md:items-stretch">
+                <div className="relative min-h-[220px] overflow-hidden md:min-h-[300px]">
                   {event.image_url ? (
                     <>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={event.image_url} alt={event.title} className="h-full w-full object-cover" loading="lazy" />
+                      <img
+                        src={event.image_url}
+                        alt={event.title}
+                        className="h-full w-full object-cover"
+                        loading="lazy"
+                      />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
                       <p className="absolute bottom-4 left-4 text-xs uppercase tracking-[0.4em] text-white/60">
                         Tareeq Al Haqq Event

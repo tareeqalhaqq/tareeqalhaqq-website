@@ -18,7 +18,7 @@ import { theme } from "@/theme/theme";
 
 export const DashboardScreen = () => {
   const router = useRouter();
-  const { user, role } = useAuthStore();
+  const { user } = useAuthStore();
   const { data: recent } = useQuery({
     queryKey: ["reading", user?.id],
     queryFn: () => fetchRecentReading(user?.id ?? ""),
@@ -91,23 +91,6 @@ export const DashboardScreen = () => {
         </View>
       </Section>
 
-      {role === "admin" ? (
-        <Card style={styles.adminCard}>
-          <Text variant="caption" muted>
-            Admin
-          </Text>
-          <Text variant="title">Platform Controls</Text>
-          <Text variant="body" muted>
-            Manage resources, metadata, athkar, and categories securely.
-          </Text>
-          <Button
-            label="Go to Admin Panel"
-            onPress={() => router.push("/admin")}
-            variant="primary"
-          />
-        </Card>
-      ) : null}
-
       <Section title="Recently Opened">
         {recent && recent.length > 0 ? (
           <View style={styles.list}>
@@ -173,10 +156,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     gap: theme.spacing.sm
-  },
-  adminCard: {
-    gap: theme.spacing.xs,
-    borderColor: theme.colors.accentSoft
   },
   list: {
     gap: theme.spacing.sm

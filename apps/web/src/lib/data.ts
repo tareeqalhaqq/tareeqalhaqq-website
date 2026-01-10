@@ -20,7 +20,7 @@ export const navLinks = [
   { name: 'About', href: '/about' },
   { name: 'Academy', href: 'https://markazalhaqq.org' },
   { name: 'Events', href: '/events' },
-  { name: 'Contact', href: '/contact' },
+  { name: 'Store', href: 'https://store.tareeqalhaqq.org' },
   { name: 'Sign In', href: '/signin' },
 ];
 
@@ -115,7 +115,7 @@ export const allContent = [
     description: 'Discover courses and structured learning tracks.',
     href: 'https://markazalhaqq.org',
   },
-  { type: 'Contact', title: 'Connect with Us', description: 'Reach out for guidance, support, or collaboration.', href: '/contact' },
+  { type: 'Store', title: 'Store', description: 'Shop curated resources and support the mission.', href: 'https://store.tareeqalhaqq.org' },
   ...academyCourses.map((course) => ({
     type: 'Course',
     title: course.title,

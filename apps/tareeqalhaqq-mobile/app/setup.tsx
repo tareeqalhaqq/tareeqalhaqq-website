@@ -12,19 +12,14 @@ import { Text } from "@/components/Text";
 import { Input } from "@/components/Input";
 import { Button } from "@/components/Button";
 import { Card } from "@/components/Card";
-import { Chip } from "@/components/Chip";
-import { useAuthStore } from "@/state/authStore";
-import { supabase } from "@/services/supabaseClient";
 import { setSetupCompleted } from "@/services/setup";
 import { theme } from "@/theme/theme";
 
 export default function SetupScreen() {
   const router = useRouter();
-  const { user } = useAuthStore();
   const [year, setYear] = useState<string>();
   const [month, setMonth] = useState<string>();
   const [day, setDay] = useState<string>();
-  const [madhab, setMadhab] = useState<string>();
   const [loading, setLoading] = useState(false);
 
   const years = useMemo(() => {
@@ -66,21 +61,11 @@ export default function SetupScreen() {
       Alert.alert("Birthday required", "Please select your birthday.");
       return;
     }
-    if (!madhab) {
-      Alert.alert("Select madhab", "Please choose your madhab.");
-      return;
-    }
 
     try {
       setLoading(true);
-      if (user?.id) {
-        await supabase
-          .from("profiles")
-          .update({ birth_date: formattedBirthday, madhab })
-          .eq("id", user.id);
-      }
     } catch (error) {
-      console.warn("Unable to persist setup to Supabase", error);
+      console.warn("Unable to persist setup locally", error);
     } finally {
       await setSetupCompleted(true);
       setLoading(false);
@@ -126,23 +111,9 @@ export default function SetupScreen() {
             onSelect={setDay}
           />
         </View>
-      </Card>
-
-      <Card style={styles.form}>
-        <Text variant="title">Madhab</Text>
-        <Text variant="body" muted>
-          Select your school of jurisprudence to tailor guidance and resources.
+        <Text variant="caption" muted>
+          Additional personalization is not available yet.
         </Text>
-        <View style={styles.madhabRow}>
-          {["hanafi", "shafii", "maliki", "hanbali"].map((option) => (
-            <Chip
-              key={option}
-              label={option.charAt(0).toUpperCase() + option.slice(1)}
-              active={madhab === option}
-              onPress={() => setMadhab(option)}
-            />
-          ))}
-        </View>
         <Button
           label={loading ? "Saving..." : "Continue"}
           onPress={completeSetup}
@@ -249,9 +220,4 @@ const styles = StyleSheet.create({
     paddingHorizontal: theme.spacing.sm,
     paddingVertical: theme.spacing.xs
   },
-  madhabRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: theme.spacing.sm
-  }
 });

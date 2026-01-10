@@ -38,7 +38,7 @@ export const AthkarScreen = () => {
       ) : (
         <EmptyState
           title="No athkar yet"
-          subtitle="Add categories in Supabase to see them here."
+          subtitle="Athkar content isn't available yet."
         />
       )}
     </Screen>

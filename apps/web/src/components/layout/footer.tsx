@@ -48,10 +48,14 @@ export default function Footer() {
               </ul>
             </div>
             <div>
-              <h3 className="text-xs font-semibold uppercase tracking-[0.35em] text-white/60">Contact</h3>
-              <div className="mt-4 space-y-2 text-white/60">
-                <p>contact@tareeqalhaqq.org</p>
-                <p>6468832517</p>
+              <h3 className="text-xs font-semibold uppercase tracking-[0.35em] text-white/60">Explore</h3>
+              <div className="mt-4 space-y-3 text-white/60">
+                <p className="text-sm">
+                  Visit the store for curated resources, apparel, and essentials that support the mission.
+                </p>
+                <Link href="https://store.tareeqalhaqq.org" className="text-xs uppercase tracking-[0.3em] text-primary">
+                  Shop the store
+                </Link>
               </div>
             </div>
           </div>

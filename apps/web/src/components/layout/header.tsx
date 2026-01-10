@@ -35,14 +35,14 @@ export default function Header() {
             <Logo />
           </Link>
 
-          <nav className="hidden items-center space-x-4 text-sm font-medium uppercase tracking-[0.2em] md:flex lg:space-x-6">
+          <nav className="hidden items-center space-x-3 text-xs font-semibold uppercase tracking-[0.22em] md:flex lg:space-x-5">
             {navLinks.map((link) =>
               link.subLinks ? (
                 <DropdownMenu key={link.name}>
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="ghost"
-                      className="flex items-center gap-2 rounded-full border border-white/5 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.25em] text-foreground/80 transition hover:border-white/10 hover:bg-white/10 hover:text-foreground"
+                      className="flex items-center gap-2 rounded-full border border-white/5 bg-white/5 px-4 py-2 text-[0.65rem] font-semibold uppercase tracking-[0.28em] text-foreground/80 transition hover:border-white/10 hover:bg-white/10 hover:text-foreground"
                     >
                       {link.name}
                       <ChevronDown className="h-4 w-4" />
@@ -63,8 +63,8 @@ export default function Header() {
                   key={link.name}
                   href={link.href!}
                   className={cn(
-                    "rounded-full border border-transparent px-4 py-2 text-xs transition-colors hover:border-white/10 hover:text-foreground",
-                    pathname === link.href ? "border-white/10 text-foreground" : "text-foreground/80"
+                    "rounded-full border border-transparent px-4 py-2 text-[0.65rem] font-semibold tracking-[0.28em] text-foreground/70 transition-colors hover:border-white/10 hover:text-foreground",
+                    pathname === link.href ? "border-white/10 text-foreground" : "text-foreground/70"
                   )}
                 >
                   {link.name}
@@ -87,7 +87,7 @@ export default function Header() {
               asChild
               className="hidden rounded-full bg-primary px-6 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-primary-foreground shadow-lg shadow-black/30 transition hover:shadow-xl hover:shadow-black/40 md:inline-flex"
             >
-              <Link href="/contact">Connect</Link>
+              <Link href="/signin">Sign In</Link>
             </Button>
             <Sheet open={isMobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild className="md:hidden">
