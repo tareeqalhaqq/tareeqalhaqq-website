@@ -1,12 +1,14 @@
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@300..800&family=Playfair+Display:wght@500..800&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --font-sans: "Inter", "Helvetica Neue", Arial, sans-serif;
+    --font-sans: "Manrope", "Inter", "Helvetica Neue", Arial, sans-serif;
     --font-serif: "Georgia", "Times New Roman", serif;
-    --font-headline: "Times New Roman", "Georgia", serif;
+    --font-headline: "Playfair Display", "Times New Roman", "Georgia", serif;
     --background: 205 55% 10%;
     --foreground: 206 46% 96%;
     --card: 205 42% 14%;
@@ -42,9 +44,9 @@
     --sidebar-ring: 189 86% 46%;
   }
   .dark {
-    --font-sans: "Inter", "Helvetica Neue", Arial, sans-serif;
+    --font-sans: "Manrope", "Inter", "Helvetica Neue", Arial, sans-serif;
     --font-serif: "Georgia", "Times New Roman", serif;
-    --font-headline: "Times New Roman", "Georgia", serif;
+    --font-headline: "Playfair Display", "Times New Roman", "Georgia", serif;
     --background: 215 52% 4%;
     --foreground: 206 46% 95%;
     --card: 213 48% 10%;

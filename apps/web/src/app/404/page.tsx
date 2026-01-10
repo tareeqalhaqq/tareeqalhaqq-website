@@ -19,10 +19,10 @@ export default function NotFoundPage() {
             Return Home
           </Link>
           <Link
-            href="/contact"
+            href="/signin"
             className="inline-flex items-center justify-center rounded-full border border-white/20 px-8 py-4 text-xs font-semibold uppercase tracking-[0.22em] text-white transition hover:border-white/40 hover:bg-white/10"
           >
-            Contact Us
+            Sign In
           </Link>
         </div>
       </div>

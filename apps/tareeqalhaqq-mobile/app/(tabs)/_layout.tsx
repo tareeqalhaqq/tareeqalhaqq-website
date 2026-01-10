@@ -1,5 +1,6 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Tabs } from "expo-router";
+import { Platform } from "react-native";
 import { theme } from "@/theme/theme";
 
 const getIcon = (name: string, focused: boolean) => {
@@ -30,10 +31,17 @@ export default function TabsLayout() {
           <Ionicons name={getIcon(route.name, focused)} size={size} color={color} />
         ),
         tabBarStyle: {
-          backgroundColor: theme.colors.surface,
+          backgroundColor:
+            Platform.OS === "ios"
+              ? "rgba(13, 18, 24, 0.85)"
+              : theme.colors.surface,
           borderTopColor: theme.colors.border,
           borderTopWidth: 1,
           elevation: 12,
+          shadowColor: "#000",
+          shadowOpacity: 0.25,
+          shadowRadius: 18,
+          shadowOffset: { width: 0, height: -6 },
           height: 72,
           paddingTop: 8,
           paddingBottom: 14

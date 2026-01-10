@@ -67,7 +67,7 @@ export const AthkarDetailScreen = () => {
       ) : (
         <EmptyState
           title="No athkar yet"
-          subtitle="Add items to this category in Supabase."
+          subtitle="This collection isn't available yet."
         />
       )}
     </Screen>

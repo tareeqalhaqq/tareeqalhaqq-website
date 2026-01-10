@@ -9,7 +9,7 @@ import { signOut } from "@/services/auth";
 import { theme } from "@/theme/theme";
 
 export const ProfileScreen = () => {
-  const { user, role } = useAuthStore();
+  const { user } = useAuthStore();
   const displayName =
     user?.user_metadata?.full_name ??
     user?.email?.split("@")[0] ??
@@ -29,11 +29,9 @@ export const ProfileScreen = () => {
         <Text variant="body" muted>
           {user?.email ?? "No email available"}
         </Text>
-        <View style={styles.badges}>
-          <Text variant="caption" muted>
-            Role: {role}
-          </Text>
-        </View>
+        <Text variant="caption" muted>
+          Member access enabled
+        </Text>
       </Card>
 
       <Section title="Account">
@@ -62,9 +60,6 @@ const styles = StyleSheet.create({
   },
   profileCard: {
     gap: theme.spacing.xs
-  },
-  badges: {
-    marginTop: theme.spacing.xs
   },
   detailCard: {
     marginBottom: theme.spacing.sm,

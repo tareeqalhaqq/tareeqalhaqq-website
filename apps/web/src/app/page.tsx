@@ -103,7 +103,7 @@ export default function Home() {
                   size="lg"
                   className="rounded-full bg-primary px-8 py-6 text-sm font-semibold uppercase tracking-[0.3em] text-primary-foreground shadow-lg shadow-black/30 transition"
                 >
-                  <Link href="/contact">Join the Community</Link>
+                  <Link href="/signin">Sign In</Link>
                 </Button>
               </motion.div>
               <motion.div whileHover={{ y: -4 }} whileTap={{ scale: 0.97 }}>

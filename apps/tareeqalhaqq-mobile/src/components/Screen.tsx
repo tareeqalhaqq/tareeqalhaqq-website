@@ -53,8 +53,8 @@ const styles = StyleSheet.create({
     flex: 1
   },
   content: {
-    paddingHorizontal: theme.spacing.lg,
-    paddingVertical: theme.spacing.xl,
-    gap: theme.spacing.lg
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.lg,
+    gap: theme.spacing.md
   }
 });

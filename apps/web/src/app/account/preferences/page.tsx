@@ -22,7 +22,7 @@ export default function AccountPreferencesPage() {
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.replace('/login');
+      router.replace('/signin');
     }
   }, [router, status]);
 

@@ -11,7 +11,7 @@ export default function DashboardRouter() {
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.replace('/login');
+      router.replace('/signin');
       return;
     }
 
@@ -38,7 +38,7 @@ export default function DashboardRouter() {
           <h1 className="text-2xl font-semibold">Loading your dashboard</h1>
           <p className="text-sm text-white/70">
             We&apos;re preparing the best view for your account. If you&apos;re not signed in, you&apos;ll be redirected to the
-            login screen.
+            sign-in screen.
           </p>
         </div>
       </div>
