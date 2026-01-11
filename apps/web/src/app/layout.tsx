@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ClerkProvider } from "@clerk/nextjs";
 import ToasterClient from "@/components/ToasterClient";
 import "./globals.css";
 
@@ -15,8 +16,10 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className="font-sans antialiased bg-background">
-        <ToasterClient />
-        {children}
+        <ClerkProvider>
+          <ToasterClient />
+          {children}
+        </ClerkProvider>
       </body>
     </html>
   );

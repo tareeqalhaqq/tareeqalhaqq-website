@@ -1,20 +1,18 @@
-"use client";
+'use client';
 
-import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-
-import { createBrowserClient } from '@/lib/supabase/client';
+import { useRouter } from 'next/navigation';
+import { useClerk } from '@clerk/nextjs';
 
 export default function LogoutPage() {
   const router = useRouter();
+  const { signOut } = useClerk();
 
   useEffect(() => {
-    const supabase = createBrowserClient();
-
-    supabase.auth.signOut().finally(() => {
+    signOut().finally(() => {
       router.replace('/signin');
     });
-  }, [router]);
+  }, [router, signOut]);
 
   return (
     <main className="flex min-h-screen items-center justify-center">

@@ -1,23 +1,21 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { auth } from '@clerk/nextjs/server';
+import { createSupabaseClient } from '@/lib/supabase';
 
 const selectFields = 'id, title, description, location, date, time, image_url, created_at';
 const defaultEventImage = '/images/logo1.png';
 
 const assertAdmin = async () => {
-  const supabase = createClient();
+  const { userId } = await auth();
+  const supabase = await createSupabaseClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
+  if (!userId) {
     return { supabase, errorResponse: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) };
   }
 
   const [profileResult, membershipResult] = await Promise.all([
-    supabase.from('profiles').select('app_role').eq('id', user.id).maybeSingle(),
-    supabase.from('academy_memberships').select('academy_role').eq('user_id', user.id).maybeSingle(),
+    supabase.from('profiles').select('app_role').eq('clerk_id', userId).maybeSingle(),
+    supabase.from('academy_memberships').select('academy_role').eq('clerk_id', userId).maybeSingle(),
   ]);
 
   const isAdmin =
