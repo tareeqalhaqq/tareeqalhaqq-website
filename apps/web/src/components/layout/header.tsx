@@ -16,6 +16,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Menu, Search, ChevronDown } from "lucide-react";
 import dynamic from "next/dynamic";
+import {
+  SignInButton,
+  SignUpButton,
+  SignedIn,
+  SignedOut,
+  UserButton,
+} from "@clerk/nextjs";
+import { clerkAuthAppearance } from "@/lib/clerk-appearance";
 
 const SearchDialog = dynamic(
   () => import("@/components/search-dialog").then((mod) => mod.SearchDialog),
@@ -83,12 +91,31 @@ export default function Header() {
               <Search className="h-5 w-5" />
               <span className="sr-only">Search</span>
             </Button>
-            <Button
-              asChild
-              className="hidden rounded-full bg-primary px-6 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-primary-foreground shadow-lg shadow-black/30 transition hover:shadow-xl hover:shadow-black/40 md:inline-flex"
-            >
-              <Link href="/signin">Sign In</Link>
-            </Button>
+            <SignedOut>
+              <div className="hidden items-center gap-2 md:flex">
+                <SignInButton mode="redirect" redirectUrl="/signin">
+                  <Button
+                    className="rounded-full bg-primary px-6 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-primary-foreground shadow-lg shadow-black/30 transition hover:shadow-xl hover:shadow-black/40"
+                  >
+                    Sign In
+                  </Button>
+                </SignInButton>
+                <SignUpButton mode="redirect" redirectUrl="/signup">
+                  <Button
+                    variant="outline"
+                    className="rounded-full border-white/20 bg-white/5 px-6 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-white transition hover:border-white/30 hover:bg-white/10"
+                  >
+                    Sign Up
+                  </Button>
+                </SignUpButton>
+              </div>
+            </SignedOut>
+            <SignedIn>
+              <UserButton
+                appearance={clerkAuthAppearance}
+                afterSignOutUrl="/"
+              />
+            </SignedIn>
             <Sheet open={isMobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild className="md:hidden">
                 <Button
@@ -141,6 +168,31 @@ export default function Header() {
                       </div>
                     ))}
                   </nav>
+                  <div className="mt-8 space-y-3">
+                    <SignedOut>
+                      <SignInButton mode="redirect" redirectUrl="/signin">
+                        <Button className="w-full rounded-full bg-primary px-6 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-primary-foreground shadow-lg shadow-black/30 transition hover:shadow-xl hover:shadow-black/40">
+                          Sign In
+                        </Button>
+                      </SignInButton>
+                      <SignUpButton mode="redirect" redirectUrl="/signup">
+                        <Button
+                          variant="outline"
+                          className="w-full rounded-full border-white/20 bg-white/5 px-6 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-white transition hover:border-white/30 hover:bg-white/10"
+                        >
+                          Sign Up
+                        </Button>
+                      </SignUpButton>
+                    </SignedOut>
+                    <SignedIn>
+                      <div className="flex items-center justify-center">
+                        <UserButton
+                          appearance={clerkAuthAppearance}
+                          afterSignOutUrl="/"
+                        />
+                      </div>
+                    </SignedIn>
+                  </div>
                 </div>
               </SheetContent>
             </Sheet>
