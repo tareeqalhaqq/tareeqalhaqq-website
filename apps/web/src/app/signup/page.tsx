@@ -2,6 +2,8 @@
 
 import { SignUp } from '@clerk/nextjs';
 
+import { clerkAuthAppearance } from '@/lib/clerk-appearance';
+
 export default function SignupPage() {
   return (
     <section className="page-section">
@@ -14,14 +16,16 @@ export default function SignupPage() {
             personal dashboard.
           </p>
         </div>
-        <div className="glass-panel flex justify-center p-6">
-          <SignUp
-            appearance={{ elements: { card: 'bg-transparent shadow-none' } }}
-            routing="path"
-            path="/signup"
-            signInUrl="/signin"
-            afterSignUpUrl="/dashboard"
-          />
+        <div className="glass-panel flex justify-center p-8 md:p-10">
+          <div className="w-full max-w-md">
+            <SignUp
+              appearance={clerkAuthAppearance}
+              routing="path"
+              path="/signup"
+              signInUrl="/signin"
+              afterSignUpUrl="/dashboard"
+            />
+          </div>
         </div>
       </div>
     </section>
