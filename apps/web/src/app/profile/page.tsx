@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -8,14 +8,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuthProfile } from '@/hooks/use-auth-profile';
+import { useSupabaseClient } from '@/hooks/use-supabase-client';
 import { useToast } from '@/hooks/use-toast';
-import { createBrowserClient } from '@/lib/supabase/client';
 
 export default function ProfilePage() {
   const router = useRouter();
   const { status, user, profile } = useAuthProfile();
   const { toast } = useToast();
-  const supabase = useMemo(() => createBrowserClient(), []);
+  const supabase = useSupabaseClient();
   const [fullName, setFullName] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
   const [isSaving, setIsSaving] = useState(false);
@@ -32,19 +32,19 @@ export default function ProfilePage() {
   }, [profile?.avatar_url, profile?.full_name]);
 
   const handleSave = async () => {
-    if (!user?.id) return;
+    if (!user?.id || !supabase) return;
     setIsSaving(true);
 
     const { error } = await supabase
       .from('profiles')
       .upsert(
         {
-          id: user.id,
+          clerk_id: user.id,
           full_name: fullName.trim() || null,
           avatar_url: avatarUrl.trim() || null,
           email: user.email,
         },
-        { onConflict: 'id' },
+        { onConflict: 'clerk_id' },
       );
 
     if (error) {

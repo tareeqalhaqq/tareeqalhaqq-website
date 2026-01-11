@@ -2,6 +2,7 @@
 
 import type { FormEvent } from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useAuth } from '@clerk/nextjs';
 
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -21,7 +22,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { createBrowserClient } from '@/lib/supabase/client';
+import { useSupabaseClient } from '@/hooks/use-supabase-client';
 
 type EventRecord = {
   id: string;
@@ -57,7 +58,8 @@ type EventsManagerProps = {
 
 export function EventsManager({ adminName }: EventsManagerProps) {
   const { toast } = useToast();
-  const supabase = useMemo(() => createBrowserClient(), []);
+  const supabase = useSupabaseClient();
+  const { userId } = useAuth();
   const [events, setEvents] = useState<EventRecord[]>([]);
   const [status, setStatus] = useState<'loading' | 'ready'>('loading');
   const [formState, setFormState] = useState<FormState>(emptyForm);
@@ -76,6 +78,9 @@ export function EventsManager({ adminName }: EventsManagerProps) {
   const [isFetchingLocations, setIsFetchingLocations] = useState(false);
 
   const loadEvents = useCallback(async () => {
+    if (!supabase) {
+      return;
+    }
     setStatus('loading');
     try {
       const { data, error } = await supabase
@@ -98,7 +103,9 @@ export function EventsManager({ adminName }: EventsManagerProps) {
   }, [supabase, toast]);
 
   useEffect(() => {
-    loadEvents();
+    if (supabase) {
+      loadEvents();
+    }
   }, [loadEvents]);
 
   const openCreateDialog = () => {
@@ -185,6 +192,14 @@ export function EventsManager({ adminName }: EventsManagerProps) {
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (!supabase) {
+      toast({
+        title: 'Unable to save event',
+        description: 'Please sign in again to continue.',
+        variant: 'destructive',
+      });
+      return;
+    }
     setIsSubmitting(true);
 
     try {
@@ -204,17 +219,13 @@ export function EventsManager({ adminName }: EventsManagerProps) {
           throw new Error(error.message);
         }
       } else {
-        const {
-          data: { user },
-          error: userError,
-        } = await supabase.auth.getUser();
-        if (userError || !user) {
-          throw new Error(userError?.message || 'You must be signed in to create an event.');
+        if (!userId) {
+          throw new Error('You must be signed in to create an event.');
         }
         const { error } = await supabase.from('events').insert({
           ...payload,
           image_url: tbaState.image_url ? null : formState.image_url || null,
-          created_by: user.id,
+          created_by_clerk: userId,
         });
         if (error) {
           throw new Error(error.message);
@@ -248,6 +259,14 @@ export function EventsManager({ adminName }: EventsManagerProps) {
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
+    if (!supabase) {
+      toast({
+        title: 'Unable to delete event',
+        description: 'Please sign in again to continue.',
+        variant: 'destructive',
+      });
+      return;
+    }
     setIsSubmitting(true);
 
     try {

@@ -1,9 +1,10 @@
 'use client';
 
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { createBrowserClient } from '@/lib/supabase/client';
+import { useAuth } from '@clerk/nextjs';
+import { useAuthProfile } from '@/hooks/use-auth-profile';
 
 const EXPO_WEB_URL =
   process.env.NEXT_PUBLIC_EXPO_WEB_URL || 'http://localhost:8081';
@@ -12,20 +13,20 @@ const EXPO_ORIGIN = new URL(EXPO_WEB_URL).origin;
 export default function MobileBridgePage() {
   const router = useRouter();
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  const supabase = useMemo(() => createBrowserClient(), []);
   const [allowed, setAllowed] = useState(false);
+  const { status, isAdmin } = useAuthProfile();
+  const { getToken, isSignedIn, userId } = useAuth();
+  const [supabaseToken, setSupabaseToken] = useState<string | null>(null);
 
   const sendSession = async () => {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    if (!session) return;
+    if (!supabaseToken || !userId) return;
     iframeRef.current?.contentWindow?.postMessage(
       {
         type: 'SUPABASE_SESSION',
         session: {
-          access_token: session.access_token,
-          refresh_token: session.refresh_token,
+          access_token: supabaseToken,
+          refresh_token: null,
+          user_id: userId,
         },
       },
       EXPO_ORIGIN
@@ -33,53 +34,47 @@ export default function MobileBridgePage() {
   };
 
   useEffect(() => {
-    let mounted = true;
-    const checkRole = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      const userId = session?.user?.id;
-      if (!userId) {
-        router.replace('/signin');
-        return;
-      }
-      const [profileResult, membershipResult] = await Promise.all([
-        supabase.from('profiles').select('app_role').eq('id', userId).maybeSingle(),
-        supabase.from('academy_memberships').select('academy_role').eq('user_id', userId).maybeSingle(),
-      ]);
-      const isAdmin =
-        profileResult.data?.app_role === 'admin' || membershipResult.data?.academy_role === 'admin';
-      if (isAdmin) {
-        router.replace('/dashboard/admin');
-        return;
-      }
-      if (mounted) setAllowed(true);
-    };
-    checkRole();
-    return () => {
-      mounted = false;
-    };
-  }, []);
+    if (status === 'unauthenticated') {
+      router.replace('/signin');
+      return;
+    }
+    if (status === 'authenticated' && isAdmin) {
+      router.replace('/dashboard/admin');
+      return;
+    }
+    if (status === 'authenticated' && !isAdmin) {
+      setAllowed(true);
+    }
+  }, [isAdmin, router, status]);
 
   useEffect(() => {
-    let mounted = true;
-
-    const sendIfMounted = async () => {
-      if (!mounted) return;
-      await sendSession();
-    };
-
-    const { data: authListener } = supabase.auth.onAuthStateChange(() => {
-      sendIfMounted();
-    });
-
-    sendIfMounted();
-
+    let isMounted = true;
+    if (!isSignedIn) {
+      setSupabaseToken(null);
+      return () => {
+        isMounted = false;
+      };
+    }
+    getToken({ template: 'supabase' })
+      .then((token) => {
+        if (isMounted) {
+          setSupabaseToken(token ?? null);
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setSupabaseToken(null);
+        }
+      });
     return () => {
-      mounted = false;
-      authListener?.subscription.unsubscribe();
+      isMounted = false;
     };
-  }, [supabase]);
+  }, [getToken, isSignedIn]);
+
+  useEffect(() => {
+    if (!supabaseToken) return;
+    void sendSession();
+  }, [supabaseToken, userId]);
 
   if (!allowed) {
     return null;
