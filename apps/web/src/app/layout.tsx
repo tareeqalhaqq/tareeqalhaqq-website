@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 import ToasterClient from "@/components/ToasterClient";
+import { clerkAuthAppearance } from "@/lib/clerk-appearance";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -14,13 +15,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
-      <body className="font-sans antialiased bg-background">
-        <ClerkProvider>
+    <ClerkProvider appearance={clerkAuthAppearance}>
+      <html lang="en" className="dark">
+        <body className="font-sans antialiased bg-background">
           <ToasterClient />
           {children}
-        </ClerkProvider>
-      </body>
-    </html>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
