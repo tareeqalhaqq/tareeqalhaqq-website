@@ -1,0 +1,28 @@
+'use server';
+
+import { auth, currentUser } from '@clerk/nextjs/server';
+import { createClient } from '@supabase/supabase-js';
+
+export async function syncUserToSupabase() {
+  const { userId } = await auth();
+  const user = await currentUser();
+
+  if (!userId || !user) {
+    return;
+  }
+
+  const email = user.emailAddresses[0]?.emailAddress;
+
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  );
+
+  await supabase.from('profiles').upsert(
+    {
+      clerk_id: userId,
+      email,
+    },
+    { onConflict: 'clerk_id' },
+  );
+}
