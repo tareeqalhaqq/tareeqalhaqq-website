@@ -3,10 +3,13 @@ import { useEffect, useMemo, useState } from "react";
 import { Stack, useRouter, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ClerkProvider } from "@clerk/clerk-expo";
 import { supabase } from "@/services/supabaseClient";
 import { clearUserRole, fetchUserRole, saveUserRole } from "@/services/profiles";
 import { useAuthStore } from "@/state/authStore";
 import { getSetupCompleted } from "@/services/setup";
+import { env } from "@/config/env";
+import { clerkTokenCache } from "@/services/clerkTokenCache";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -14,6 +17,7 @@ export default function RootLayout() {
   const [ready, setReady] = useState(false);
   const [setupComplete, setSetupComplete] = useState<boolean | null>(null);
   const queryClient = useMemo(() => new QueryClient(), []);
+  const clerkKey = env.clerkPublishableKey;
   const segments = useSegments();
   const router = useRouter();
   const { session, setSession, setRole } = useAuthStore();
@@ -122,9 +126,20 @@ export default function RootLayout() {
     return null;
   }
 
-  return (
+  const content = (
     <QueryClientProvider client={queryClient}>
       <Stack screenOptions={{ headerShown: false }} />
     </QueryClientProvider>
+  );
+
+  if (!clerkKey) {
+    console.warn("Missing EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY for Clerk.");
+    return content;
+  }
+
+  return (
+    <ClerkProvider publishableKey={clerkKey} tokenCache={clerkTokenCache}>
+      {content}
+    </ClerkProvider>
   );
 }
