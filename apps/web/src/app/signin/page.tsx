@@ -1,8 +1,8 @@
 'use client';
 
-import { SignIn } from '@clerk/nextjs';
+import { SignInButton } from '@clerk/nextjs';
 
-import { clerkAuthAppearance } from '@/lib/clerk-appearance';
+import { Button } from '@/components/ui/button';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,15 +17,12 @@ export default function SigninPage() {
             Access your Tareeq Al Haqq Academy dashboard, lessons, and community updates.
           </p>
         </div>
-        <div className="glass-panel flex justify-center p-8 md:p-10">
-          <div className="w-full max-w-md">
-            <SignIn
-              appearance={clerkAuthAppearance}
-              routing="path"
-              path="/signin"
-              signUpUrl="/signup"
-            />
-          </div>
+        <div className="flex justify-center">
+          <SignInButton mode="redirect" redirectUrl="/signin">
+            <Button className="rounded-full bg-primary px-8 py-3 text-xs font-semibold uppercase tracking-[0.35em] text-primary-foreground shadow-lg shadow-black/30 transition hover:shadow-xl hover:shadow-black/40">
+              Sign In
+            </Button>
+          </SignInButton>
         </div>
       </div>
     </section>
