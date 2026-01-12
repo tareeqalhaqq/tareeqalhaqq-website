@@ -85,7 +85,8 @@ export default function Home() {
             <motion.div className="space-y-5" variants={fadeUp}>
               <p className="eyebrow text-primary">Tareeq Al Haqq</p>
               <h1 className="text-4xl font-headline uppercase tracking-[0.12em] text-white md:text-5xl">
-                A Clear Path to Authentic Knowledge
+                A Clear Path to
+                <span className="mt-2 block text-accent">Authentic Knowledge</span>
               </h1>
               <p className="mx-auto max-w-2xl text-base text-white/80 md:text-lg">
                 Study with assurance. Our platform curates dependable resources, structured learning tracks, and simple tools so you can focus on understanding, not searching.

@@ -12,7 +12,7 @@ export default function AboutPage() {
           <p className="eyebrow">Our Heritage</p>
           <h1 className="text-4xl uppercase tracking-[0.2em] text-white md:text-5xl">About Tareeq Al Haqq</h1>
           <p className="mx-auto max-w-3xl text-base text-white/70">
-            Tareeq Al Haqq is a neutral platform dedicated to making authentic Islamic knowledge accessible with clarity, context, and trustworthy sourcing.
+            Tareeq Al Haqq is a neutral platform dedicated to making authentic Islamic knowledge accessible with clarity, context, and trustworthy sourcing. Founded by Mustafa Asif, the initiative prioritises verified scholarship and a calm, modern learning experience.
           </p>
         </div>
 
@@ -35,7 +35,7 @@ export default function AboutPage() {
 
         <div className="glass-panel space-y-8 text-left text-white/80">
           <p>
-            Built by researchers, editors, and teachers, Tareeq Al Haqq curates dependable references, commentary, and learning experiences so anyone can explore the faith with confidence.
+            Built by researchers, editors, and teachers, Tareeq Al Haqq curates dependable references, commentary, and learning experiences so anyone can explore the faith with confidence under the guidance of its founder, Mustafa Asif.
           </p>
 
           <div className="grid gap-8 md:grid-cols-3">
