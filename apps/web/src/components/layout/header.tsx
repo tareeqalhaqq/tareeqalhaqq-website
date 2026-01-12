@@ -18,7 +18,6 @@ import { Menu, Search, ChevronDown } from "lucide-react";
 import dynamic from "next/dynamic";
 import {
   SignInButton,
-  SignUpButton,
   SignedIn,
   SignedOut,
   UserButton,
@@ -100,14 +99,6 @@ export default function Header() {
                     Sign In
                   </Button>
                 </SignInButton>
-                <SignUpButton mode="redirect" redirectUrl="/signup">
-                  <Button
-                    variant="outline"
-                    className="rounded-full border-white/20 bg-white/5 px-6 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-white transition hover:border-white/30 hover:bg-white/10"
-                  >
-                    Sign Up
-                  </Button>
-                </SignUpButton>
               </div>
             </SignedOut>
             <SignedIn>
@@ -175,14 +166,6 @@ export default function Header() {
                           Sign In
                         </Button>
                       </SignInButton>
-                      <SignUpButton mode="redirect" redirectUrl="/signup">
-                        <Button
-                          variant="outline"
-                          className="w-full rounded-full border-white/20 bg-white/5 px-6 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-white transition hover:border-white/30 hover:bg-white/10"
-                        >
-                          Sign Up
-                        </Button>
-                      </SignUpButton>
                     </SignedOut>
                     <SignedIn>
                       <div className="flex items-center justify-center">
