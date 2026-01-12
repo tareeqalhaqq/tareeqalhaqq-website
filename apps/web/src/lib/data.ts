@@ -21,7 +21,6 @@ export const navLinks = [
   { name: 'Academy', href: 'https://markazalhaqq.org' },
   { name: 'Events', href: '/events' },
   { name: 'Store', href: 'https://store.tareeqalhaqq.org' },
-  { name: 'Sign In', href: '/signin' },
 ];
 
 export const socialLinks = [

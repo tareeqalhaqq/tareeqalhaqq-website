@@ -12,6 +12,8 @@ export async function syncUserToSupabase() {
   }
 
   const email = user.emailAddresses[0]?.emailAddress;
+  const fullName = user.fullName ?? null;
+  const avatarUrl = user.imageUrl ?? null;
 
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -22,6 +24,8 @@ export async function syncUserToSupabase() {
     {
       clerk_id: userId,
       email,
+      full_name: fullName,
+      avatar_url: avatarUrl,
     },
     { onConflict: 'clerk_id' },
   );
