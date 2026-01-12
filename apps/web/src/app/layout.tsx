@@ -14,8 +14,13 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+  
   return (
-    <ClerkProvider appearance={clerkAuthAppearance}>
+    <ClerkProvider 
+      publishableKey={publishableKey}
+      appearance={clerkAuthAppearance}
+    >
       <html lang="en" className="dark">
         <body className="font-sans antialiased bg-background">
           <ToasterClient />
