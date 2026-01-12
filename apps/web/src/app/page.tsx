@@ -98,15 +98,6 @@ export default function Home() {
               <motion.div whileHover={{ y: -4 }} whileTap={{ scale: 0.97 }}>
                 <Button
                   asChild
-                  size="lg"
-                  className="rounded-full bg-primary px-8 py-6 text-sm font-semibold uppercase tracking-[0.3em] text-primary-foreground shadow-lg shadow-black/30 transition"
-                >
-                  <Link href="/signin">Sign In</Link>
-                </Button>
-              </motion.div>
-              <motion.div whileHover={{ y: -4 }} whileTap={{ scale: 0.97 }}>
-                <Button
-                  asChild
                   variant="outline"
                   size="lg"
                   className="rounded-full border-white/20 bg-white/5 px-8 py-6 text-sm font-semibold uppercase tracking-[0.3em] text-white transition hover:border-white/30 hover:bg-white/10"

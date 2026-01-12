@@ -17,7 +17,6 @@ import {
 import { Menu, Search, ChevronDown } from "lucide-react";
 import dynamic from "next/dynamic";
 import {
-  SignInButton,
   SignedIn,
   SignedOut,
   UserButton,
@@ -92,13 +91,12 @@ export default function Header() {
             </Button>
             <SignedOut>
               <div className="hidden items-center gap-2 md:flex">
-                <SignInButton mode="redirect" redirectUrl="/signin">
-                  <Button
-                    className="rounded-full bg-primary px-6 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-primary-foreground shadow-lg shadow-black/30 transition hover:shadow-xl hover:shadow-black/40"
-                  >
-                    Sign In
-                  </Button>
-                </SignInButton>
+                <Button
+                  asChild
+                  className="rounded-full bg-primary px-6 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-primary-foreground shadow-lg shadow-black/30 transition hover:shadow-xl hover:shadow-black/40"
+                >
+                  <Link href="/signin">Sign In</Link>
+                </Button>
               </div>
             </SignedOut>
             <SignedIn>
@@ -161,11 +159,12 @@ export default function Header() {
                   </nav>
                   <div className="mt-8 space-y-3">
                     <SignedOut>
-                      <SignInButton mode="redirect" redirectUrl="/signin">
-                        <Button className="w-full rounded-full bg-primary px-6 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-primary-foreground shadow-lg shadow-black/30 transition hover:shadow-xl hover:shadow-black/40">
-                          Sign In
-                        </Button>
-                      </SignInButton>
+                      <Button
+                        asChild
+                        className="w-full rounded-full bg-primary px-6 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-primary-foreground shadow-lg shadow-black/30 transition hover:shadow-xl hover:shadow-black/40"
+                      >
+                        <Link href="/signin">Sign In</Link>
+                      </Button>
                     </SignedOut>
                     <SignedIn>
                       <div className="flex items-center justify-center">

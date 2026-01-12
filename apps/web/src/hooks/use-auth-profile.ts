@@ -95,6 +95,8 @@ export function useAuthProfile() {
     }
 
     const email = clerkUser?.primaryEmailAddress?.emailAddress ?? null;
+    const fullName = clerkUser?.fullName ?? null;
+    const avatarUrl = clerkUser?.imageUrl ?? null;
     const nextUser = { id: userId, email };
 
     const ensureProfile = async () => {
@@ -104,6 +106,8 @@ export function useAuthProfile() {
           {
             clerk_id: userId,
             email,
+            full_name: fullName,
+            avatar_url: avatarUrl,
             app_role: 'member',
           },
           { onConflict: 'clerk_id' },
@@ -114,7 +118,15 @@ export function useAuthProfile() {
       await ensureProfile();
       await loadProfile(nextUser);
     })();
-  }, [clerkUser?.primaryEmailAddress?.emailAddress, isLoaded, isSignedIn, supabase, userId]);
+  }, [
+    clerkUser?.primaryEmailAddress?.emailAddress,
+    clerkUser?.fullName,
+    clerkUser?.imageUrl,
+    isLoaded,
+    isSignedIn,
+    supabase,
+    userId,
+  ]);
 
   const role = deriveRole(state.profile, state.membership);
   const isAdmin = role === 'admin';
