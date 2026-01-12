@@ -51,7 +51,7 @@ export default function Home() {
     <div className="flex flex-col min-h-screen">
       <main className="flex-grow">
         <motion.section
-          className="relative flex min-h-[calc(100vh-80px)] flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 px-6 py-24 text-center"
+          className="relative flex min-h-[calc(100vh-80px)] flex-col items-center justify-center overflow-hidden px-6 py-24 text-center"
           initial="hidden"
           animate="visible"
           variants={staggerContainer}
@@ -107,13 +107,6 @@ export default function Home() {
               </motion.div>
             </motion.div>
           </motion.div>
-          <motion.span
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-primary/10"
-            aria-hidden
-            initial={{ opacity: 0 }}
-            animate={{ opacity: [0.2, 0.4, 0.2] }}
-            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-          />
         </motion.section>
 
         <section className="page-section">

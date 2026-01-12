@@ -22,7 +22,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { useSupabaseClient } from '@/hooks/use-supabase-client';
+import { useSupabase } from '@/lib/supabaseClient';
 
 type EventRecord = {
   id: string;
@@ -58,7 +58,7 @@ type EventsManagerProps = {
 
 export function EventsManager({ adminName }: EventsManagerProps) {
   const { toast } = useToast();
-  const supabase = useSupabaseClient();
+  const supabase = useSupabase();
   const { userId } = useAuth();
   const [events, setEvents] = useState<EventRecord[]>([]);
   const [status, setStatus] = useState<'loading' | 'ready'>('loading');
