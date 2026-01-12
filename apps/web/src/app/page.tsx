@@ -5,7 +5,6 @@ import Link from "next/link";
 import { BookOpen, Users, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 
 const fadeUp = {
@@ -50,7 +49,6 @@ const trustPoints = [
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
-      <Header />
       <main className="flex-grow">
         <motion.section
           className="relative flex min-h-[calc(100vh-80px)] flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 px-6 py-24 text-center"
