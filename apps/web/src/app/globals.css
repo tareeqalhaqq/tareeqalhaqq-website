@@ -9,7 +9,7 @@
     --font-sans: "Manrope", "Inter", "Helvetica Neue", Arial, sans-serif;
     --font-serif: "Georgia", "Times New Roman", serif;
     --font-headline: "Playfair Display", "Times New Roman", "Georgia", serif;
-    --background: 205 55% 10%;
+    --background: 220 60% 9%;
     --foreground: 206 46% 96%;
     --card: 205 42% 14%;
     --card-foreground: 206 46% 96%;
@@ -34,7 +34,7 @@
     --chart-4: 188 55% 58%;
     --chart-5: 210 40% 48%;
     --radius: 0.5rem;
-    --sidebar-background: 205 55% 12%;
+    --sidebar-background: 220 60% 10%;
     --sidebar-foreground: 206 46% 96%;
     --sidebar-primary: 189 86% 46%;
     --sidebar-primary-foreground: 0 0% 100%;
@@ -47,7 +47,7 @@
     --font-sans: "Manrope", "Inter", "Helvetica Neue", Arial, sans-serif;
     --font-serif: "Georgia", "Times New Roman", serif;
     --font-headline: "Playfair Display", "Times New Roman", "Georgia", serif;
-    --background: 215 52% 4%;
+    --background: 220 60% 6%;
     --foreground: 206 46% 95%;
     --card: 213 48% 10%;
     --card-foreground: 206 46% 95%;
@@ -71,7 +71,7 @@
     --chart-3: 200 55% 36%;
     --chart-4: 188 60% 62%;
     --chart-5: 210 45% 52%;
-    --sidebar-background: 215 52% 4%;
+    --sidebar-background: 220 60% 6%;
     --sidebar-foreground: 206 46% 95%;
     --sidebar-primary: 189 90% 52%;
     --sidebar-primary-foreground: 0 0% 100%;
@@ -88,7 +88,7 @@
   }
   body {
     @apply bg-background text-foreground;
-    background: linear-gradient(180deg, rgba(4, 20, 32, 0.98), rgba(3, 30, 38, 0.98));
+    background: linear-gradient(180deg, rgba(5, 14, 46, 0.98), rgba(7, 18, 56, 0.98));
     background-attachment: fixed;
     min-height: 100vh;
   }
