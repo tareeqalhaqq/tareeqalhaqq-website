@@ -30,5 +30,13 @@ export const clerkAuthAppearance = {
     identityPreviewEditButton: 'text-primary hover:text-primary/80',
     alertText: 'text-red-200',
     alertIcon: 'text-red-200',
+    userButtonPopoverCard: 'rounded-2xl border border-white/10 bg-slate-950 text-white shadow-2xl shadow-black/40',
+    userButtonPopoverMain: 'bg-transparent text-white',
+    userButtonPopoverFooter: 'border-t border-white/10',
+    userButtonPopoverActionButton:
+      'text-white/80 hover:bg-white/10 hover:text-white',
+    userButtonPopoverActionButtonText: 'text-white/80',
+    userButtonPopoverActionButtonIcon: 'text-white/60',
+    userButtonPopoverActionButtonLabel: 'text-white/50',
   },
 } as const;

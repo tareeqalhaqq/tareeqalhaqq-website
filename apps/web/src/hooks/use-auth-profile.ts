@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useAuth, useUser } from '@clerk/nextjs';
-import { useSupabaseClient } from '@/hooks/use-supabase-client';
+import { useSupabase } from '@/lib/supabaseClient';
 
 type Role = 'admin' | 'student' | 'member';
 
@@ -45,7 +45,7 @@ const deriveRole = (profile: Profile | null, membership: AcademyMembership | nul
 };
 
 export function useAuthProfile() {
-  const supabase = useSupabaseClient();
+  const supabase = useSupabase();
   const { isLoaded, isSignedIn, userId } = useAuth();
   const { user: clerkUser } = useUser();
   const [state, setState] = useState<AuthState>({
