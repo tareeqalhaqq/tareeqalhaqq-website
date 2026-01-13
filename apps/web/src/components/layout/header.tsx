@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { useUser } from "@auth0/nextjs-auth0";
+import * as Avatar from '@radix-ui/react-avatar';
 import { Logo } from "@/components/icons";
 import { navLinks } from "@/lib/data";
 import { cn } from "@/lib/utils";
@@ -16,12 +18,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Menu, Search, ChevronDown } from "lucide-react";
 import dynamic from "next/dynamic";
-import {
-  SignedIn,
-  SignedOut,
-  UserButton,
-} from "@clerk/nextjs";
-import { clerkAuthAppearance } from "@/lib/clerk-appearance";
 
 const SearchDialog = dynamic(
   () => import("@/components/search-dialog").then((mod) => mod.SearchDialog),
@@ -34,10 +30,19 @@ const dashboardLinks = [
   { name: "Settings", href: "/account/preferences" },
 ];
 
+const getInitials = (name?: string | null) =>
+  name
+    ?.split(" ")
+    .map((part) => part.charAt(0).toUpperCase())
+    .slice(0, 2)
+    .join("") || "U";
+
 export default function Header() {
   const pathname = usePathname();
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isSearchOpen, setSearchOpen] = useState(false);
+  const { user, isLoading } = useUser();
+  const isAuthenticated = Boolean(user);
 
   return (
     <>
@@ -48,8 +53,8 @@ export default function Header() {
           </Link>
 
           <nav className="hidden items-center space-x-3 text-xs font-semibold uppercase tracking-[0.22em] md:flex lg:space-x-5">
-            <SignedOut>
-              {navLinks.map((link) =>
+            {!isAuthenticated &&
+              navLinks.map((link) =>
                 link.subLinks ? (
                   <DropdownMenu key={link.name}>
                     <DropdownMenuTrigger asChild>
@@ -84,9 +89,8 @@ export default function Header() {
                   </Link>
                 )
               )}
-            </SignedOut>
-            <SignedIn>
-              {dashboardLinks.map((link) => (
+            {isAuthenticated &&
+              dashboardLinks.map((link) => (
                 <Link
                   key={link.name}
                   href={link.href}
@@ -98,7 +102,6 @@ export default function Header() {
                   {link.name}
                 </Link>
               ))}
-            </SignedIn>
           </nav>
 
           <div className="flex items-center gap-2 sm:gap-3">
@@ -111,22 +114,32 @@ export default function Header() {
               <Search className="h-5 w-5" />
               <span className="sr-only">Search</span>
             </Button>
-            <SignedOut>
+            {!isAuthenticated && !isLoading && (
               <div className="hidden items-center gap-2 md:flex">
                 <Button
                   asChild
                   className="rounded-full bg-primary px-6 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-primary-foreground shadow-lg shadow-black/30 transition hover:shadow-xl hover:shadow-black/40"
                 >
-                  <Link href="/signin">Sign In</Link>
+                  <a href="/auth/login">Sign In</a>
                 </Button>
               </div>
-            </SignedOut>
-            <SignedIn>
-              <UserButton
-                appearance={clerkAuthAppearance}
-                afterSignOutUrl="/"
-              />
-            </SignedIn>
+            )}
+            {isAuthenticated && (
+              <div className="flex items-center gap-3">
+                <Avatar.Root className="h-9 w-9 overflow-hidden rounded-full border border-white/15 bg-white/10">
+                  <Avatar.Image className="h-full w-full object-cover" src={user?.picture ?? undefined} alt={user?.name ?? 'User'} />
+                  <Avatar.Fallback className="flex h-full w-full items-center justify-center text-xs font-semibold text-white">
+                    {getInitials(user?.name ?? user?.email)}
+                  </Avatar.Fallback>
+                </Avatar.Root>
+                <a
+                  href="/auth/logout"
+                  className="hidden text-xs font-semibold uppercase tracking-[0.28em] text-foreground/70 transition hover:text-foreground md:block"
+                >
+                  Log Out
+                </a>
+              </div>
+            )}
             <Sheet open={isMobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild className="md:hidden">
                 <Button
@@ -144,7 +157,7 @@ export default function Header() {
                     <Logo className="text-left" />
                   </Link>
                   <nav className="flex flex-col space-y-4">
-                    <SignedIn>
+                    {isAuthenticated && (
                       <div className="space-y-3">
                         <p className="text-xs font-semibold uppercase tracking-[0.35em] text-primary/80">
                           Dashboard
@@ -162,7 +175,7 @@ export default function Header() {
                           ))}
                         </div>
                       </div>
-                    </SignedIn>
+                    )}
                     {navLinks.map((link) => (
                       <div key={link.name}>
                         {link.subLinks ? (
@@ -199,22 +212,21 @@ export default function Header() {
                     ))}
                   </nav>
                   <div className="mt-8 space-y-3">
-                    <SignedOut>
+                    {!isAuthenticated && !isLoading && (
                       <Button
                         asChild
                         className="w-full rounded-full bg-primary px-6 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-primary-foreground shadow-lg shadow-black/30 transition hover:shadow-xl hover:shadow-black/40"
                       >
-                        <Link href="/signin">Sign In</Link>
+                        <a href="/auth/login">Sign In</a>
                       </Button>
-                    </SignedOut>
-                    <SignedIn>
+                    )}
+                    {isAuthenticated && (
                       <div className="flex items-center justify-center">
-                        <UserButton
-                          appearance={clerkAuthAppearance}
-                          afterSignOutUrl="/"
-                        />
+                        <a href="/auth/logout" className="text-xs font-semibold uppercase tracking-[0.35em] text-foreground/70">
+                          Log Out
+                        </a>
                       </div>
-                    </SignedIn>
+                    )}
                   </div>
                 </div>
               </SheetContent>

@@ -1,13 +1,10 @@
-import type { Metadata } from "next";
-import { ClerkProvider } from "@clerk/nextjs";
-import { clerkAuthAppearance } from "@/lib/clerk-appearance";
-import Header from "@/components/layout/header";
-import "./globals.css";
+import type { Metadata } from 'next';
+import { Auth0Provider } from '@auth0/nextjs-auth0/client';
+import './globals.css';
 
 export const metadata: Metadata = {
-  title: "Tareeq Al Haqq",
-  description:
-    "A trusted platform delivering authenticated resources, intelligent study tools, and timely updates for seekers of knowledge.",
+  title: 'Auth0 Next.js App',
+  description: 'Next.js app with Auth0 authentication',
 };
 
 export default function RootLayout({
@@ -16,12 +13,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark">
-      <body className="font-sans antialiased">
-        <ClerkProvider appearance={clerkAuthAppearance}>
-          <Header />
+    <html lang="en">
+      <body>
+        <Auth0Provider>
           {children}
-        </ClerkProvider>
+        </Auth0Provider>
       </body>
     </html>
   );

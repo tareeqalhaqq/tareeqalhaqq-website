@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useAuth, useUser } from '@clerk/nextjs';
+import { useUser } from '@auth0/nextjs-auth0';
 import { useSupabase } from '@/lib/supabaseClient';
 
 type Role = 'admin' | 'student' | 'member';
@@ -46,8 +46,7 @@ const deriveRole = (profile: Profile | null, membership: AcademyMembership | nul
 
 export function useAuthProfile() {
   const supabase = useSupabase();
-  const { isLoaded, isSignedIn, userId } = useAuth();
-  const { user: clerkUser } = useUser();
+  const { user, isLoading } = useUser();
   const [state, setState] = useState<AuthState>({
     status: 'loading',
     user: null,
@@ -55,36 +54,36 @@ export function useAuthProfile() {
     membership: null,
   });
 
-  const loadProfile = async (user: User) => {
+  const loadProfile = async (authUser: User) => {
     if (!supabase) return;
 
     const [profileResult, membershipResult] = await Promise.all([
       supabase
         .from('profiles')
         .select('clerk_id, email, app_role, full_name, avatar_url, created_at')
-        .eq('clerk_id', user.id)
+        .eq('clerk_id', authUser.id)
         .maybeSingle(),
       supabase
         .from('academy_memberships')
         .select('academy_role, active')
-        .eq('clerk_id', user.id)
+        .eq('clerk_id', authUser.id)
         .maybeSingle(),
     ]);
 
     setState({
       status: 'authenticated',
-      user,
+      user: authUser,
       profile: profileResult.data ?? null,
       membership: membershipResult.data ?? null,
     });
   };
 
   useEffect(() => {
-    if (!isLoaded) {
+    if (isLoading) {
       return;
     }
 
-    if (!isSignedIn || !userId) {
+    if (!user?.sub) {
       setState({ status: 'unauthenticated', user: null, profile: null, membership: null });
       return;
     }
@@ -94,17 +93,17 @@ export function useAuthProfile() {
       return;
     }
 
-    const email = clerkUser?.primaryEmailAddress?.emailAddress ?? null;
-    const fullName = clerkUser?.fullName ?? null;
-    const avatarUrl = clerkUser?.imageUrl ?? null;
-    const nextUser = { id: userId, email };
+    const email = user.email ?? null;
+    const fullName = user.name ?? null;
+    const avatarUrl = user.picture ?? null;
+    const nextUser = { id: user.sub, email };
 
     const ensureProfile = async () => {
       await supabase
         .from('profiles')
         .upsert(
           {
-            clerk_id: userId,
+            clerk_id: user.sub,
             email,
             full_name: fullName,
             avatar_url: avatarUrl,
@@ -119,13 +118,12 @@ export function useAuthProfile() {
       await loadProfile(nextUser);
     })();
   }, [
-    clerkUser?.primaryEmailAddress?.emailAddress,
-    clerkUser?.fullName,
-    clerkUser?.imageUrl,
-    isLoaded,
-    isSignedIn,
+    isLoading,
     supabase,
-    userId,
+    user?.email,
+    user?.name,
+    user?.picture,
+    user?.sub,
   ]);
 
   const role = deriveRole(state.profile, state.membership);

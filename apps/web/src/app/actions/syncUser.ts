@@ -1,20 +1,20 @@
 'use server';
 
-import { auth, currentUser } from '@clerk/nextjs/server';
 import { createClient } from '@supabase/supabase-js';
+import { auth0 } from '@/lib/auth0';
 
 export async function syncUserToSupabase() {
-  const { userId, getToken } = await auth();
-  const user = await currentUser();
+  const session = await auth0.getSession();
+  const user = session?.user;
 
-  if (!userId || !user) {
+  if (!user) {
     return;
   }
 
-  const token = await getToken();
-  const email = user.emailAddresses[0]?.emailAddress;
-  const fullName = user.fullName ?? null;
-  const avatarUrl = user.imageUrl ?? null;
+  const { token } = await auth0.getAccessToken();
+  const email = user.email ?? null;
+  const fullName = user.name ?? null;
+  const avatarUrl = user.picture ?? null;
 
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -26,7 +26,7 @@ export async function syncUserToSupabase() {
 
   await supabase.from('profiles').upsert(
     {
-      clerk_id: userId,
+      clerk_id: user.sub,
       email,
       full_name: fullName,
       avatar_url: avatarUrl,
