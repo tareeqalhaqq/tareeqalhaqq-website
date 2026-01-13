@@ -1,10 +1,17 @@
 import type { Metadata } from 'next';
-import { Auth0Provider } from '@auth0/nextjs-auth0/client';
+import {
+  ClerkProvider,
+  SignInButton,
+  SignUpButton,
+  SignedIn,
+  SignedOut,
+  UserButton,
+} from '@clerk/nextjs';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Auth0 Next.js App',
-  description: 'Next.js app with Auth0 authentication',
+  title: 'Clerk Next.js App',
+  description: 'Next.js app with Clerk authentication',
 };
 
 export default function RootLayout({
@@ -13,12 +20,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body>
-        <Auth0Provider>
+    <ClerkProvider>
+      <html lang="en">
+        <body>
+          <header className="flex items-center justify-end gap-3 px-6 py-4">
+            <SignedOut>
+              <SignInButton />
+              <SignUpButton />
+            </SignedOut>
+            <SignedIn>
+              <UserButton />
+            </SignedIn>
+          </header>
           {children}
-        </Auth0Provider>
-      </body>
-    </html>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

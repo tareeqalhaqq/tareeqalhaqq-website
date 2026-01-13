@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { SignOutButton } from '@clerk/nextjs';
 
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -151,9 +152,11 @@ export default function UserDashboardPage() {
                       Done for now? Log out to keep your account secure and pick up where you left off later.
                     </p>
                     <div className="mt-auto">
-                      <Button asChild variant="destructive" className="w-full">
-                        <Link href="/logout">Log out</Link>
-                      </Button>
+                      <SignOutButton>
+                        <Button variant="destructive" className="w-full">
+                          Log out
+                        </Button>
+                      </SignOutButton>
                     </div>
                   </div>
                 </div>

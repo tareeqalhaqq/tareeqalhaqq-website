@@ -1,12 +1,14 @@
+import { SignUpButton } from '@clerk/nextjs';
+
 export default function Page() {
   return (
     <main className="app-container">
       <div className="main-card-wrapper">
         <h1 className="main-title">Create an account</h1>
-        <p className="action-text">Sign up with Auth0 to get started.</p>
-        <a href="/auth/login?screen_hint=signup" className="button login">
-          Sign Up
-        </a>
+        <p className="action-text">Sign up with Clerk to get started.</p>
+        <SignUpButton>
+          <button className="button login">Sign Up</button>
+        </SignUpButton>
       </div>
     </main>
   );
