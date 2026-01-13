@@ -3,7 +3,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@clerk/nextjs';
+import { useUser } from '@auth0/nextjs-auth0';
 import { useAuthProfile } from '@/hooks/use-auth-profile';
 
 const EXPO_WEB_URL =
@@ -15,18 +15,17 @@ export default function MobileBridgePage() {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [allowed, setAllowed] = useState(false);
   const { status, isAdmin } = useAuthProfile();
-  const { getToken, isSignedIn, userId } = useAuth();
-  const [supabaseToken, setSupabaseToken] = useState<string | null>(null);
+  const { user, isLoading } = useUser();
 
   const sendSession = async () => {
-    if (!supabaseToken || !userId) return;
+    if (!user?.sub) return;
     iframeRef.current?.contentWindow?.postMessage(
       {
         type: 'SUPABASE_SESSION',
         session: {
-          access_token: supabaseToken,
+          access_token: null,
           refresh_token: null,
-          user_id: userId,
+          user_id: user.sub,
         },
       },
       EXPO_ORIGIN
@@ -48,33 +47,9 @@ export default function MobileBridgePage() {
   }, [isAdmin, router, status]);
 
   useEffect(() => {
-    let isMounted = true;
-    if (!isSignedIn) {
-      setSupabaseToken(null);
-      return () => {
-        isMounted = false;
-      };
-    }
-    getToken()
-      .then((token) => {
-        if (isMounted) {
-          setSupabaseToken(token ?? null);
-        }
-      })
-      .catch(() => {
-        if (isMounted) {
-          setSupabaseToken(null);
-        }
-      });
-    return () => {
-      isMounted = false;
-    };
-  }, [getToken, isSignedIn]);
-
-  useEffect(() => {
-    if (!supabaseToken) return;
+    if (isLoading || !user?.sub) return;
     void sendSession();
-  }, [supabaseToken, userId]);
+  }, [isLoading, user?.sub]);
 
   if (!allowed) {
     return null;
