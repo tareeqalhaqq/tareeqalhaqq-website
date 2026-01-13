@@ -1,13 +1,17 @@
 import type { Metadata } from 'next';
-import { ClerkProvider } from '@clerk/nextjs';
-import Header from '@/components/layout/header';
-import Footer from '@/components/layout/footer';
+import {
+  ClerkProvider,
+  SignInButton,
+  SignUpButton,
+  SignedIn,
+  SignedOut,
+  UserButton,
+} from '@clerk/nextjs';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Tareeq Al Haqq',
-  description:
-    'A trusted platform delivering authenticated resources, intelligent study tools, and timely updates for seekers of knowledge.',
+  title: 'Clerk Next.js App',
+  description: 'Next.js app with Clerk authentication',
 };
 
 export default function RootLayout({
@@ -18,12 +22,17 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en">
-        <body className="bg-background font-sans antialiased text-foreground">
-          <div className="flex min-h-screen flex-col">
-            <Header />
-            <main className="flex-1">{children}</main>
-            <Footer />
-          </div>
+        <body>
+          <header className="flex items-center justify-end gap-3 px-6 py-4">
+            <SignedOut>
+              <SignInButton />
+              <SignUpButton />
+            </SignedOut>
+            <SignedIn>
+              <UserButton />
+            </SignedIn>
+          </header>
+          {children}
         </body>
       </html>
     </ClerkProvider>
