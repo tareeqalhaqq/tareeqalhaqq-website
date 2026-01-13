@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { SignOutButton } from '@clerk/nextjs';
 
 import { Button } from '@/components/ui/button';
 import { useAuthProfile } from '@/hooks/use-auth-profile';
@@ -56,9 +57,9 @@ export default function StudentDashboardPage() {
                 <Button asChild>
                   <a href="https://markazalhaqq.org">Continue learning</a>
                 </Button>
-                <Button asChild variant="outline">
-                  <a href="/logout">Sign out</a>
-                </Button>
+                <SignOutButton>
+                  <Button variant="outline">Sign out</Button>
+                </SignOutButton>
               </div>
             </div>
             <div className="glass-panel grid gap-4 p-6 text-white md:grid-cols-3">

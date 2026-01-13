@@ -3,7 +3,14 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { useUser } from "@auth0/nextjs-auth0";
+import {
+  SignInButton,
+  SignOutButton,
+  SignedIn,
+  SignedOut,
+  UserButton,
+  useUser,
+} from "@clerk/nextjs";
 import * as Avatar from '@radix-ui/react-avatar';
 import { Logo } from "@/components/icons";
 import { navLinks } from "@/lib/data";
@@ -41,8 +48,8 @@ export default function Header() {
   const pathname = usePathname();
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isSearchOpen, setSearchOpen] = useState(false);
-  const { user, isLoading } = useUser();
-  const isAuthenticated = Boolean(user);
+  const { user, isLoaded } = useUser();
+  const isAuthenticated = Boolean(user?.id);
 
   return (
     <>
@@ -114,31 +121,34 @@ export default function Header() {
               <Search className="h-5 w-5" />
               <span className="sr-only">Search</span>
             </Button>
-            {!isAuthenticated && !isLoading && (
+            {!isAuthenticated && isLoaded && (
               <div className="hidden items-center gap-2 md:flex">
-                <Button
-                  asChild
-                  className="rounded-full bg-primary px-6 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-primary-foreground shadow-lg shadow-black/30 transition hover:shadow-xl hover:shadow-black/40"
-                >
-                  <a href="/auth/login">Sign In</a>
-                </Button>
+                <SignedOut>
+                  <SignInButton>
+                    <Button className="rounded-full bg-primary px-6 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-primary-foreground shadow-lg shadow-black/30 transition hover:shadow-xl hover:shadow-black/40">
+                      Sign In
+                    </Button>
+                  </SignInButton>
+                </SignedOut>
               </div>
             )}
             {isAuthenticated && (
-              <div className="flex items-center gap-3">
-                <Avatar.Root className="h-9 w-9 overflow-hidden rounded-full border border-white/15 bg-white/10">
-                  <Avatar.Image className="h-full w-full object-cover" src={user?.picture ?? undefined} alt={user?.name ?? 'User'} />
-                  <Avatar.Fallback className="flex h-full w-full items-center justify-center text-xs font-semibold text-white">
-                    {getInitials(user?.name ?? user?.email)}
-                  </Avatar.Fallback>
-                </Avatar.Root>
-                <a
-                  href="/auth/logout"
-                  className="hidden text-xs font-semibold uppercase tracking-[0.28em] text-foreground/70 transition hover:text-foreground md:block"
-                >
-                  Log Out
-                </a>
-              </div>
+              <SignedIn>
+                <div className="flex items-center gap-3">
+                  <Avatar.Root className="h-9 w-9 overflow-hidden rounded-full border border-white/15 bg-white/10">
+                    <Avatar.Image className="h-full w-full object-cover" src={user?.imageUrl ?? undefined} alt={user?.fullName ?? 'User'} />
+                    <Avatar.Fallback className="flex h-full w-full items-center justify-center text-xs font-semibold text-white">
+                      {getInitials(user?.fullName ?? user?.primaryEmailAddress?.emailAddress)}
+                    </Avatar.Fallback>
+                  </Avatar.Root>
+                  <UserButton />
+                  <SignOutButton>
+                    <button className="hidden text-xs font-semibold uppercase tracking-[0.28em] text-foreground/70 transition hover:text-foreground md:block">
+                      Log Out
+                    </button>
+                  </SignOutButton>
+                </div>
+              </SignedIn>
             )}
             <Sheet open={isMobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild className="md:hidden">
@@ -212,20 +222,25 @@ export default function Header() {
                     ))}
                   </nav>
                   <div className="mt-8 space-y-3">
-                    {!isAuthenticated && !isLoading && (
-                      <Button
-                        asChild
-                        className="w-full rounded-full bg-primary px-6 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-primary-foreground shadow-lg shadow-black/30 transition hover:shadow-xl hover:shadow-black/40"
-                      >
-                        <a href="/auth/login">Sign In</a>
-                      </Button>
+                    {!isAuthenticated && isLoaded && (
+                      <SignedOut>
+                        <SignInButton>
+                          <Button className="w-full rounded-full bg-primary px-6 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-primary-foreground shadow-lg shadow-black/30 transition hover:shadow-xl hover:shadow-black/40">
+                            Sign In
+                          </Button>
+                        </SignInButton>
+                      </SignedOut>
                     )}
                     {isAuthenticated && (
-                      <div className="flex items-center justify-center">
-                        <a href="/auth/logout" className="text-xs font-semibold uppercase tracking-[0.35em] text-foreground/70">
-                          Log Out
-                        </a>
-                      </div>
+                      <SignedIn>
+                        <div className="flex items-center justify-center">
+                          <SignOutButton>
+                            <button className="text-xs font-semibold uppercase tracking-[0.35em] text-foreground/70">
+                              Log Out
+                            </button>
+                          </SignOutButton>
+                        </div>
+                      </SignedIn>
                     )}
                   </div>
                 </div>

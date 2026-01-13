@@ -2,7 +2,7 @@
 
 import type { FormEvent } from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useUser } from '@auth0/nextjs-auth0';
+import { useUser } from '@clerk/nextjs';
 
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -219,13 +219,13 @@ export function EventsManager({ adminName }: EventsManagerProps) {
           throw new Error(error.message);
         }
       } else {
-        if (!user?.sub) {
+        if (!user?.id) {
           throw new Error('You must be signed in to create an event.');
         }
         const { error } = await supabase.from('events').insert({
           ...payload,
           image_url: tbaState.image_url ? null : formState.image_url || null,
-          created_by_clerk: user.sub,
+          created_by_clerk: user.id,
         });
         if (error) {
           throw new Error(error.message);

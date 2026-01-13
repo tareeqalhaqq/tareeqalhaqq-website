@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { SignOutButton } from '@clerk/nextjs';
 
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -67,9 +68,9 @@ export default function AdminDashboardPage() {
                 <Button asChild>
                   <a href="https://markazalhaqq.org">View academy site</a>
                 </Button>
-                <Button asChild variant="outline">
-                  <a href="/logout">Sign out</a>
-                </Button>
+                <SignOutButton>
+                  <Button variant="outline">Sign out</Button>
+                </SignOutButton>
               </div>
             </div>
 

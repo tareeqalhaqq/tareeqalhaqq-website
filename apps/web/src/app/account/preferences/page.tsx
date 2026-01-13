@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useUser } from '@auth0/nextjs-auth0';
+import { SignOutButton, useUser } from '@clerk/nextjs';
 
 import { Button } from '@/components/ui/button';
 import Profile from '@/components/Profile';
@@ -45,16 +45,19 @@ export default function AccountPreferencesPage() {
 
         <div className="glass-panel space-y-6 p-8 text-white">
           <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-white/70">
-            Signed in as <span className="text-white">{user?.email ?? authUser?.email ?? 'Unknown'}</span>
+            Signed in as{' '}
+            <span className="text-white">
+              {user?.email ?? authUser?.primaryEmailAddress?.emailAddress ?? 'Unknown'}
+            </span>
           </div>
           <Profile />
           <div className="flex flex-wrap gap-3">
             <Button asChild variant="outline">
               <Link href="/profile">Edit profile</Link>
             </Button>
-            <Button asChild variant="ghost">
-              <a href="/auth/logout">Sign out</a>
-            </Button>
+            <SignOutButton>
+              <Button variant="ghost">Sign out</Button>
+            </SignOutButton>
           </div>
         </div>
       </div>

@@ -1,13 +1,12 @@
 import { NextResponse } from 'next/server';
-import { auth0 } from '@/lib/auth0';
+import { auth } from '@clerk/nextjs/server';
 import { createSupabaseClient } from '@/lib/supabase';
 
 const selectFields = 'id, title, description, location, date, time, image_url, created_at';
 const defaultEventImage = '/images/logo1.png';
 
 const assertAdmin = async () => {
-  const session = await auth0.getSession();
-  const userId = session?.user?.sub;
+  const { userId } = auth();
   const supabase = await createSupabaseClient();
 
   if (!userId) {

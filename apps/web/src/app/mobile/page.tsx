@@ -3,7 +3,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useUser } from '@auth0/nextjs-auth0';
+import { useUser } from '@clerk/nextjs';
 import { useAuthProfile } from '@/hooks/use-auth-profile';
 
 const EXPO_WEB_URL =
@@ -15,17 +15,17 @@ export default function MobileBridgePage() {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [allowed, setAllowed] = useState(false);
   const { status, isAdmin } = useAuthProfile();
-  const { user, isLoading } = useUser();
+  const { user, isLoaded } = useUser();
 
   const sendSession = async () => {
-    if (!user?.sub) return;
+    if (!user?.id) return;
     iframeRef.current?.contentWindow?.postMessage(
       {
         type: 'SUPABASE_SESSION',
         session: {
           access_token: null,
           refresh_token: null,
-          user_id: user.sub,
+          user_id: user.id,
         },
       },
       EXPO_ORIGIN
@@ -47,9 +47,9 @@ export default function MobileBridgePage() {
   }, [isAdmin, router, status]);
 
   useEffect(() => {
-    if (isLoading || !user?.sub) return;
+    if (!isLoaded || !user?.id) return;
     void sendSession();
-  }, [isLoading, user?.sub]);
+  }, [isLoaded, user?.id]);
 
   if (!allowed) {
     return null;

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useUser } from '@auth0/nextjs-auth0';
+import { useUser } from '@clerk/nextjs';
 import { useSupabase } from '@/lib/supabaseClient';
 
 type Role = 'admin' | 'student' | 'member';
@@ -46,7 +46,7 @@ const deriveRole = (profile: Profile | null, membership: AcademyMembership | nul
 
 export function useAuthProfile() {
   const supabase = useSupabase();
-  const { user, isLoading } = useUser();
+  const { user, isLoaded } = useUser();
   const [state, setState] = useState<AuthState>({
     status: 'loading',
     user: null,
@@ -79,11 +79,11 @@ export function useAuthProfile() {
   };
 
   useEffect(() => {
-    if (isLoading) {
+    if (!isLoaded) {
       return;
     }
 
-    if (!user?.sub) {
+    if (!user?.id) {
       setState({ status: 'unauthenticated', user: null, profile: null, membership: null });
       return;
     }
@@ -93,17 +93,17 @@ export function useAuthProfile() {
       return;
     }
 
-    const email = user.email ?? null;
-    const fullName = user.name ?? null;
-    const avatarUrl = user.picture ?? null;
-    const nextUser = { id: user.sub, email };
+    const email = user.primaryEmailAddress?.emailAddress ?? null;
+    const fullName = user.fullName ?? null;
+    const avatarUrl = user.imageUrl ?? null;
+    const nextUser = { id: user.id, email };
 
     const ensureProfile = async () => {
       await supabase
         .from('profiles')
         .upsert(
           {
-            clerk_id: user.sub,
+            clerk_id: user.id,
             email,
             full_name: fullName,
             avatar_url: avatarUrl,
@@ -118,12 +118,12 @@ export function useAuthProfile() {
       await loadProfile(nextUser);
     })();
   }, [
-    isLoading,
+    isLoaded,
     supabase,
-    user?.email,
-    user?.name,
-    user?.picture,
-    user?.sub,
+    user?.id,
+    user?.primaryEmailAddress?.emailAddress,
+    user?.fullName,
+    user?.imageUrl,
   ]);
 
   const role = deriveRole(state.profile, state.membership);
