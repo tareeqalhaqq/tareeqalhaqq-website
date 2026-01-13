@@ -54,7 +54,7 @@ export default function Header() {
   return (
     <>
       <header className="sticky top-0 z-50 w-full px-3 py-3 sm:px-4">
-        <div className="group relative mx-auto flex w-full max-w-6xl items-center justify-between gap-3 rounded-full border border-white/10 bg-black/60 px-4 py-2.5 shadow-[0_18px_50px_rgba(0,0,0,0.35)] backdrop-blur-2xl transition duration-300 before:absolute before:inset-0 before:-z-10 before:rounded-full before:bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.18),transparent_55%)] before:opacity-70 before:blur-2xl after:absolute after:-inset-px after:-z-10 after:rounded-full after:bg-gradient-to-r after:from-white/15 after:via-transparent after:to-white/15 after:opacity-0 after:transition after:duration-300 group-hover:border-white/20 group-hover:after:opacity-100 sm:px-6 sm:py-3">
+        <div className="group relative mx-auto flex w-full max-w-6xl items-center justify-between gap-3 rounded-full border border-white/10 bg-[#0f1829]/80 px-4 py-2.5 shadow-[0_18px_50px_rgba(0,0,0,0.35)] backdrop-blur-2xl transition duration-300 before:absolute before:inset-0 before:-z-10 before:rounded-full before:bg-[radial-gradient(circle_at_top,rgba(110,193,214,0.3),transparent_60%)] before:opacity-80 before:blur-2xl after:absolute after:-inset-px after:-z-10 after:rounded-full after:bg-gradient-to-r after:from-white/10 after:via-transparent after:to-white/10 after:opacity-0 after:transition after:duration-300 group-hover:border-white/20 group-hover:after:opacity-100 sm:px-6 sm:py-3">
           <Link href="/" className="flex items-center transition-transform hover:scale-[1.01]">
             <Logo />
           </Link>
@@ -67,13 +67,13 @@ export default function Header() {
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="ghost"
-                        className="flex items-center gap-2 rounded-full border border-white/5 bg-white/5 px-4 py-2 text-[0.65rem] font-semibold uppercase tracking-[0.28em] text-foreground/80 transition hover:border-white/10 hover:bg-white/10 hover:text-foreground"
+                        className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[0.65rem] font-semibold uppercase tracking-[0.28em] text-foreground/80 transition hover:border-white/20 hover:bg-white/10 hover:text-foreground"
                       >
                         {link.name}
                         <ChevronDown className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent className="min-w-[200px] overflow-hidden rounded-2xl border border-white/10 bg-secondary/60 backdrop-blur-xl">
+                    <DropdownMenuContent className="min-w-[200px] overflow-hidden rounded-2xl border border-white/10 bg-[#0f1829]/90 backdrop-blur-xl">
                       {link.subLinks.map((subLink) => (
                         <DropdownMenuItem key={subLink.name} asChild>
                           <Link href={subLink.href} className="text-xs uppercase tracking-[0.25em] text-foreground/80 hover:text-primary">
@@ -88,7 +88,7 @@ export default function Header() {
                     key={link.name}
                     href={link.href!}
                     className={cn(
-                      "rounded-full border border-transparent px-4 py-2 text-[0.65rem] font-semibold tracking-[0.28em] text-foreground/70 transition-colors hover:border-white/10 hover:text-foreground",
+                      "rounded-full border border-transparent px-4 py-2 text-[0.65rem] font-semibold tracking-[0.28em] text-foreground/70 transition-colors hover:border-white/20 hover:text-foreground",
                       pathname === link.href ? "border-white/10 text-foreground" : "text-foreground/70"
                     )}
                   >
@@ -102,7 +102,7 @@ export default function Header() {
                   key={link.name}
                   href={link.href}
                   className={cn(
-                    "rounded-full border border-transparent px-4 py-2 text-[0.65rem] font-semibold tracking-[0.28em] text-foreground/70 transition-colors hover:border-white/10 hover:text-foreground",
+                    "rounded-full border border-transparent px-4 py-2 text-[0.65rem] font-semibold tracking-[0.28em] text-foreground/70 transition-colors hover:border-white/20 hover:text-foreground",
                     pathname === link.href ? "border-white/10 text-foreground" : "text-foreground/70"
                   )}
                 >
@@ -135,7 +135,7 @@ export default function Header() {
             {isAuthenticated && (
               <SignedIn>
                 <div className="flex items-center gap-3">
-                  <Avatar.Root className="h-9 w-9 overflow-hidden rounded-full border border-white/15 bg-white/10">
+                  <Avatar.Root className="h-9 w-9 overflow-hidden rounded-full border border-white/20 bg-white/10">
                     <Avatar.Image className="h-full w-full object-cover" src={user?.imageUrl ?? undefined} alt={user?.fullName ?? 'User'} />
                     <Avatar.Fallback className="flex h-full w-full items-center justify-center text-xs font-semibold text-white">
                       {getInitials(user?.fullName ?? user?.primaryEmailAddress?.emailAddress)}
@@ -161,7 +161,7 @@ export default function Header() {
                   <span className="sr-only">Open menu</span>
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="w-[280px] border-white/10 bg-black/80 text-foreground">
+              <SheetContent side="left" className="w-[280px] border-white/10 bg-[#0f1829]/95 text-foreground">
                 <div className="p-6">
                   <Link href="/" className="mb-8 block" onClick={() => setMobileMenuOpen(false)}>
                     <Logo className="text-left" />

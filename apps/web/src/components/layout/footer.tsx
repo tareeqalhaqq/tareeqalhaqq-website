@@ -13,17 +13,17 @@ const iconMap = {
 
 export default function Footer() {
   return (
-    <footer className="border-t border-white/10 bg-black/70 text-white">
+    <footer className="border-t border-white/10 bg-[#0f1829]/90 text-white">
       <div className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
         <div className="grid gap-12 md:grid-cols-[1.4fr_1fr_1fr]">
           <div className="space-y-6">
             <Logo />
             <p className="max-w-sm text-sm text-white/70">
-              A trusted platform delivering authenticated resources, intelligent study tools, and timely updates for seekers of knowledge.
+              Tareeq Al Haqq blends the Rahmaniyyah-inspired aesthetic with an authentic roadmap for seekers of knowledge.
             </p>
             <div className="flex items-center gap-4 text-xs uppercase tracking-[0.3em] text-white/40">
               <span className="h-px flex-1 bg-white/20" />
-              Authentic Knowledge Tools
+              Authentic Knowledge & Care
               <span className="h-px flex-1 bg-white/20" />
             </div>
           </div>
@@ -51,7 +51,7 @@ export default function Footer() {
               <h3 className="text-xs font-semibold uppercase tracking-[0.35em] text-white/60">Explore</h3>
               <div className="mt-4 space-y-3 text-white/60">
                 <p className="text-sm">
-                  Visit the store for curated resources, apparel, and essentials that support the mission.
+                  Discover curated resources, apparel, and essentials that support the mission.
                 </p>
                 <Link href="https://store.tareeqalhaqq.org" className="text-xs uppercase tracking-[0.3em] text-primary">
                   Shop the store
@@ -76,7 +76,7 @@ export default function Footer() {
                 );
               })}
             </div>
-            <p className="text-xs uppercase tracking-[0.35em] text-white/40">Stay connected to verified learning</p>
+            <p className="text-xs uppercase tracking-[0.35em] text-white/40">Seeking knowledge is an obligation</p>
           </div>
         </div>
         <div className="mt-12 border-t border-white/10 pt-8 text-center text-xs uppercase tracking-[0.3em] text-white/40">
