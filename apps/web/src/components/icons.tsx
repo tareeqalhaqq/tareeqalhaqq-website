@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 export function Logo({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
   return (
     <div className={cn("flex items-center gap-4 text-foreground", className)} {...props}>
-      <span className="relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-white/5">
+      <span className="relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl bg-primary/10">
         <Image
           src="/images/logo1.png"
           alt="Tareeq Al Haqq crest"
@@ -18,7 +18,7 @@ export function Logo({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
       </span>
       <div className="flex flex-col leading-tight">
         <span className="text-xs uppercase tracking-[0.45em] text-primary/70">Tareeq</span>
-        <span className="text-2xl font-headline text-foreground">Al Haqq</span>
+        <span className="text-2xl font-headline uppercase text-foreground">Al Haqq</span>
       </div>
     </div>
   );
