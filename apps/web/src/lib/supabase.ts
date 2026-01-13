@@ -13,10 +13,3 @@ export async function createSupabaseClient() {
     }
   );
 }
-
-export function createPublicSupabaseClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
-  );
-}

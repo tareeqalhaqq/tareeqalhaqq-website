@@ -1,5 +1,5 @@
 import { Calendar, Clock, MapPin } from 'lucide-react';
-import { createPublicSupabaseClient } from '@/lib/supabase';
+import { createSupabaseClient } from '@/lib/supabase';
 
 type EventRecord = {
   id: string;
@@ -22,7 +22,7 @@ const formatDate = (date: string | null) => {
 };
 
 export default async function EventsPage() {
-  const supabase = createPublicSupabaseClient();
+  const supabase = await createSupabaseClient();
   const { data: events } = await supabase
     .from('events')
     .select('id, title, description, location, date, time, image_url')
