@@ -15,8 +15,8 @@ export default function Profile() {
 
   if (!isLoaded) {
     return (
-      <div className="loading-state">
-        <div className="loading-text">Loading user profile...</div>
+      <div className="glass-panel p-6 text-center text-sm text-white/70">
+        Loading user profile...
       </div>
     );
   }
@@ -33,19 +33,21 @@ export default function Profile() {
   const email = user.primaryEmailAddress?.emailAddress ?? null;
 
   return (
-    <div className="profile-card action-card">
-      <Avatar.Root className="profile-avatar">
+    <div className="space-y-4 text-center">
+      <Avatar.Root className="mx-auto flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border border-white/20 bg-white/10">
         <Avatar.Image
-          className="profile-picture"
+          className="h-full w-full object-cover"
           src={user.imageUrl ?? undefined}
           alt={displayName}
         />
-        <Avatar.Fallback className="profile-fallback" delayMs={200}>
+        <Avatar.Fallback className="text-lg font-semibold text-white" delayMs={200}>
           {getInitials(displayName)}
         </Avatar.Fallback>
       </Avatar.Root>
-      <h2 className="profile-name">{displayName}</h2>
-      {email && <p className="profile-email">{email}</p>}
+      <div className="space-y-1">
+        <h2 className="text-2xl font-semibold text-white">{displayName}</h2>
+        {email && <p className="text-sm text-white/70">{email}</p>}
+      </div>
     </div>
   );
 }
