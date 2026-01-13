@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,39 +6,47 @@
 
 @layer base {
   :root {
-    --background: 222 47% 6%;
-    --foreground: 210 40% 98%;
-    --card: 222 38% 12%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222 38% 10%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 43 74% 58%;
-    --primary-foreground: 222 47% 6%;
-    --secondary: 220 28% 15%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 220 20% 22%;
-    --muted-foreground: 215 20% 65%;
-    --accent: 43 74% 58%;
-    --accent-foreground: 222 47% 6%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 215 18% 25%;
-    --input: 215 18% 25%;
-    --ring: 43 74% 58%;
-    --radius: 1.5rem;
-    --sidebar-background: 222 40% 8%;
-    --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 43 74% 58%;
-    --sidebar-primary-foreground: 222 47% 6%;
-    --sidebar-accent: 222 30% 15%;
-    --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 215 18% 25%;
-    --sidebar-ring: 43 74% 58%;
+    --background: 219 46% 11%;
+    --foreground: 0 0% 96%;
+    --card: 196 45% 22%;
+    --card-foreground: 0 0% 96%;
+    --popover: 219 46% 11%;
+    --popover-foreground: 0 0% 96%;
+    --primary: 192 56% 64%;
+    --primary-foreground: 219 46% 11%;
+    --secondary: 196 45% 22%;
+    --secondary-foreground: 0 0% 96%;
+    --muted: 209 42% 17%;
+    --muted-foreground: 210 12% 72%;
+    --accent: 192 56% 64%;
+    --accent-foreground: 219 46% 11%;
+    --destructive: 26 82% 60%;
+    --destructive-foreground: 219 46% 11%;
+    --border: 196 45% 22%;
+    --input: 196 45% 22%;
+    --ring: 192 56% 64%;
+    --radius: 1.25rem;
+    --sidebar-background: 219 46% 11%;
+    --sidebar-foreground: 0 0% 96%;
+    --sidebar-primary: 192 56% 64%;
+    --sidebar-primary-foreground: 219 46% 11%;
+    --sidebar-accent: 196 45% 22%;
+    --sidebar-accent-foreground: 0 0% 96%;
+    --sidebar-border: 196 45% 22%;
+    --sidebar-ring: 192 56% 64%;
+    --font-sans: "Inter", sans-serif;
+    --font-serif: "Amiri", serif;
+    --font-headline: "Playfair Display", serif;
   }
 
   body {
     @apply min-h-screen bg-background text-foreground;
-    background-image: radial-gradient(circle at top, rgba(255, 255, 255, 0.12), transparent 55%);
+    background-image: radial-gradient(circle at top, rgba(110, 193, 214, 0.3), transparent 60%),
+      url('/bg-texture.png');
+    background-position: top center, center;
+    background-repeat: no-repeat, no-repeat;
+    background-size: 100% 60%, cover;
+    background-attachment: fixed;
   }
 }
 
@@ -57,5 +65,13 @@
 
   .eyebrow {
     @apply text-xs uppercase tracking-[0.4em] text-primary/80;
+  }
+
+  .glass-card {
+    @apply rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-[0_24px_60px_rgba(0,0,0,0.4)];
+  }
+
+  .section-title {
+    @apply text-3xl font-headline text-white md:text-4xl;
   }
 }
