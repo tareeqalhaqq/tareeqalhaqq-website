@@ -60,6 +60,18 @@ export function EventsManager({ adminName }: EventsManagerProps) {
   const { toast } = useToast();
   const supabase = useSupabase();
   const { userId } = useAuth();
+  const eventsTableLink = useMemo(() => {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    if (!supabaseUrl) return null;
+    try {
+      const host = new URL(supabaseUrl).host;
+      const projectRef = host.split('.')[0];
+      if (!projectRef) return null;
+      return `https://app.supabase.com/project/${projectRef}/editor?schema=public&table=events`;
+    } catch {
+      return null;
+    }
+  }, []);
   const [events, setEvents] = useState<EventRecord[]>([]);
   const [status, setStatus] = useState<'loading' | 'ready'>('loading');
   const [formState, setFormState] = useState<FormState>(emptyForm);
@@ -317,178 +329,187 @@ export function EventsManager({ adminName }: EventsManagerProps) {
             {adminName ? `Hi ${adminName},` : 'Hi there,'} keep event details accurate for the public schedule.
           </p>
         </div>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={openCreateDialog}>Add event</Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl bg-slate-950 text-white">
-            <DialogHeader>
-              <DialogTitle>{editingEvent ? 'Edit event' : 'Create new event'}</DialogTitle>
-              <DialogDescription className="text-white/60">
-                Provide the details for your upcoming gathering. Save to update the public events page.
-              </DialogDescription>
-            </DialogHeader>
-            <form className="space-y-4" onSubmit={handleSubmit}>
-              <div className="grid gap-4 md:grid-cols-2">
+        <div className="flex flex-wrap items-center gap-3">
+          {eventsTableLink && (
+            <Button asChild variant="outline">
+              <a href={eventsTableLink} target="_blank" rel="noreferrer">
+                Open Supabase table
+              </a>
+            </Button>
+          )}
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button onClick={openCreateDialog}>Add event</Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl bg-slate-950 text-white">
+              <DialogHeader>
+                <DialogTitle>{editingEvent ? 'Edit event' : 'Create new event'}</DialogTitle>
+                <DialogDescription className="text-white/60">
+                  Provide the details for your upcoming gathering. Save to update the public events page.
+                </DialogDescription>
+              </DialogHeader>
+              <form className="space-y-4" onSubmit={handleSubmit}>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="event-title">Title</Label>
+                    <Input
+                      id="event-title"
+                      value={formState.title}
+                      onChange={(event) => handleChange('title', event.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between gap-3">
+                      <Label htmlFor="event-location">Location</Label>
+                      <label className="flex items-center gap-2 text-xs text-white/60">
+                        <input
+                          type="checkbox"
+                          checked={tbaState.location}
+                          onChange={(event) => {
+                            const checked = event.target.checked;
+                            setTbaState((prev) => ({ ...prev, location: checked }));
+                            if (checked) {
+                              setFormState((prev) => ({ ...prev, location: '' }));
+                              setLocationSuggestions([]);
+                            }
+                          }}
+                        />
+                        To be announced
+                      </label>
+                    </div>
+                    <Input
+                      id="event-location"
+                      value={formState.location}
+                      onChange={(event) => handleChange('location', event.target.value)}
+                      placeholder={tbaState.location ? 'To be announced' : 'Search for a venue or address'}
+                      disabled={tbaState.location}
+                      required={!tbaState.location}
+                    />
+                    {!tbaState.location && (
+                      <div className="space-y-1">
+                        {isFetchingLocations && (
+                          <p className="text-xs text-white/50">Searching maps for addresses…</p>
+                        )}
+                        {locationSuggestions.length > 0 && (
+                          <div className="rounded-lg border border-white/10 bg-black/50">
+                            {locationSuggestions.map((suggestion) => (
+                              <button
+                                key={suggestion}
+                                type="button"
+                                className="block w-full px-3 py-2 text-left text-sm text-white/80 hover:bg-white/5"
+                                onClick={() => applyLocationSuggestion(suggestion)}
+                              >
+                                {suggestion}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between gap-3">
+                      <Label htmlFor="event-date">Date</Label>
+                      <label className="flex items-center gap-2 text-xs text-white/60">
+                        <input
+                          type="checkbox"
+                          checked={tbaState.date}
+                          onChange={(event) => {
+                            const checked = event.target.checked;
+                            setTbaState((prev) => ({ ...prev, date: checked }));
+                            if (checked) {
+                              setFormState((prev) => ({ ...prev, date: '' }));
+                            }
+                          }}
+                        />
+                        To be announced
+                      </label>
+                    </div>
+                    <Input
+                      id="event-date"
+                      type="date"
+                      value={formState.date}
+                      onChange={(event) => handleChange('date', event.target.value)}
+                      required={!tbaState.date}
+                      disabled={tbaState.date}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between gap-3">
+                      <Label htmlFor="event-time">Time</Label>
+                      <label className="flex items-center gap-2 text-xs text-white/60">
+                        <input
+                          type="checkbox"
+                          checked={tbaState.time}
+                          onChange={(event) => {
+                            const checked = event.target.checked;
+                            setTbaState((prev) => ({ ...prev, time: checked }));
+                            if (checked) {
+                              setFormState((prev) => ({ ...prev, time: '' }));
+                            }
+                          }}
+                        />
+                        To be announced
+                      </label>
+                    </div>
+                    <Input
+                      id="event-time"
+                      type="time"
+                      value={formState.time}
+                      onChange={(event) => handleChange('time', event.target.value)}
+                      disabled={tbaState.time}
+                    />
+                  </div>
+                  <div className="space-y-2 md:col-span-2">
+                    <div className="flex items-center justify-between gap-3">
+                      <Label htmlFor="event-image">Image URL</Label>
+                      <label className="flex items-center gap-2 text-xs text-white/60">
+                        <input
+                          type="checkbox"
+                          checked={tbaState.image_url}
+                          onChange={(event) => {
+                            const checked = event.target.checked;
+                            setTbaState((prev) => ({ ...prev, image_url: checked }));
+                            if (checked) {
+                              setFormState((prev) => ({ ...prev, image_url: '' }));
+                            }
+                          }}
+                        />
+                        To be announced
+                      </label>
+                    </div>
+                    <Input
+                      id="event-image"
+                      value={formState.image_url}
+                      onChange={(event) => handleChange('image_url', event.target.value)}
+                      placeholder="https://"
+                      disabled={tbaState.image_url}
+                    />
+                  </div>
+                </div>
                 <div className="space-y-2">
-                  <Label htmlFor="event-title">Title</Label>
-                  <Input
-                    id="event-title"
-                    value={formState.title}
-                    onChange={(event) => handleChange('title', event.target.value)}
+                  <Label htmlFor="event-description">Description</Label>
+                  <Textarea
+                    id="event-description"
+                    value={formState.description}
+                    onChange={(event) => handleChange('description', event.target.value)}
+                    rows={4}
                     required
                   />
                 </div>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between gap-3">
-                    <Label htmlFor="event-location">Location</Label>
-                    <label className="flex items-center gap-2 text-xs text-white/60">
-                      <input
-                        type="checkbox"
-                        checked={tbaState.location}
-                        onChange={(event) => {
-                          const checked = event.target.checked;
-                          setTbaState((prev) => ({ ...prev, location: checked }));
-                          if (checked) {
-                            setFormState((prev) => ({ ...prev, location: '' }));
-                            setLocationSuggestions([]);
-                          }
-                        }}
-                      />
-                      To be announced
-                    </label>
-                  </div>
-                  <Input
-                    id="event-location"
-                    value={formState.location}
-                    onChange={(event) => handleChange('location', event.target.value)}
-                    placeholder={tbaState.location ? 'To be announced' : 'Search for a venue or address'}
-                    disabled={tbaState.location}
-                    required={!tbaState.location}
-                  />
-                  {!tbaState.location && (
-                    <div className="space-y-1">
-                      {isFetchingLocations && (
-                        <p className="text-xs text-white/50">Searching maps for addresses…</p>
-                      )}
-                      {locationSuggestions.length > 0 && (
-                        <div className="rounded-lg border border-white/10 bg-black/50">
-                          {locationSuggestions.map((suggestion) => (
-                            <button
-                              key={suggestion}
-                              type="button"
-                              className="block w-full px-3 py-2 text-left text-sm text-white/80 hover:bg-white/5"
-                              onClick={() => applyLocationSuggestion(suggestion)}
-                            >
-                              {suggestion}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  )}
+                <div className="flex flex-wrap justify-end gap-3 pt-2">
+                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={isSubmitting}>
+                    {isSubmitting ? 'Saving…' : 'Save event'}
+                  </Button>
                 </div>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between gap-3">
-                    <Label htmlFor="event-date">Date</Label>
-                    <label className="flex items-center gap-2 text-xs text-white/60">
-                      <input
-                        type="checkbox"
-                        checked={tbaState.date}
-                        onChange={(event) => {
-                          const checked = event.target.checked;
-                          setTbaState((prev) => ({ ...prev, date: checked }));
-                          if (checked) {
-                            setFormState((prev) => ({ ...prev, date: '' }));
-                          }
-                        }}
-                      />
-                      To be announced
-                    </label>
-                  </div>
-                  <Input
-                    id="event-date"
-                    type="date"
-                    value={formState.date}
-                    onChange={(event) => handleChange('date', event.target.value)}
-                    required={!tbaState.date}
-                    disabled={tbaState.date}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between gap-3">
-                    <Label htmlFor="event-time">Time</Label>
-                    <label className="flex items-center gap-2 text-xs text-white/60">
-                      <input
-                        type="checkbox"
-                        checked={tbaState.time}
-                        onChange={(event) => {
-                          const checked = event.target.checked;
-                          setTbaState((prev) => ({ ...prev, time: checked }));
-                          if (checked) {
-                            setFormState((prev) => ({ ...prev, time: '' }));
-                          }
-                        }}
-                      />
-                      To be announced
-                    </label>
-                  </div>
-                  <Input
-                    id="event-time"
-                    type="time"
-                    value={formState.time}
-                    onChange={(event) => handleChange('time', event.target.value)}
-                    disabled={tbaState.time}
-                  />
-                </div>
-                <div className="space-y-2 md:col-span-2">
-                  <div className="flex items-center justify-between gap-3">
-                    <Label htmlFor="event-image">Image URL</Label>
-                    <label className="flex items-center gap-2 text-xs text-white/60">
-                      <input
-                        type="checkbox"
-                        checked={tbaState.image_url}
-                        onChange={(event) => {
-                          const checked = event.target.checked;
-                          setTbaState((prev) => ({ ...prev, image_url: checked }));
-                          if (checked) {
-                            setFormState((prev) => ({ ...prev, image_url: '' }));
-                          }
-                        }}
-                      />
-                      To be announced
-                    </label>
-                  </div>
-                  <Input
-                    id="event-image"
-                    value={formState.image_url}
-                    onChange={(event) => handleChange('image_url', event.target.value)}
-                    placeholder="https://"
-                    disabled={tbaState.image_url}
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="event-description">Description</Label>
-                <Textarea
-                  id="event-description"
-                  value={formState.description}
-                  onChange={(event) => handleChange('description', event.target.value)}
-                  rows={4}
-                  required
-                />
-              </div>
-              <div className="flex flex-wrap justify-end gap-3 pt-2">
-                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? 'Saving…' : 'Save event'}
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       <div className="rounded-lg border border-white/10">
