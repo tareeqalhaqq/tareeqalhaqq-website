@@ -110,9 +110,9 @@ export default function Home() {
           </motion.div>
         </motion.section>
 
-        <section className="page-section">
+        <section className="fluent-section">
           <motion.div
-            className="page-section__inner grid gap-12 md:grid-cols-[1.1fr_0.9fr] md:items-center"
+            className="fluent-section__inner grid gap-12 md:grid-cols-[1.1fr_0.9fr] md:items-center"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, amount: 0.4 }}
@@ -158,9 +158,9 @@ export default function Home() {
           </motion.div>
         </section>
 
-        <section className="page-section">
+        <section className="fluent-section">
           <motion.div
-            className="page-section__inner space-y-10 text-center"
+            className="fluent-section__inner space-y-10 text-center"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, amount: 0.3 }}
