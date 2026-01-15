@@ -121,6 +121,14 @@
     @apply relative z-10 mx-auto w-full max-w-6xl;
   }
 
+  .fluent-section {
+    @apply relative px-4 py-16 sm:px-6 lg:px-8;
+  }
+
+  .fluent-section__inner {
+    @apply relative mx-auto w-full max-w-6xl;
+  }
+
   .glass-panel {
     @apply rounded-3xl border border-white/10 bg-white/5 p-8 shadow-xl shadow-black/40 backdrop-blur-lg;
     box-shadow: 0 30px 60px -40px rgba(10, 48, 60, 0.9);
