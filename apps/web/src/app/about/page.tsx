@@ -26,7 +26,6 @@ export default function AboutPage() {
               height={800}
               className="h-full w-full object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 p-6">
               <p className="text-xs uppercase tracking-[0.4em] text-white/70">Documenting authentic scholarship in action</p>
             </div>
