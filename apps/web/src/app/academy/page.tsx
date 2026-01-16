@@ -33,18 +33,20 @@ export default function AcademyPage() {
               ))}
             </div>
             <p className="text-sm text-white/70">
-              The Markaz Al Haqq academy experience is directed by Mustafa Asif, ensuring the learning track stays anchored to authentic sources and a supportive student journey.
+              The Markaz Al Haqq academy experience is directed by Mustafa Asif, with scholars from the New Jersey and Pennsylvania area, ensuring the learning track stays anchored to authentic sources and a supportive student journey.
             </p>
           </div>
           <div className="glass-panel space-y-4">
             <p className="eyebrow text-left">Access</p>
             <h2 className="text-2xl font-headline uppercase tracking-[0.2em] text-white">Getting Ready</h2>
             <p className="text-sm text-white/70">
-              Academy accounts will open in 2026. To access the academy, go here once the portal is live: markazalhaqq.org. Mustafa Asif serves as director for Markaz Al Haqq.
+              Academy accounts will open in 2026. Visit the academy site once the portal is live.
             </p>
-            <div className="rounded-2xl border border-white/10 bg-black/50 p-4 text-left text-xs uppercase tracking-[0.3em] text-white/60">
-              markazalhaqq.org
-            </div>
+            <Button asChild className="w-full rounded-2xl text-xs uppercase tracking-[0.3em]">
+              <Link href="https://markazalhaqq.org" target="_blank" rel="noreferrer">
+                Visit Markaz Al Haqq
+              </Link>
+            </Button>
             <p className="text-xs uppercase tracking-[0.3em] text-white/50">
               Join the mailing list for launch updates and early onboarding.
             </p>
