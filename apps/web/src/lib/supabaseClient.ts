@@ -10,7 +10,7 @@ export function useSupabase() {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
-      accessToken: async () => session?.getToken({ template: 'supabase' }) ?? null,
+      accessToken: async () => session?.getToken() ?? null,
     },
   );
 
