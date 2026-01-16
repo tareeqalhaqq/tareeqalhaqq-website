@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Dialog,
@@ -9,7 +9,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { allContent } from "@/lib/data";
+import { baseContent } from "@/lib/data";
+import { useSupabase } from "@/lib/supabaseClient";
 import { Search } from "lucide-react";
 
 type SearchResult = {
@@ -22,11 +23,44 @@ type SearchResult = {
 export function SearchDialog({ open, onOpenChange }: { open: boolean, onOpenChange: (open: boolean) => void }) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
+  const [eventResults, setEventResults] = useState<SearchResult[]>([]);
+  const supabase = useSupabase();
+
+  useEffect(() => {
+    let isMounted = true;
+    const loadEvents = async () => {
+      const { data } = await supabase
+        .from("events")
+        .select("id, title, description")
+        .order("date", { ascending: true });
+
+      if (!isMounted) {
+        return;
+      }
+
+      setEventResults(
+        (data ?? []).map((event) => ({
+          type: "Event",
+          title: event.title,
+          description: event.description ?? "Upcoming event",
+          href: "/events",
+        }))
+      );
+    };
+
+    loadEvents();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [supabase]);
+
+  const searchableContent = useMemo(() => [...baseContent, ...eventResults], [eventResults]);
 
   useEffect(() => {
     if (query.length > 2) {
       const lowerCaseQuery = query.toLowerCase();
-      const filteredResults = allContent.filter(
+      const filteredResults = searchableContent.filter(
         (item) =>
           item.title.toLowerCase().includes(lowerCaseQuery) ||
           (item.description && item.description.toLowerCase().includes(lowerCaseQuery))
@@ -35,7 +69,7 @@ export function SearchDialog({ open, onOpenChange }: { open: boolean, onOpenChan
     } else {
       setResults([]);
     }
-  }, [query]);
+  }, [query, searchableContent]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
