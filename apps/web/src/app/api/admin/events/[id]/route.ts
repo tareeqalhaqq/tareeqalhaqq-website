@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { createSupabaseClient } from '@/lib/supabase';
 
-const selectFields = 'id, title, description, location, date, time, image_url, created_at';
+const selectFields = 'id, title, description, location, date, time, image_url, event_type, is_virtual, created_at';
 const defaultEventImage = '/images/logo1.png';
 
 const assertAdmin = async () => {
@@ -40,6 +40,8 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     date: string | null;
     time?: string | null;
     image_url?: string | null;
+    event_type?: string | null;
+    is_virtual?: boolean | null;
   };
 
   const normalizedLocation = payload.location?.trim() || null;
@@ -56,6 +58,8 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       date: normalizedDate,
       time: normalizedTime,
       image_url: normalizedImage,
+      event_type: payload.event_type ?? 'tareeq',
+      is_virtual: payload.is_virtual ?? false,
     })
     .eq('id', id)
     .select(selectFields)

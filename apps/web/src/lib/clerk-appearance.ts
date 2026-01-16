@@ -1,7 +1,7 @@
 export const clerkAuthAppearance = {
   variables: {
     colorPrimary: 'hsl(189 86% 46%)',
-    colorBackground: 'transparent',
+    colorBackground: 'hsl(222 47% 11%)',
     colorText: 'hsl(206 46% 96%)',
     colorTextSecondary: 'rgba(255, 255, 255, 0.65)',
     fontFamily: 'var(--font-sans)',
@@ -10,7 +10,7 @@ export const clerkAuthAppearance = {
   elements: {
     rootBox: 'w-full',
     cardBox: 'w-full',
-    card: 'w-full bg-transparent shadow-none',
+    card: 'w-full rounded-3xl border border-white/10 bg-slate-950 p-8 shadow-2xl shadow-black/50',
     headerTitle: 'text-2xl font-headline text-white',
     headerSubtitle: 'text-sm text-white/70',
     socialButtonsBlockButton:

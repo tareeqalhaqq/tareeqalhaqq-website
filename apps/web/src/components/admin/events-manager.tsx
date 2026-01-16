@@ -32,6 +32,8 @@ type EventRecord = {
   date: string | null;
   time: string | null;
   image_url: string | null;
+  event_type: string | null;
+  is_virtual: boolean | null;
   created_at: string;
 };
 
@@ -42,6 +44,8 @@ const emptyForm = {
   date: '',
   time: '',
   image_url: '',
+  event_type: 'tareeq',
+  is_virtual: false,
 };
 
 type FormState = typeof emptyForm;
@@ -51,6 +55,7 @@ type TBAState = {
   time: boolean;
   image_url: boolean;
 };
+type TextField = Exclude<keyof FormState, 'is_virtual'>;
 
 type EventsManagerProps = {
   adminName?: string;
@@ -97,7 +102,7 @@ export function EventsManager({ adminName }: EventsManagerProps) {
     try {
       const { data, error } = await supabase
         .from('events')
-        .select('id, title, description, location, date, time, image_url, created_at')
+        .select('id, title, description, location, date, time, image_url, event_type, is_virtual, created_at')
         .order('date', { ascending: true });
       if (error) {
         throw new Error(error.message);
@@ -134,28 +139,31 @@ export function EventsManager({ adminName }: EventsManagerProps) {
 
   const openEditDialog = (event: EventRecord) => {
     const normalizedTime = event.time ? event.time.slice(0, 5) : '';
+    const isVirtual = Boolean(event.is_virtual);
     const isTbaLocation = !event.location || event.location.toLowerCase() === 'to be announced';
     setEditingEvent(event);
     setFormState({
       title: event.title,
       description: event.description,
-      location: event.location ?? '',
+      location: isVirtual ? 'Virtual' : event.location ?? '',
       date: event.date ?? '',
       time: normalizedTime,
       image_url: event.image_url ?? '',
+      event_type: event.event_type ?? 'tareeq',
+      is_virtual: isVirtual,
     });
     setTbaState({
-      location: isTbaLocation,
+      location: !isVirtual && isTbaLocation,
       date: !event.date,
       time: !event.time,
       image_url: !event.image_url,
     });
-    setLocationQuery(event.location || '');
+    setLocationQuery(isVirtual ? 'Virtual' : event.location || '');
     setLocationSuggestions([]);
     setIsDialogOpen(true);
   };
 
-  const handleChange = (field: keyof FormState, value: string) => {
+  const handleChange = (field: TextField, value: string) => {
     setFormState((prev) => ({ ...prev, [field]: value }));
     if (field === 'location') {
       setLocationQuery(value);
@@ -165,7 +173,7 @@ export function EventsManager({ adminName }: EventsManagerProps) {
   useEffect(() => {
     const controller = new AbortController();
     const query = locationQuery.trim();
-    if (tbaState.location || query.length < 3) {
+    if (tbaState.location || formState.is_virtual || query.length < 3) {
       setLocationSuggestions([]);
       return;
     }
@@ -194,10 +202,10 @@ export function EventsManager({ adminName }: EventsManagerProps) {
       controller.abort();
       clearTimeout(timer);
     };
-  }, [locationQuery, tbaState.location]);
+  }, [formState.is_virtual, locationQuery, tbaState.location]);
 
   const applyLocationSuggestion = (value: string) => {
-    setFormState((prev) => ({ ...prev, location: value }));
+    setFormState((prev) => ({ ...prev, location: value, is_virtual: false }));
     setLocationQuery(value);
     setLocationSuggestions([]);
   };
@@ -217,12 +225,16 @@ export function EventsManager({ adminName }: EventsManagerProps) {
     try {
       const normalizedDate = tbaState.date ? null : formState.date || null;
       const normalizedTime = tbaState.time ? null : formState.time || null;
+      const normalizedImage = tbaState.image_url ? null : formState.image_url || null;
       const payload = {
         title: formState.title,
         description: formState.description,
-        location: tbaState.location ? 'To be announced' : formState.location,
+        location: formState.is_virtual ? 'Virtual' : tbaState.location ? 'To be announced' : formState.location,
         date: normalizedDate,
         time: normalizedTime,
+        image_url: normalizedImage,
+        event_type: formState.event_type,
+        is_virtual: formState.is_virtual,
       };
 
       if (editingEvent) {
@@ -236,7 +248,6 @@ export function EventsManager({ adminName }: EventsManagerProps) {
         }
         const { error } = await supabase.from('events').insert({
           ...payload,
-          image_url: tbaState.image_url ? null : formState.image_url || null,
           created_by_clerk: userId,
         });
         if (error) {
@@ -310,11 +321,12 @@ export function EventsManager({ adminName }: EventsManagerProps) {
     () =>
       events.map((event) => ({
         ...event,
+        eventLabel: event.event_type === 'markaz' ? 'Markaz Al Haqq' : 'Tareeq Al Haqq',
         formattedDate: event.date
           ? new Date(event.date).toLocaleDateString('en-GB', { dateStyle: 'medium' })
           : 'To be announced',
         formattedTime: event.time || 'To be announced',
-        formattedLocation: event.location || 'To be announced',
+        formattedLocation: event.is_virtual ? 'Virtual' : event.location || 'To be announced',
       })),
     [events],
   );
@@ -360,33 +372,76 @@ export function EventsManager({ adminName }: EventsManagerProps) {
                     />
                   </div>
                   <div className="space-y-2">
+                    <Label htmlFor="event-type">Event label</Label>
+                    <select
+                      id="event-type"
+                      value={formState.event_type}
+                      onChange={(event) => handleChange('event_type', event.target.value)}
+                      className="flex h-10 w-full rounded-md border border-white/10 bg-slate-950 px-3 py-2 text-sm text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+                    >
+                      <option value="tareeq">Tareeq Al Haqq</option>
+                      <option value="markaz">Markaz Al Haqq</option>
+                    </select>
+                  </div>
+                  <div className="space-y-2">
                     <div className="flex items-center justify-between gap-3">
                       <Label htmlFor="event-location">Location</Label>
-                      <label className="flex items-center gap-2 text-xs text-white/60">
-                        <input
-                          type="checkbox"
-                          checked={tbaState.location}
-                          onChange={(event) => {
-                            const checked = event.target.checked;
-                            setTbaState((prev) => ({ ...prev, location: checked }));
-                            if (checked) {
-                              setFormState((prev) => ({ ...prev, location: '' }));
-                              setLocationSuggestions([]);
-                            }
-                          }}
-                        />
-                        To be announced
-                      </label>
+                      <div className="flex flex-wrap items-center gap-4 text-xs text-white/60">
+                        <label className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            checked={formState.is_virtual}
+                            onChange={(event) => {
+                              const checked = event.target.checked;
+                              setFormState((prev) => ({
+                                ...prev,
+                                is_virtual: checked,
+                                location: checked ? 'Virtual' : '',
+                              }));
+                              if (checked) {
+                                setTbaState((prev) => ({ ...prev, location: false }));
+                                setLocationSuggestions([]);
+                                setLocationQuery('Virtual');
+                              } else {
+                                setLocationQuery('');
+                              }
+                            }}
+                          />
+                          Virtual
+                        </label>
+                        <label className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            checked={tbaState.location}
+                            onChange={(event) => {
+                              const checked = event.target.checked;
+                              setTbaState((prev) => ({ ...prev, location: checked }));
+                              if (checked) {
+                                setFormState((prev) => ({ ...prev, location: '' }));
+                                setLocationSuggestions([]);
+                              }
+                            }}
+                            disabled={formState.is_virtual}
+                          />
+                          To be announced
+                        </label>
+                      </div>
                     </div>
                     <Input
                       id="event-location"
                       value={formState.location}
                       onChange={(event) => handleChange('location', event.target.value)}
-                      placeholder={tbaState.location ? 'To be announced' : 'Search for a venue or address'}
-                      disabled={tbaState.location}
-                      required={!tbaState.location}
+                      placeholder={
+                        formState.is_virtual
+                          ? 'Virtual'
+                          : tbaState.location
+                            ? 'To be announced'
+                            : 'Search for a venue or address'
+                      }
+                      disabled={tbaState.location || formState.is_virtual}
+                      required={!tbaState.location && !formState.is_virtual}
                     />
-                    {!tbaState.location && (
+                    {!tbaState.location && !formState.is_virtual && (
                       <div className="space-y-1">
                         {isFetchingLocations && (
                           <p className="text-xs text-white/50">Searching maps for addresses…</p>
@@ -517,6 +572,7 @@ export function EventsManager({ adminName }: EventsManagerProps) {
           <TableHeader>
             <TableRow>
               <TableHead className="text-white/60">Event</TableHead>
+              <TableHead className="text-white/60">Label</TableHead>
               <TableHead className="text-white/60">Date</TableHead>
               <TableHead className="text-white/60">Time</TableHead>
               <TableHead className="text-white/60">Location</TableHead>
@@ -526,14 +582,14 @@ export function EventsManager({ adminName }: EventsManagerProps) {
           <TableBody>
             {status === 'loading' && (
               <TableRow>
-                <TableCell colSpan={5} className="text-center text-sm text-white/60">
+                <TableCell colSpan={6} className="text-center text-sm text-white/60">
                   Loading events…
                 </TableCell>
               </TableRow>
             )}
             {status === 'ready' && events.length === 0 && (
               <TableRow>
-                <TableCell colSpan={5} className="text-center text-sm text-white/60">
+                <TableCell colSpan={6} className="text-center text-sm text-white/60">
                   No events available yet.
                 </TableCell>
               </TableRow>
@@ -546,6 +602,11 @@ export function EventsManager({ adminName }: EventsManagerProps) {
                       <p className="font-semibold text-white">{event.title}</p>
                       <p className="text-xs text-white/60">{event.description}</p>
                     </div>
+                  </TableCell>
+                  <TableCell className="align-top text-sm text-white/70">
+                    <span className="inline-flex rounded-full border border-white/10 px-3 py-1 text-xs uppercase tracking-[0.3em] text-white/70">
+                      {event.eventLabel}
+                    </span>
                   </TableCell>
                   <TableCell className="align-top text-sm text-white/70">{event.formattedDate}</TableCell>
                   <TableCell className="align-top text-sm text-white/70">{event.formattedTime}</TableCell>
