@@ -5,7 +5,6 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuthProfile } from '@/hooks/use-auth-profile';
 import { EventsManager } from '@/components/admin/events-manager';
 
@@ -73,46 +72,27 @@ export default function AdminDashboardPage() {
               </div>
             </div>
 
-            <Tabs defaultValue="overview" className="space-y-6">
-              <TabsList className="glass-panel flex w-full flex-wrap gap-2 border border-white/10 bg-white/10 p-2 text-white">
-                <TabsTrigger
-                  value="overview"
-                  className="rounded-full px-5 py-2 text-[0.65rem] uppercase tracking-[0.28em] text-white/70 transition data-[state=active]:bg-white data-[state=active]:text-slate-900"
-                >
-                  Overview
-                </TabsTrigger>
-                <TabsTrigger
-                  value="events"
-                  className="rounded-full px-5 py-2 text-[0.65rem] uppercase tracking-[0.28em] text-white/70 transition data-[state=active]:bg-white data-[state=active]:text-slate-900"
-                >
-                  Events
-                </TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="overview" className="space-y-6">
-                <div className="glass-panel grid gap-4 p-6 text-white md:grid-cols-3">
-                  <div className="space-y-2">
-                    <p className="text-sm uppercase tracking-[0.18em] text-white/60">Members</p>
-                    <p className="text-lg font-semibold">Monitor enrollment</p>
-                    <p className="text-sm text-white/70">Track how students are engaging across lessons and resources.</p>
-                  </div>
-                  <div className="space-y-2">
-                    <p className="text-sm uppercase tracking-[0.18em] text-white/60">Content</p>
-                    <p className="text-lg font-semibold">Curate learning</p>
-                    <p className="text-sm text-white/70">Review course material and keep your community up to date.</p>
-                  </div>
-                  <div className="space-y-2">
-                    <p className="text-sm uppercase tracking-[0.18em] text-white/60">Access</p>
-                    <p className="text-lg font-semibold">Secure admin workflows</p>
-                    <p className="text-sm text-white/70">Confirm roles, review sign-ins, and keep admin tools protected.</p>
-                  </div>
+            <div className="space-y-6">
+              <div className="glass-panel grid gap-4 p-6 text-white md:grid-cols-3">
+                <div className="space-y-2">
+                  <p className="text-sm uppercase tracking-[0.18em] text-white/60">Members</p>
+                  <p className="text-lg font-semibold">Monitor enrollment</p>
+                  <p className="text-sm text-white/70">Track how students are engaging across lessons and resources.</p>
                 </div>
-              </TabsContent>
+                <div className="space-y-2">
+                  <p className="text-sm uppercase tracking-[0.18em] text-white/60">Content</p>
+                  <p className="text-lg font-semibold">Curate learning</p>
+                  <p className="text-sm text-white/70">Review course material and keep your community up to date.</p>
+                </div>
+                <div className="space-y-2">
+                  <p className="text-sm uppercase tracking-[0.18em] text-white/60">Access</p>
+                  <p className="text-lg font-semibold">Secure admin workflows</p>
+                  <p className="text-sm text-white/70">Confirm roles, review sign-ins, and keep admin tools protected.</p>
+                </div>
+              </div>
 
-              <TabsContent value="events">
-                <EventsManager adminName={profile?.full_name ?? undefined} />
-              </TabsContent>
-            </Tabs>
+              <EventsManager adminName={profile?.full_name ?? undefined} />
+            </div>
           </>
         )}
       </div>
