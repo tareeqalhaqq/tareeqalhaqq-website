@@ -6,6 +6,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   icons: {
     icon: "/images/logo.ico",
+    shortcut: "/images/logo.ico",
   },
 };
 
