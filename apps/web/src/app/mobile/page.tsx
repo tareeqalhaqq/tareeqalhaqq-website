@@ -55,7 +55,7 @@ export default function MobileBridgePage() {
         isMounted = false;
       };
     }
-    getToken({ template: 'supabase' })
+    getToken()
       .then((token) => {
         if (isMounted) {
           setSupabaseToken(token ?? null);
