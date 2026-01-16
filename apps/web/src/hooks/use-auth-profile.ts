@@ -100,6 +100,13 @@ export function useAuthProfile() {
     const nextUser = { id: userId, email };
 
     const ensureProfile = async () => {
+      const existingProfile = await supabase
+        .from('profiles')
+        .select('app_role')
+        .eq('clerk_id', userId)
+        .maybeSingle();
+      const appRole = existingProfile.data?.app_role ?? 'member';
+
       await supabase
         .from('profiles')
         .upsert(
@@ -108,7 +115,7 @@ export function useAuthProfile() {
             email,
             full_name: fullName,
             avatar_url: avatarUrl,
-            app_role: 'member',
+            app_role: appRole,
           },
           { onConflict: 'clerk_id' },
         );
