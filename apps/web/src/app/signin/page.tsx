@@ -45,8 +45,8 @@ export default function SigninPage() {
           </div>
         </header>
 
-        <div className="mx-auto w-full max-w-xl rounded-[32px] border border-white/10 bg-white/5 p-6 shadow-[0_28px_60px_-40px_rgba(0,0,0,0.8)] backdrop-blur-2xl sm:p-8">
-          <div className="space-y-5 text-center">
+        <div className="mx-auto w-full max-w-xl space-y-6 text-center">
+          <div className="space-y-5">
             <p className="eyebrow">Welcome back</p>
             <h1 className="text-3xl font-headline text-white sm:text-4xl">
               Sign in to your account
@@ -55,14 +55,12 @@ export default function SigninPage() {
               Choose a sign-in option below to continue to your dashboard.
             </p>
           </div>
-          <div className="mt-8 rounded-2xl border border-white/10 bg-slate-950/40 p-4">
-            <SignIn
-              appearance={clerkAuthAppearance}
-              path="/signin"
-              routing="path"
-              afterSignInUrl="/dashboard"
-            />
-          </div>
+          <SignIn
+            appearance={clerkAuthAppearance}
+            path="/signin"
+            routing="path"
+            afterSignInUrl="/dashboard"
+          />
         </div>
       </div>
     </section>
