@@ -6,6 +6,11 @@ const selectFields = 'id, title, description, location, date, time, image_url, e
 const defaultEventImage = '/images/logo1.png';
 
 const normalizeRole = (role?: string | null) => role?.trim().toLowerCase() ?? null;
+const adminRoles = new Set(['admin', 'administrator', 'owner', 'super_admin', 'superadmin']);
+const isAdminRole = (role?: string | null) => {
+  const normalized = normalizeRole(role);
+  return normalized ? adminRoles.has(normalized) : false;
+};
 
 const assertAdmin = async () => {
   const { userId, sessionClaims } = await auth();
@@ -26,9 +31,9 @@ const assertAdmin = async () => {
     publicMetadata?.role ?? publicMetadata?.app_role ?? unsafeMetadata?.role ?? unsafeMetadata?.app_role,
   );
   const isAdmin =
-    normalizeRole(profileResult.data?.app_role) === 'admin' ||
-    normalizeRole(membershipResult.data?.academy_role) === 'admin' ||
-    clerkRole === 'admin';
+    isAdminRole(profileResult.data?.app_role) ||
+    isAdminRole(membershipResult.data?.academy_role) ||
+    isAdminRole(clerkRole);
 
   if (profileResult.error || membershipResult.error || !isAdmin) {
     return { supabase, errorResponse: NextResponse.json({ error: 'Forbidden' }, { status: 403 }) };
