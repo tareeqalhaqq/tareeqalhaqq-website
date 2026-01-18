@@ -13,7 +13,7 @@ const isAdminRole = (role?: string | null) => {
 };
 
 const assertAdmin = async () => {
-  const { userId, sessionClaims } = await auth();
+  const { userId } = await auth();
   const supabase = await createSupabaseClient();
 
   if (!userId) {
@@ -25,15 +25,8 @@ const assertAdmin = async () => {
     supabase.from('academy_memberships').select('academy_role').eq('clerk_id', userId).maybeSingle(),
   ]);
 
-  const publicMetadata = sessionClaims?.publicMetadata as { role?: string; app_role?: string } | undefined;
-  const unsafeMetadata = sessionClaims?.unsafeMetadata as { role?: string; app_role?: string } | undefined;
-  const clerkRole = normalizeRole(
-    publicMetadata?.role ?? publicMetadata?.app_role ?? unsafeMetadata?.role ?? unsafeMetadata?.app_role,
-  );
   const isAdmin =
-    isAdminRole(profileResult.data?.app_role) ||
-    isAdminRole(membershipResult.data?.academy_role) ||
-    isAdminRole(clerkRole);
+    isAdminRole(profileResult.data?.app_role) || isAdminRole(membershipResult.data?.academy_role);
 
   if (profileResult.error || membershipResult.error || !isAdmin) {
     return { supabase, errorResponse: NextResponse.json({ error: 'Forbidden' }, { status: 403 }) };

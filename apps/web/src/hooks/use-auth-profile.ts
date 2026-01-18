@@ -5,7 +5,6 @@ import { useAuth, useUser } from '@clerk/nextjs';
 import { useSupabase } from '@/lib/supabaseClient';
 
 type Role = 'admin' | 'student' | 'member';
-type ClerkRole = Role | null;
 
 type User = {
   id: string;
@@ -43,17 +42,16 @@ const isAdminRole = (role: string | null | undefined) => {
   return normalized ? adminRoles.has(normalized) : false;
 };
 
-const deriveRole = (profile: Profile | null, membership: AcademyMembership | null, clerkRole: ClerkRole): Role => {
+const deriveRole = (profile: Profile | null, membership: AcademyMembership | null): Role => {
   const profileRole = normalizeRole(profile?.app_role);
   const membershipRole = normalizeRole(membership?.academy_role);
-  const normalizedClerkRole = normalizeRole(clerkRole);
-  const isAdmin = isAdminRole(profileRole) || isAdminRole(membershipRole) || isAdminRole(normalizedClerkRole);
+  const isAdmin = isAdminRole(profileRole) || isAdminRole(membershipRole);
   if (isAdmin) return 'admin';
 
   const isStudent = Boolean(membership?.active) && membershipRole === 'student';
   if (isStudent) return 'student';
 
-  return profileRole === 'student' || normalizedClerkRole === 'student' ? 'student' : 'member';
+  return profileRole === 'student' ? 'student' : 'member';
 };
 
 export function useAuthProfile() {
@@ -67,7 +65,7 @@ export function useAuthProfile() {
     membership: null,
   });
 
-  const loadProfile = async (user: User, clerkRole: ClerkRole) => {
+  const loadProfile = async (user: User) => {
     if (!supabase) return;
 
     const profileResult = await supabase
@@ -127,11 +125,6 @@ export function useAuthProfile() {
     const avatarUrl = clerkUser?.imageUrl ?? null;
     const nextUser = { id: userId, email };
 
-    const clerkRole = normalizeRole(clerkUser?.publicMetadata?.role as string | undefined)
-      ?? normalizeRole(clerkUser?.publicMetadata?.app_role as string | undefined)
-      ?? normalizeRole(clerkUser?.unsafeMetadata?.role as string | undefined)
-      ?? normalizeRole(clerkUser?.unsafeMetadata?.app_role as string | undefined);
-
     const ensureProfile = async () => {
       const existingProfileByClerk = await supabase
         .from('profiles')
@@ -150,8 +143,7 @@ export function useAuthProfile() {
 
       const existingProfile = existingProfileByClerk.data ? existingProfileByClerk : existingProfileByEmail;
       const existingRole = existingProfile?.data?.app_role;
-      const appRole =
-        isAdminRole(clerkRole) || isAdminRole(existingRole) ? 'admin' : normalizeRole(existingRole) ?? 'member';
+      const appRole = normalizeRole(existingRole) ?? 'member';
 
       if (existingProfile?.data?.id && !existingProfile.data.clerk_id) {
         await supabase
@@ -182,25 +174,19 @@ export function useAuthProfile() {
 
     void (async () => {
       await ensureProfile();
-      await loadProfile(nextUser, clerkRole);
+      await loadProfile(nextUser);
     })();
   }, [
     clerkUser?.primaryEmailAddress?.emailAddress,
     clerkUser?.fullName,
     clerkUser?.imageUrl,
-    clerkUser?.publicMetadata,
-    clerkUser?.unsafeMetadata,
     isLoaded,
     isSignedIn,
     supabase,
     userId,
   ]);
 
-  const clerkRole = normalizeRole(clerkUser?.publicMetadata?.role as string | undefined)
-    ?? normalizeRole(clerkUser?.publicMetadata?.app_role as string | undefined)
-    ?? normalizeRole(clerkUser?.unsafeMetadata?.role as string | undefined)
-    ?? normalizeRole(clerkUser?.unsafeMetadata?.app_role as string | undefined);
-  const role = deriveRole(state.profile, state.membership, clerkRole);
+  const role = deriveRole(state.profile, state.membership);
   const isAdmin = role === 'admin';
   const isStudent = role === 'student';
 
