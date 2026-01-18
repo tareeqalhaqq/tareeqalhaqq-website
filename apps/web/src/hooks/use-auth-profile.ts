@@ -36,12 +36,17 @@ type AuthState = {
 };
 
 const normalizeRole = (role: string | null | undefined) => role?.trim().toLowerCase() ?? null;
+const adminRoles = new Set(['admin', 'administrator', 'owner', 'super_admin', 'superadmin']);
+const isAdminRole = (role: string | null | undefined) => {
+  const normalized = normalizeRole(role);
+  return normalized ? adminRoles.has(normalized) : false;
+};
 
 const deriveRole = (profile: Profile | null, membership: AcademyMembership | null, clerkRole: ClerkRole): Role => {
   const profileRole = normalizeRole(profile?.app_role);
   const membershipRole = normalizeRole(membership?.academy_role);
   const normalizedClerkRole = normalizeRole(clerkRole);
-  const isAdmin = profileRole === 'admin' || membershipRole === 'admin' || normalizedClerkRole === 'admin';
+  const isAdmin = isAdminRole(profileRole) || isAdminRole(membershipRole) || isAdminRole(normalizedClerkRole);
   if (isAdmin) return 'admin';
 
   const isStudent = Boolean(membership?.active) && membershipRole === 'student';
@@ -116,8 +121,9 @@ export function useAuthProfile() {
         .select('app_role')
         .eq('clerk_id', userId)
         .maybeSingle();
-      const existingRole = normalizeRole(existingProfile.data?.app_role);
-      const appRole = clerkRole === 'admin' || existingRole === 'admin' ? 'admin' : existingRole ?? 'member';
+      const existingRole = existingProfile.data?.app_role;
+      const appRole =
+        isAdminRole(clerkRole) || isAdminRole(existingRole) ? 'admin' : normalizeRole(existingRole) ?? 'member';
 
       await supabase
         .from('profiles')
