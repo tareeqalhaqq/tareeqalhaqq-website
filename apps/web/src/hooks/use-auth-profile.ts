@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
-import { fetchAuthProfileByClerkId } from '@/app/actions/fetchAuthProfile';
-import type { AcademyMembership, Profile } from '@/types/auth-profile';
+import { useSupabase } from '@/lib/supabaseClient';
+import type { Profile } from '@/types/auth-profile';
 
 type Role = 'admin' | 'student' | 'member';
 
@@ -18,7 +18,6 @@ type AuthState = {
   status: AuthStatus;
   user: User | null;
   profile: Profile | null;
-  membership: AcademyMembership | null;
   error: string | null;
 };
 
@@ -31,23 +30,17 @@ const isAdminRole = (role: string | null | undefined) => {
 
 const getProfileRole = (profile: Profile | null) =>
   normalizeRole(profile?.app_role ?? profile?.user_role ?? profile?.role);
-const getMembershipRole = (membership: AcademyMembership | null) =>
-  normalizeRole(membership?.academy_role ?? membership?.role);
 const getProfileEmail = (profile: Profile | null) =>
   profile?.email ?? profile?.user_email ?? profile?.email_address ?? null;
 
-const deriveRole = (profile: Profile | null, membership: AcademyMembership | null): Role | null => {
+const deriveRole = (profile: Profile | null): Role | null => {
   if (!profile) {
     return null;
   }
 
   const profileRole = getProfileRole(profile);
-  const membershipRole = getMembershipRole(membership);
-  const isAdmin = isAdminRole(profileRole) || isAdminRole(membershipRole);
+  const isAdmin = isAdminRole(profileRole);
   if (isAdmin) return 'admin';
-
-  const isStudent = Boolean(membership?.active) && membershipRole === 'student';
-  if (isStudent) return 'student';
 
   if (profileRole === 'student') {
     return 'student';
@@ -58,26 +51,46 @@ const deriveRole = (profile: Profile | null, membership: AcademyMembership | nul
 
 export function useAuthProfile() {
   const { isLoaded, isSignedIn, userId } = useAuth();
+  const supabase = useSupabase();
   const [state, setState] = useState<AuthState>({
     status: 'loading',
     user: null,
     profile: null,
-    membership: null,
     error: null,
   });
   const activeUserRef = useRef<string | null>(null);
 
   const loadProfile = async (id: string) => {
-    const fetchProfile = async () => fetchAuthProfileByClerkId(id);
-    let profileResult = await fetchProfile();
-    let profile = profileResult.profile ?? null;
+    setState({
+      status: 'loading',
+      user: { id, email: null },
+      profile: null,
+      error: null,
+    });
+
+    const profileResult = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('clerk_id', id)
+      .maybeSingle();
+
+    if (profileResult.error) {
+      setState({
+        status: 'error',
+        user: { id, email: null },
+        profile: null,
+        error: 'We could not load your profile details. Please try again.',
+      });
+      return;
+    }
+
+    const profile = profileResult.data ?? null;
 
     if (!profile) {
       setState({
         status: 'error',
         user: { id, email: null },
         profile: null,
-        membership: null,
         error: 'No profile was found for this account. Please contact support so we can finish setup.',
       });
       return;
@@ -90,7 +103,6 @@ export function useAuthProfile() {
         email: getProfileEmail(profile),
       },
       profile,
-      membership: profileResult.membership ?? null,
       error: null,
     });
   };
@@ -102,7 +114,7 @@ export function useAuthProfile() {
 
     if (!isSignedIn || !userId) {
       activeUserRef.current = null;
-      setState({ status: 'unauthenticated', user: null, profile: null, membership: null, error: null });
+      setState({ status: 'unauthenticated', user: null, profile: null, error: null });
       return;
     }
 
@@ -116,10 +128,11 @@ export function useAuthProfile() {
   }, [
     isLoaded,
     isSignedIn,
+    supabase,
     userId,
   ]);
 
-  const role = deriveRole(state.profile, state.membership);
+  const role = deriveRole(state.profile);
   const isAdmin = role === 'admin';
   const isStudent = role === 'student';
 
