@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useAuthProfile } from '@/hooks/use-auth-profile';
 
 export default function UserDashboardPage() {
-  const { status, profile, user, isAdmin, role } = useAuthProfile();
+  const { status, profile, user, isAdmin, role, error } = useAuthProfile();
   const displayName = profile?.full_name ?? profile?.display_name ?? profile?.name ?? 'there';
   const memberSince = profile?.created_at ? new Date(profile.created_at).toLocaleDateString() : null;
 
@@ -29,6 +29,16 @@ export default function UserDashboardPage() {
             </p>
             <Button asChild>
               <Link href="/signin">Go to sign in</Link>
+            </Button>
+          </div>
+        )}
+        {status === 'error' && (
+          <div className="glass-panel space-y-3 p-8 text-white">
+            <p className="eyebrow">Profile unavailable</p>
+            <h1 className="text-3xl font-semibold">We couldn&apos;t load your profile</h1>
+            <p className="text-sm text-white/70">{error ?? 'Please contact support to finish setting up your account.'}</p>
+            <Button asChild variant="outline">
+              <Link href="/signin">Return to sign in</Link>
             </Button>
           </div>
         )}
@@ -92,7 +102,7 @@ export default function UserDashboardPage() {
                   </p>
                   <div className="flex flex-wrap gap-3 text-xs text-white/60">
                     <span className="rounded-full bg-white/5 px-3 py-1">Email: {user?.email ?? 'Unavailable'}</span>
-                    <span className="rounded-full bg-white/5 px-3 py-1">Role: {role}</span>
+                    <span className="rounded-full bg-white/5 px-3 py-1">Role: {role ?? 'Unavailable'}</span>
                     {memberSince && <span className="rounded-full bg-white/5 px-3 py-1">Member since {memberSince}</span>}
                   </div>
                 </div>

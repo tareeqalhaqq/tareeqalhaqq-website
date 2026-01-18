@@ -10,7 +10,7 @@ import { useAuthProfile } from '@/hooks/use-auth-profile';
 
 export default function AccountPreferencesPage() {
   const router = useRouter();
-  const { status, user } = useAuthProfile();
+  const { status, user, error } = useAuthProfile();
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -26,6 +26,25 @@ export default function AccountPreferencesPage() {
             <p className="eyebrow">Account settings</p>
             <h1 className="text-3xl font-semibold">Loading preferences</h1>
             <p className="text-sm text-white/70">Preparing your account settings…</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (status === 'error') {
+    return (
+      <section className="min-h-screen px-4 pb-16 pt-24 sm:px-6 lg:px-8">
+        <div className="mx-auto w-full max-w-6xl text-white">
+          <div className="space-y-3">
+            <p className="eyebrow">Account settings</p>
+            <h1 className="text-3xl font-semibold">We couldn&apos;t load your profile</h1>
+            <p className="text-sm text-white/70">{error ?? 'Please contact support to finish setting up your account.'}</p>
+          </div>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Button asChild variant="outline">
+              <Link href="/dashboard/user">Back to dashboard</Link>
+            </Button>
           </div>
         </div>
       </section>

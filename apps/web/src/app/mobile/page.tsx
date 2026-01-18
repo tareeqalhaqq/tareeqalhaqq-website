@@ -14,7 +14,7 @@ export default function MobileBridgePage() {
   const router = useRouter();
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [allowed, setAllowed] = useState(false);
-  const { status, isAdmin } = useAuthProfile();
+  const { status, isAdmin, error } = useAuthProfile();
   const { getToken, isSignedIn, userId } = useAuth();
   const [supabaseToken, setSupabaseToken] = useState<string | null>(null);
 
@@ -75,6 +75,18 @@ export default function MobileBridgePage() {
     if (!supabaseToken) return;
     void sendSession();
   }, [supabaseToken, userId]);
+
+  if (status === 'error') {
+    return (
+      <main className="min-h-screen bg-slate-950 px-4 py-10 text-white">
+        <div className="mx-auto max-w-3xl space-y-3">
+          <p className="eyebrow">Tareeq Al Haqq App</p>
+          <h1 className="text-3xl font-semibold">We couldn&apos;t load your profile</h1>
+          <p className="text-sm text-white/70">{error ?? 'Please contact support to finish setting up your account.'}</p>
+        </div>
+      </main>
+    );
+  }
 
   if (!allowed) {
     return null;
