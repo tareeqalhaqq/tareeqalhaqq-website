@@ -7,7 +7,7 @@ import { useAuthProfile } from '@/hooks/use-auth-profile';
 
 export default function DashboardRouterClient() {
   const router = useRouter();
-  const { status, role, isAdmin } = useAuthProfile();
+  const { status, role, isAdmin, error } = useAuthProfile();
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -26,7 +26,9 @@ export default function DashboardRouterClient() {
         return;
       }
 
-      router.replace('/dashboard/user');
+      if (role === 'member') {
+        router.replace('/dashboard/user');
+      }
     }
   }, [isAdmin, role, router, status]);
 
@@ -35,11 +37,20 @@ export default function DashboardRouterClient() {
       <div className="page-section__inner">
         <div className="glass-panel space-y-3 p-8 text-white">
           <p className="eyebrow">Dashboard</p>
-          <h1 className="text-2xl font-semibold">Loading your dashboard</h1>
-          <p className="text-sm text-white/70">
-            We&apos;re preparing the best view for your account. If you&apos;re not signed in, you&apos;ll be redirected to
-            the sign-in screen.
-          </p>
+          {status === 'error' ? (
+            <>
+              <h1 className="text-2xl font-semibold">We couldn&apos;t load your profile</h1>
+              <p className="text-sm text-white/70">{error ?? 'Please contact support to finish setting up your account.'}</p>
+            </>
+          ) : (
+            <>
+              <h1 className="text-2xl font-semibold">Loading your dashboard</h1>
+              <p className="text-sm text-white/70">
+                We&apos;re preparing the best view for your account. If you&apos;re not signed in, you&apos;ll be redirected to
+                the sign-in screen.
+              </p>
+            </>
+          )}
         </div>
       </div>
     </section>

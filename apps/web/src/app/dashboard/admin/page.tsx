@@ -10,7 +10,7 @@ import { EventsManager } from '@/components/admin/events-manager';
 
 export default function AdminDashboardPage() {
   const router = useRouter();
-  const { status, profile, isAdmin } = useAuthProfile();
+  const { status, profile, isAdmin, error } = useAuthProfile();
   const isAuthorized = status === 'authenticated' && isAdmin;
 
   useEffect(() => {
@@ -38,6 +38,16 @@ export default function AdminDashboardPage() {
             </p>
             <Button asChild>
               <Link href="/signin">Go to sign in</Link>
+            </Button>
+          </div>
+        )}
+        {status === 'error' && (
+          <div className="glass-panel space-y-3 p-8 text-white">
+            <p className="eyebrow">Profile unavailable</p>
+            <h1 className="text-3xl font-semibold">We couldn&apos;t load your profile</h1>
+            <p className="text-sm text-white/70">{error ?? 'Please contact support to finish setting up your account.'}</p>
+            <Button asChild variant="outline">
+              <Link href="/dashboard">Back to dashboard</Link>
             </Button>
           </div>
         )}

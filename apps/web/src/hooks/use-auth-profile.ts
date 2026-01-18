@@ -34,13 +34,14 @@ type AcademyMembership = {
   active: boolean | null;
 };
 
-type AuthStatus = 'loading' | 'unauthenticated' | 'authenticated';
+type AuthStatus = 'loading' | 'unauthenticated' | 'authenticated' | 'error';
 
 type AuthState = {
   status: AuthStatus;
   user: User | null;
   profile: Profile | null;
   membership: AcademyMembership | null;
+  error: string | null;
 };
 
 const normalizeRole = (role: string | null | undefined) => role?.trim().toLowerCase() ?? null;
@@ -57,7 +58,11 @@ const getMembershipRole = (membership: AcademyMembership | null) =>
 const getProfileEmail = (profile: Profile | null) =>
   profile?.email ?? profile?.user_email ?? profile?.email_address ?? null;
 
-const deriveRole = (profile: Profile | null, membership: AcademyMembership | null): Role => {
+const deriveRole = (profile: Profile | null, membership: AcademyMembership | null): Role | null => {
+  if (!profile) {
+    return null;
+  }
+
   const profileRole = getProfileRole(profile);
   const membershipRole = getMembershipRole(membership);
   const isAdmin = isAdminRole(profileRole) || isAdminRole(membershipRole);
@@ -66,7 +71,11 @@ const deriveRole = (profile: Profile | null, membership: AcademyMembership | nul
   const isStudent = Boolean(membership?.active) && membershipRole === 'student';
   if (isStudent) return 'student';
 
-  return profileRole === 'student' ? 'student' : 'member';
+  if (profileRole === 'student') {
+    return 'student';
+  }
+
+  return profileRole ?? null;
 };
 
 export function useAuthProfile() {
@@ -77,6 +86,7 @@ export function useAuthProfile() {
     user: null,
     profile: null,
     membership: null,
+    error: null,
   });
   const syncAttemptedRef = useRef(false);
   const activeUserRef = useRef<string | null>(null);
@@ -114,6 +124,17 @@ export function useAuthProfile() {
       profile = retryResult.data ?? null;
     }
 
+    if (!profile) {
+      setState({
+        status: 'error',
+        user: { id, email: null },
+        profile: null,
+        membership: null,
+        error: 'No profile was found for this account. Please contact support so we can finish setup.',
+      });
+      return;
+    }
+
     const membershipFilter = profile?.id ? `clerk_id.eq.${id},user_id.eq.${profile.id}` : `clerk_id.eq.${id}`;
     const membershipResult = await supabase
       .from('academy_memberships')
@@ -133,6 +154,7 @@ export function useAuthProfile() {
       },
       profile,
       membership: membershipResult.data ?? null,
+      error: null,
     });
   };
 
@@ -144,7 +166,7 @@ export function useAuthProfile() {
     if (!isSignedIn || !userId) {
       syncAttemptedRef.current = false;
       activeUserRef.current = null;
-      setState({ status: 'unauthenticated', user: null, profile: null, membership: null });
+      setState({ status: 'unauthenticated', user: null, profile: null, membership: null, error: null });
       return;
     }
 
@@ -154,7 +176,7 @@ export function useAuthProfile() {
     }
 
     if (!supabase) {
-      setState((prev) => ({ ...prev, status: 'loading' }));
+      setState((prev) => ({ ...prev, status: 'loading', error: null }));
       return;
     }
 
