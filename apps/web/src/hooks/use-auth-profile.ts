@@ -2,36 +2,15 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
-import { useSupabase } from '@/lib/supabaseClient';
+import { fetchAuthProfileByClerkId } from '@/app/actions/fetchAuthProfile';
 import { syncUserToSupabase } from '@/app/actions/syncUser';
+import type { AcademyMembership, Profile } from '@/types/auth-profile';
 
 type Role = 'admin' | 'student' | 'member';
 
 type User = {
   id: string;
   email: string | null;
-};
-
-export type Profile = {
-  id: string;
-  clerk_id: string | null;
-  email: string | null;
-  user_email?: string | null;
-  email_address?: string | null;
-  app_role?: string | null;
-  user_role?: string | null;
-  role?: string | null;
-  full_name?: string | null;
-  display_name?: string | null;
-  name?: string | null;
-  avatar_url?: string | null;
-  created_at: string;
-};
-
-type AcademyMembership = {
-  academy_role?: string | null;
-  role?: string | null;
-  active: boolean | null;
 };
 
 type AuthStatus = 'loading' | 'unauthenticated' | 'authenticated' | 'error';
@@ -79,7 +58,6 @@ const deriveRole = (profile: Profile | null, membership: AcademyMembership | nul
 };
 
 export function useAuthProfile() {
-  const supabase = useSupabase();
   const { isLoaded, isSignedIn, userId } = useAuth();
   const [state, setState] = useState<AuthState>({
     status: 'loading',
@@ -92,22 +70,9 @@ export function useAuthProfile() {
   const activeUserRef = useRef<string | null>(null);
 
   const loadProfile = async (id: string) => {
-    if (!supabase) return;
-
-    const fetchProfile = async () =>
-      supabase
-        .from('profiles')
-        .select('*')
-        .eq('clerk_id', id)
-        .maybeSingle();
-
-    const profileResult = await fetchProfile();
-
-    if (profileResult.error) {
-      console.error('Supabase profile fetch failed:', profileResult.error);
-    }
-
-    let profile = profileResult.data ?? null;
+    const fetchProfile = async () => fetchAuthProfileByClerkId(id);
+    let profileResult = await fetchProfile();
+    let profile = profileResult.profile ?? null;
 
     if (!profile && !syncAttemptedRef.current) {
       syncAttemptedRef.current = true;
@@ -117,11 +82,8 @@ export function useAuthProfile() {
         console.error('Supabase profile sync failed:', error);
       }
 
-      const retryResult = await fetchProfile();
-      if (retryResult.error) {
-        console.error('Supabase profile retry failed:', retryResult.error);
-      }
-      profile = retryResult.data ?? null;
+      profileResult = await fetchProfile();
+      profile = profileResult.profile ?? null;
     }
 
     if (!profile) {
@@ -135,17 +97,6 @@ export function useAuthProfile() {
       return;
     }
 
-    const membershipFilter = profile?.id ? `clerk_id.eq.${id},user_id.eq.${profile.id}` : `clerk_id.eq.${id}`;
-    const membershipResult = await supabase
-      .from('academy_memberships')
-      .select('*')
-      .or(membershipFilter)
-      .maybeSingle();
-
-    if (membershipResult.error) {
-      console.error('Supabase membership fetch failed:', membershipResult.error);
-    }
-
     setState({
       status: 'authenticated',
       user: {
@@ -153,7 +104,7 @@ export function useAuthProfile() {
         email: getProfileEmail(profile),
       },
       profile,
-      membership: membershipResult.data ?? null,
+      membership: profileResult.membership ?? null,
       error: null,
     });
   };
@@ -175,18 +126,12 @@ export function useAuthProfile() {
       syncAttemptedRef.current = false;
     }
 
-    if (!supabase) {
-      setState((prev) => ({ ...prev, status: 'loading', error: null }));
-      return;
-    }
-
     void (async () => {
       await loadProfile(userId);
     })();
   }, [
     isLoaded,
     isSignedIn,
-    supabase,
     userId,
   ]);
 
