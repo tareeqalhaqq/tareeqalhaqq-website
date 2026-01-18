@@ -59,6 +59,7 @@ export function useAuthProfile() {
     error: null,
   });
   const activeUserRef = useRef<string | null>(null);
+  const lastLoadedUserRef = useRef<string | null>(null);
 
   const loadProfile = async (id: string) => {
     setState({
@@ -114,6 +115,7 @@ export function useAuthProfile() {
 
     if (!isSignedIn || !userId) {
       activeUserRef.current = null;
+      lastLoadedUserRef.current = null;
       setState({ status: 'unauthenticated', user: null, profile: null, error: null });
       return;
     }
@@ -121,6 +123,12 @@ export function useAuthProfile() {
     if (activeUserRef.current !== userId) {
       activeUserRef.current = userId;
     }
+
+    if (lastLoadedUserRef.current === userId) {
+      return;
+    }
+
+    lastLoadedUserRef.current = userId;
 
     void (async () => {
       await loadProfile(userId);
