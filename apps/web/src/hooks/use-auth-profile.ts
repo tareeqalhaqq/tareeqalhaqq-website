@@ -13,6 +13,7 @@ type User = {
 };
 
 export type Profile = {
+  id: string;
   clerk_id: string | null;
   email: string | null;
   app_role: string | null;
@@ -69,23 +70,39 @@ export function useAuthProfile() {
   const loadProfile = async (user: User, clerkRole: ClerkRole) => {
     if (!supabase) return;
 
-    const [profileResult, membershipResult] = await Promise.all([
-      supabase
+    const profileResult = await supabase
+      .from('profiles')
+      .select('id, clerk_id, email, app_role, full_name, avatar_url, created_at')
+      .eq('clerk_id', user.id)
+      .maybeSingle();
+
+    let profile = profileResult.data ?? null;
+
+    if (!profile && user.email) {
+      const emailProfileResult = await supabase
         .from('profiles')
-        .select('clerk_id, email, app_role, full_name, avatar_url, created_at')
-        .eq('clerk_id', user.id)
-        .maybeSingle(),
-      supabase
-        .from('academy_memberships')
-        .select('academy_role, active')
-        .eq('clerk_id', user.id)
-        .maybeSingle(),
-    ]);
+        .select('id, clerk_id, email, app_role, full_name, avatar_url, created_at')
+        .eq('email', user.email)
+        .maybeSingle();
+      profile = emailProfileResult.data ?? null;
+
+      if (profile && !profile.clerk_id) {
+        await supabase.from('profiles').update({ clerk_id: user.id }).eq('id', profile.id);
+        profile = { ...profile, clerk_id: user.id };
+      }
+    }
+
+    const membershipFilter = profile?.id ? `clerk_id.eq.${user.id},user_id.eq.${profile.id}` : `clerk_id.eq.${user.id}`;
+    const membershipResult = await supabase
+      .from('academy_memberships')
+      .select('academy_role, active')
+      .or(membershipFilter)
+      .maybeSingle();
 
     setState({
       status: 'authenticated',
       user,
-      profile: profileResult.data ?? null,
+      profile,
       membership: membershipResult.data ?? null,
     });
   };
@@ -116,27 +133,51 @@ export function useAuthProfile() {
       ?? normalizeRole(clerkUser?.unsafeMetadata?.app_role as string | undefined);
 
     const ensureProfile = async () => {
-      const existingProfile = await supabase
+      const existingProfileByClerk = await supabase
         .from('profiles')
-        .select('app_role')
+        .select('id, app_role, clerk_id')
         .eq('clerk_id', userId)
         .maybeSingle();
-      const existingRole = existingProfile.data?.app_role;
+
+      const existingProfileByEmail =
+        !existingProfileByClerk.data && email
+          ? await supabase
+              .from('profiles')
+              .select('id, app_role, clerk_id')
+              .eq('email', email)
+              .maybeSingle()
+          : null;
+
+      const existingProfile = existingProfileByClerk.data ? existingProfileByClerk : existingProfileByEmail;
+      const existingRole = existingProfile?.data?.app_role;
       const appRole =
         isAdminRole(clerkRole) || isAdminRole(existingRole) ? 'admin' : normalizeRole(existingRole) ?? 'member';
 
-      await supabase
-        .from('profiles')
-        .upsert(
-          {
+      if (existingProfile?.data?.id && !existingProfile.data.clerk_id) {
+        await supabase
+          .from('profiles')
+          .update({
             clerk_id: userId,
             email,
             full_name: fullName,
             avatar_url: avatarUrl,
             app_role: appRole,
-          },
-          { onConflict: 'clerk_id' },
-        );
+          })
+          .eq('id', existingProfile.data.id);
+      } else {
+        await supabase
+          .from('profiles')
+          .upsert(
+            {
+              clerk_id: userId,
+              email,
+              full_name: fullName,
+              avatar_url: avatarUrl,
+              app_role: appRole,
+            },
+            { onConflict: 'clerk_id' },
+          );
+      }
     };
 
     void (async () => {
