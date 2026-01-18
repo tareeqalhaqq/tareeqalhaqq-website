@@ -1,16 +1,27 @@
 'use client';
 
 import { createClient } from '@supabase/supabase-js';
-import { useSession } from '@clerk/nextjs';
+import { useAuth } from '@clerk/nextjs';
 
 export function useSupabase() {
-  const { session } = useSession();
+  const { getToken } = useAuth();
 
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
-      accessToken: async () => session?.getToken() ?? null,
+      global: {
+        fetch: async (url, options = {}) => {
+          const token = await getToken({ template: 'supabase' });
+          return fetch(url, {
+            ...options,
+            headers: {
+              ...options.headers,
+              Authorization: token ? `Bearer ${token}` : '',
+            },
+          });
+        },
+      },
     },
   );
 
