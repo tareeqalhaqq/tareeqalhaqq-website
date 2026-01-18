@@ -1,13 +1,23 @@
 'use client';
 
 import Link from 'next/link';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
 import { useAuthProfile } from '@/hooks/use-auth-profile';
+import { EventsManager } from '@/components/admin/events-manager';
 
 export default function AdminDashboardPage() {
-  const { status, profile } = useAuthProfile();
-  const isAuthorized = status === 'authenticated' && profile?.role === 'admin';
+  const router = useRouter();
+  const { status, profile, isAdmin } = useAuthProfile();
+  const isAuthorized = status === 'authenticated' && isAdmin;
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.replace('/signin');
+    }
+  }, [router, status]);
 
   return (
     <section className="page-section">
@@ -27,7 +37,7 @@ export default function AdminDashboardPage() {
               This area is reserved for administrators. Please sign in to verify your credentials.
             </p>
             <Button asChild>
-              <Link href="/login">Go to login</Link>
+              <Link href="/signin">Go to sign in</Link>
             </Button>
           </div>
         )}
@@ -54,29 +64,34 @@ export default function AdminDashboardPage() {
               </p>
               <div className="flex flex-wrap gap-3 pt-2">
                 <Button asChild>
-                  <a href="/academy">View academy site</a>
+                  <a href="https://markazalhaqq.org">View academy site</a>
                 </Button>
                 <Button asChild variant="outline">
                   <a href="/logout">Sign out</a>
                 </Button>
               </div>
             </div>
-            <div className="glass-panel grid gap-4 p-6 text-white md:grid-cols-3">
-              <div className="space-y-2">
-                <p className="text-sm uppercase tracking-[0.18em] text-white/60">Members</p>
-                <p className="text-lg font-semibold">Monitor enrollment</p>
-                <p className="text-sm text-white/70">Track how students are engaging across lessons and resources.</p>
+
+            <div className="space-y-6">
+              <div className="glass-panel grid gap-4 p-6 text-white md:grid-cols-3">
+                <div className="space-y-2">
+                  <p className="text-sm uppercase tracking-[0.18em] text-white/60">Members</p>
+                  <p className="text-lg font-semibold">Monitor enrollment</p>
+                  <p className="text-sm text-white/70">Track how students are engaging across lessons and resources.</p>
+                </div>
+                <div className="space-y-2">
+                  <p className="text-sm uppercase tracking-[0.18em] text-white/60">Content</p>
+                  <p className="text-lg font-semibold">Curate learning</p>
+                  <p className="text-sm text-white/70">Review course material and keep your community up to date.</p>
+                </div>
+                <div className="space-y-2">
+                  <p className="text-sm uppercase tracking-[0.18em] text-white/60">Access</p>
+                  <p className="text-lg font-semibold">Secure admin workflows</p>
+                  <p className="text-sm text-white/70">Confirm roles, review sign-ins, and keep admin tools protected.</p>
+                </div>
               </div>
-              <div className="space-y-2">
-                <p className="text-sm uppercase tracking-[0.18em] text-white/60">Content</p>
-                <p className="text-lg font-semibold">Curate learning</p>
-                <p className="text-sm text-white/70">Review course material and keep your community up to date.</p>
-              </div>
-              <div className="space-y-2">
-                <p className="text-sm uppercase tracking-[0.18em] text-white/60">Account</p>
-                <p className="text-lg font-semibold">Secure access</p>
-                <p className="text-sm text-white/70">Manage profile details, billing preferences, and sign-in options.</p>
-              </div>
+
+              <EventsManager adminName={profile?.full_name ?? undefined} />
             </div>
           </>
         )}

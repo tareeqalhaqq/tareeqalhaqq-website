@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
-import { createClient } from '@/utils/supabase/clients';
+import { useEffect, useState } from 'react';
+import { useAuth, useUser } from '@clerk/nextjs';
+import { useSupabase } from '@/lib/supabaseClient';
 
-type Role = 'admin' | 'student';
+type Role = 'admin' | 'student' | 'member';
 
 type User = {
   id: string;
@@ -11,12 +12,17 @@ type User = {
 };
 
 export type Profile = {
-  id: string;
+  clerk_id: string | null;
   email: string | null;
-  role: Role;
+  app_role: string | null;
   full_name: string | null;
   avatar_url: string | null;
   created_at: string;
+};
+
+type AcademyMembership = {
+  academy_role: string | null;
+  active: boolean | null;
 };
 
 type AuthStatus = 'loading' | 'unauthenticated' | 'authenticated';
@@ -25,71 +31,118 @@ type AuthState = {
   status: AuthStatus;
   user: User | null;
   profile: Profile | null;
+  membership: AcademyMembership | null;
+};
+
+const deriveRole = (profile: Profile | null, membership: AcademyMembership | null): Role => {
+  const isAdmin = profile?.app_role === 'admin' || membership?.academy_role === 'admin';
+  if (isAdmin) return 'admin';
+
+  const isStudent = Boolean(membership?.active) && membership?.academy_role === 'student';
+  if (isStudent) return 'student';
+
+  return profile?.app_role === 'student' ? 'student' : 'member';
 };
 
 export function useAuthProfile() {
-  const supabase = useMemo(() => createClient(), []);
+  const supabase = useSupabase();
+  const { isLoaded, isSignedIn, userId } = useAuth();
+  const { user: clerkUser } = useUser();
   const [state, setState] = useState<AuthState>({
     status: 'loading',
     user: null,
     profile: null,
+    membership: null,
   });
 
   const loadProfile = async (user: User) => {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('id, email, role, full_name, avatar_url, created_at')
-      .eq('id', user.id)
-      .single();
+    if (!supabase) return;
 
-    if (error) {
-      setState({ status: 'authenticated', user, profile: null });
-      return;
-    }
+    const [profileResult, membershipResult] = await Promise.all([
+      supabase
+        .from('profiles')
+        .select('clerk_id, email, app_role, full_name, avatar_url, created_at')
+        .eq('clerk_id', user.id)
+        .maybeSingle(),
+      supabase
+        .from('academy_memberships')
+        .select('academy_role, active')
+        .eq('clerk_id', user.id)
+        .maybeSingle(),
+    ]);
 
-    setState({ status: 'authenticated', user, profile: data });
+    setState({
+      status: 'authenticated',
+      user,
+      profile: profileResult.data ?? null,
+      membership: membershipResult.data ?? null,
+    });
   };
 
   useEffect(() => {
-    let isMounted = true;
+    if (!isLoaded) {
+      return;
+    }
 
-    const init = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+    if (!isSignedIn || !userId) {
+      setState({ status: 'unauthenticated', user: null, profile: null, membership: null });
+      return;
+    }
 
-      if (!isMounted) return;
+    if (!supabase) {
+      setState((prev) => ({ ...prev, status: 'loading' }));
+      return;
+    }
 
-      if (!user) {
-        setState({ status: 'unauthenticated', user: null, profile: null });
-        return;
-      }
+    const email = clerkUser?.primaryEmailAddress?.emailAddress ?? null;
+    const fullName = clerkUser?.fullName ?? null;
+    const avatarUrl = clerkUser?.imageUrl ?? null;
+    const nextUser = { id: userId, email };
 
-      await loadProfile(user);
+    const ensureProfile = async () => {
+      const existingProfile = await supabase
+        .from('profiles')
+        .select('app_role')
+        .eq('clerk_id', userId)
+        .maybeSingle();
+      const appRole = existingProfile.data?.app_role ?? 'member';
+
+      await supabase
+        .from('profiles')
+        .upsert(
+          {
+            clerk_id: userId,
+            email,
+            full_name: fullName,
+            avatar_url: avatarUrl,
+            app_role: appRole,
+          },
+          { onConflict: 'clerk_id' },
+        );
     };
 
-    init();
+    void (async () => {
+      await ensureProfile();
+      await loadProfile(nextUser);
+    })();
+  }, [
+    clerkUser?.primaryEmailAddress?.emailAddress,
+    clerkUser?.fullName,
+    clerkUser?.imageUrl,
+    isLoaded,
+    isSignedIn,
+    supabase,
+    userId,
+  ]);
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      const sessionUser = session?.user ?? null;
-      if (!sessionUser) {
-        setState({ status: 'unauthenticated', user: null, profile: null });
-        return;
-      }
-
-      loadProfile(sessionUser);
-    });
-
-    return () => {
-      isMounted = false;
-      subscription.unsubscribe();
-    };
-  }, [supabase]);
+  const role = deriveRole(state.profile, state.membership);
+  const isAdmin = role === 'admin';
+  const isStudent = role === 'student';
 
   return {
     ...state,
-    isAdmin: state.profile?.role === 'admin',
+    role,
+    isAdmin,
+    isStudent,
   };
 }

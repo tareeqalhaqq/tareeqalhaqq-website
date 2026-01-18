@@ -5,7 +5,6 @@ import Link from "next/link";
 import { BookOpen, Users, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 
 const fadeUp = {
@@ -50,10 +49,9 @@ const trustPoints = [
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
-      <Header />
       <main className="flex-grow">
         <motion.section
-          className="relative flex min-h-[calc(100vh-80px)] flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 px-6 py-24 text-center"
+          className="relative flex min-h-[calc(100vh-80px)] flex-col items-center justify-center overflow-hidden px-6 py-24 text-center"
           initial="hidden"
           animate="visible"
           variants={staggerContainer}
@@ -87,7 +85,8 @@ export default function Home() {
             <motion.div className="space-y-5" variants={fadeUp}>
               <p className="eyebrow text-primary">Tareeq Al Haqq</p>
               <h1 className="text-4xl font-headline uppercase tracking-[0.12em] text-white md:text-5xl">
-                A Clear Path to Authentic Knowledge
+                A Clear Path to
+                <span className="mt-2 block text-accent">Authentic Knowledge</span>
               </h1>
               <p className="mx-auto max-w-2xl text-base text-white/80 md:text-lg">
                 Study with assurance. Our platform curates dependable resources, structured learning tracks, and simple tools so you can focus on understanding, not searching.
@@ -100,15 +99,6 @@ export default function Home() {
               <motion.div whileHover={{ y: -4 }} whileTap={{ scale: 0.97 }}>
                 <Button
                   asChild
-                  size="lg"
-                  className="rounded-full bg-primary px-8 py-6 text-sm font-semibold uppercase tracking-[0.3em] text-primary-foreground shadow-lg shadow-black/30 transition"
-                >
-                  <Link href="/contact">Join the Community</Link>
-                </Button>
-              </motion.div>
-              <motion.div whileHover={{ y: -4 }} whileTap={{ scale: 0.97 }}>
-                <Button
-                  asChild
                   variant="outline"
                   size="lg"
                   className="rounded-full border-white/20 bg-white/5 px-8 py-6 text-sm font-semibold uppercase tracking-[0.3em] text-white transition hover:border-white/30 hover:bg-white/10"
@@ -118,18 +108,11 @@ export default function Home() {
               </motion.div>
             </motion.div>
           </motion.div>
-          <motion.span
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-primary/10"
-            aria-hidden
-            initial={{ opacity: 0 }}
-            animate={{ opacity: [0.2, 0.4, 0.2] }}
-            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-          />
         </motion.section>
 
-        <section className="page-section">
+        <section className="fluent-section">
           <motion.div
-            className="page-section__inner grid gap-12 md:grid-cols-[1.1fr_0.9fr] md:items-center"
+            className="fluent-section__inner grid gap-12 md:grid-cols-[1.1fr_0.9fr] md:items-center"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, amount: 0.4 }}
@@ -175,9 +158,9 @@ export default function Home() {
           </motion.div>
         </section>
 
-        <section className="page-section">
+        <section className="fluent-section">
           <motion.div
-            className="page-section__inner space-y-10 text-center"
+            className="fluent-section__inner space-y-10 text-center"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, amount: 0.3 }}
