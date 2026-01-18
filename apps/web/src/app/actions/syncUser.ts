@@ -12,7 +12,7 @@ export async function syncUserToSupabase() {
     return;
   }
 
-  const token = await getToken();
+  const token = await getToken({ template: 'supabase' });
 
   if (!token) {
     console.error('No Clerk token generated');
