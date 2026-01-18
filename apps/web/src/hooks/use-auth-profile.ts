@@ -54,7 +54,7 @@ const deriveRole = (profile: Profile | null, membership: AcademyMembership | nul
     return 'student';
   }
 
-  return profileRole ?? null;
+  return profileRole ?? 'member';
 };
 
 export function useAuthProfile() {
