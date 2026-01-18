@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { useSupabase } from '@/lib/supabaseClient';
+import { syncUserToSupabase } from '@/app/actions/syncUser';
 
 type Role = 'admin' | 'student' | 'member';
 
@@ -63,17 +64,41 @@ export function useAuthProfile() {
     profile: null,
     membership: null,
   });
+  const syncAttemptedRef = useRef(false);
+  const activeUserRef = useRef<string | null>(null);
 
   const loadProfile = async (id: string) => {
     if (!supabase) return;
 
-    const profileResult = await supabase
-      .from('profiles')
-      .select('id, clerk_id, email, app_role, full_name, avatar_url, created_at')
-      .eq('clerk_id', id)
-      .maybeSingle();
+    const fetchProfile = async () =>
+      supabase
+        .from('profiles')
+        .select('id, clerk_id, email, app_role, full_name, avatar_url, created_at')
+        .eq('clerk_id', id)
+        .maybeSingle();
+
+    const profileResult = await fetchProfile();
+
+    if (profileResult.error) {
+      console.error('Supabase profile fetch failed:', profileResult.error);
+    }
 
     let profile = profileResult.data ?? null;
+
+    if (!profile && !syncAttemptedRef.current) {
+      syncAttemptedRef.current = true;
+      try {
+        await syncUserToSupabase();
+      } catch (error) {
+        console.error('Supabase profile sync failed:', error);
+      }
+
+      const retryResult = await fetchProfile();
+      if (retryResult.error) {
+        console.error('Supabase profile retry failed:', retryResult.error);
+      }
+      profile = retryResult.data ?? null;
+    }
 
     const membershipFilter = profile?.id ? `clerk_id.eq.${id},user_id.eq.${profile.id}` : `clerk_id.eq.${id}`;
     const membershipResult = await supabase
@@ -81,6 +106,10 @@ export function useAuthProfile() {
       .select('academy_role, active')
       .or(membershipFilter)
       .maybeSingle();
+
+    if (membershipResult.error) {
+      console.error('Supabase membership fetch failed:', membershipResult.error);
+    }
 
     setState({
       status: 'authenticated',
@@ -99,8 +128,15 @@ export function useAuthProfile() {
     }
 
     if (!isSignedIn || !userId) {
+      syncAttemptedRef.current = false;
+      activeUserRef.current = null;
       setState({ status: 'unauthenticated', user: null, profile: null, membership: null });
       return;
+    }
+
+    if (activeUserRef.current !== userId) {
+      activeUserRef.current = userId;
+      syncAttemptedRef.current = false;
     }
 
     if (!supabase) {
