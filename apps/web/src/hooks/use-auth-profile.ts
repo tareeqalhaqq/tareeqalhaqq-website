@@ -16,14 +16,21 @@ export type Profile = {
   id: string;
   clerk_id: string | null;
   email: string | null;
-  app_role: string | null;
-  full_name: string | null;
-  avatar_url: string | null;
+  user_email?: string | null;
+  email_address?: string | null;
+  app_role?: string | null;
+  user_role?: string | null;
+  role?: string | null;
+  full_name?: string | null;
+  display_name?: string | null;
+  name?: string | null;
+  avatar_url?: string | null;
   created_at: string;
 };
 
 type AcademyMembership = {
-  academy_role: string | null;
+  academy_role?: string | null;
+  role?: string | null;
   active: boolean | null;
 };
 
@@ -43,9 +50,16 @@ const isAdminRole = (role: string | null | undefined) => {
   return normalized ? adminRoles.has(normalized) : false;
 };
 
+const getProfileRole = (profile: Profile | null) =>
+  normalizeRole(profile?.app_role ?? profile?.user_role ?? profile?.role);
+const getMembershipRole = (membership: AcademyMembership | null) =>
+  normalizeRole(membership?.academy_role ?? membership?.role);
+const getProfileEmail = (profile: Profile | null) =>
+  profile?.email ?? profile?.user_email ?? profile?.email_address ?? null;
+
 const deriveRole = (profile: Profile | null, membership: AcademyMembership | null): Role => {
-  const profileRole = normalizeRole(profile?.app_role);
-  const membershipRole = normalizeRole(membership?.academy_role);
+  const profileRole = getProfileRole(profile);
+  const membershipRole = getMembershipRole(membership);
   const isAdmin = isAdminRole(profileRole) || isAdminRole(membershipRole);
   if (isAdmin) return 'admin';
 
@@ -73,7 +87,7 @@ export function useAuthProfile() {
     const fetchProfile = async () =>
       supabase
         .from('profiles')
-        .select('id, clerk_id, email, app_role, full_name, avatar_url, created_at')
+        .select('*')
         .eq('clerk_id', id)
         .maybeSingle();
 
@@ -103,7 +117,7 @@ export function useAuthProfile() {
     const membershipFilter = profile?.id ? `clerk_id.eq.${id},user_id.eq.${profile.id}` : `clerk_id.eq.${id}`;
     const membershipResult = await supabase
       .from('academy_memberships')
-      .select('academy_role, active')
+      .select('*')
       .or(membershipFilter)
       .maybeSingle();
 
@@ -115,7 +129,7 @@ export function useAuthProfile() {
       status: 'authenticated',
       user: {
         id,
-        email: profile?.email ?? null,
+        email: getProfileEmail(profile),
       },
       profile,
       membership: membershipResult.data ?? null,

@@ -7,7 +7,7 @@ import { useAuthProfile } from '@/hooks/use-auth-profile';
 
 export default function UserDashboardPage() {
   const { status, profile, user, isAdmin, role } = useAuthProfile();
-  const displayName = profile?.full_name ?? user?.email ?? 'there';
+  const displayName = profile?.full_name ?? profile?.display_name ?? profile?.name ?? 'there';
   const memberSince = profile?.created_at ? new Date(profile.created_at).toLocaleDateString() : null;
 
   return (
@@ -36,7 +36,7 @@ export default function UserDashboardPage() {
           <>
             <div className="glass-panel space-y-3 p-8 text-white">
               <p className="eyebrow">Dashboard</p>
-              <h1 className="text-3xl font-semibold">Assalamu Alaikum, {displayName}!</h1>
+              <h1 className="text-3xl font-semibold">Welcome, {displayName}!</h1>
               <p className="text-sm text-white/70">
                 You&apos;re signed in to your Tareeq Al Haqq account. We&apos;ve tailored this space using the profile details
                 stored in your account so your experience feels personal and intentional.
@@ -92,7 +92,7 @@ export default function UserDashboardPage() {
                   </p>
                   <div className="flex flex-wrap gap-3 text-xs text-white/60">
                     <span className="rounded-full bg-white/5 px-3 py-1">Email: {user?.email ?? 'Unavailable'}</span>
-                    <span className="rounded-full bg-white/5 px-3 py-1">Role: {role ?? 'member'}</span>
+                    <span className="rounded-full bg-white/5 px-3 py-1">Role: {role}</span>
                     {memberSince && <span className="rounded-full bg-white/5 px-3 py-1">Member since {memberSince}</span>}
                   </div>
                 </div>

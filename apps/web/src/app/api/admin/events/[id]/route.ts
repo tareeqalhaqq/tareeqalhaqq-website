@@ -21,12 +21,17 @@ const assertAdmin = async () => {
   }
 
   const [profileResult, membershipResult] = await Promise.all([
-    supabase.from('profiles').select('app_role').eq('clerk_id', userId).maybeSingle(),
-    supabase.from('academy_memberships').select('academy_role').eq('clerk_id', userId).maybeSingle(),
+    supabase.from('profiles').select('*').eq('clerk_id', userId).maybeSingle(),
+    supabase.from('academy_memberships').select('*').eq('clerk_id', userId).maybeSingle(),
   ]);
 
-  const isAdmin =
-    isAdminRole(profileResult.data?.app_role) || isAdminRole(membershipResult.data?.academy_role);
+  const profileRole = normalizeRole(
+    profileResult.data?.app_role ?? profileResult.data?.user_role ?? profileResult.data?.role,
+  );
+  const membershipRole = normalizeRole(
+    membershipResult.data?.academy_role ?? membershipResult.data?.role,
+  );
+  const isAdmin = isAdminRole(profileRole) || isAdminRole(membershipRole);
   if (profileResult.error || membershipResult.error || !isAdmin) {
     return { supabase, errorResponse: NextResponse.json({ error: 'Forbidden' }, { status: 403 }) };
   }

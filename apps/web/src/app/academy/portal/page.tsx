@@ -6,8 +6,8 @@ import { Button } from '@/components/ui/button';
 import { useAuthProfile } from '@/hooks/use-auth-profile';
 
 export default function AcademyPortalPage() {
-  const { status, profile, user, isAdmin, role } = useAuthProfile();
-  const displayName = profile?.full_name ?? user?.email ?? 'Student';
+  const { status, profile, isAdmin, role } = useAuthProfile();
+  const displayName = profile?.full_name ?? profile?.display_name ?? profile?.name ?? 'Student';
   const isAuthorized = status === 'authenticated' && (role === 'student' || isAdmin);
 
   return (
