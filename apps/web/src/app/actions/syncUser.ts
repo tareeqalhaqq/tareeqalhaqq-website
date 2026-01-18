@@ -1,54 +1,31 @@
 'use server';
 
-import { auth, currentUser } from '@clerk/nextjs/server';
+import type { User } from '@clerk/nextjs/server';
 import { createClient } from '@supabase/supabase-js';
 
-export async function syncUserToSupabase() {
-  const { userId, getToken } = await auth();
-  const user = await currentUser();
+export async function syncUserProfile(user: User) {
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-  if (!userId || !user) {
-    console.log('No user, skipping sync');
-    return;
+  if (!supabaseUrl || !serviceRoleKey) {
+    throw new Error('Missing Supabase service role configuration.');
   }
 
-  const token = await getToken({ template: 'supabase' });
-
-  if (!token) {
-    console.error('No Clerk token generated');
-    return;
-  }
+  const supabase = createClient(supabaseUrl, serviceRoleKey);
 
   const email = user.emailAddresses[0]?.emailAddress;
-  const fullName = user.fullName ?? null;
-  const avatarUrl = user.imageUrl ?? null;
-
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      global: {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      },
-    },
-  );
 
   const { error } = await supabase.from('profiles').upsert(
     {
-      clerk_id: userId,
+      clerk_id: user.id,
       email,
-      full_name: fullName,
-      avatar_url: avatarUrl,
+      full_name: user.fullName,
     },
     { onConflict: 'clerk_id' },
   );
 
   if (error) {
-    console.error('SUPABASE SYNC FAILED:', error);
+    console.error('SUPABASE PROFILE SYNC FAILED:', error);
     throw error;
   }
-
-  console.log('Supabase sync successful for', userId);
 }

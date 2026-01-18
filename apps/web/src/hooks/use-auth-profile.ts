@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { fetchAuthProfileByClerkId } from '@/app/actions/fetchAuthProfile';
-import { syncUserToSupabase } from '@/app/actions/syncUser';
 import type { AcademyMembership, Profile } from '@/types/auth-profile';
 
 type Role = 'admin' | 'student' | 'member';
@@ -66,25 +65,12 @@ export function useAuthProfile() {
     membership: null,
     error: null,
   });
-  const syncAttemptedRef = useRef(false);
   const activeUserRef = useRef<string | null>(null);
 
   const loadProfile = async (id: string) => {
     const fetchProfile = async () => fetchAuthProfileByClerkId(id);
     let profileResult = await fetchProfile();
     let profile = profileResult.profile ?? null;
-
-    if (!profile && !syncAttemptedRef.current) {
-      syncAttemptedRef.current = true;
-      try {
-        await syncUserToSupabase();
-      } catch (error) {
-        console.error('Supabase profile sync failed:', error);
-      }
-
-      profileResult = await fetchProfile();
-      profile = profileResult.profile ?? null;
-    }
 
     if (!profile) {
       setState({
@@ -115,7 +101,6 @@ export function useAuthProfile() {
     }
 
     if (!isSignedIn || !userId) {
-      syncAttemptedRef.current = false;
       activeUserRef.current = null;
       setState({ status: 'unauthenticated', user: null, profile: null, membership: null, error: null });
       return;
@@ -123,7 +108,6 @@ export function useAuthProfile() {
 
     if (activeUserRef.current !== userId) {
       activeUserRef.current = userId;
-      syncAttemptedRef.current = false;
     }
 
     void (async () => {
