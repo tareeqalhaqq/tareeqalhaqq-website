@@ -1,17 +1,14 @@
-import type { ReactNode } from 'react';
-import { auth, currentUser } from '@clerk/nextjs/server';
-import { syncUserProfile } from '@/app/actions/syncUser';
+import type { ReactNode } from "react";
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
+import { syncUserProfile } from "@/lib/syncUserProfile";
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
-  const { userId } = await auth();
+  const { userId } = auth();
 
-  if (userId) {
-    const user = await currentUser();
+  if (!userId) redirect("/signin");
 
-    if (user) {
-      await syncUserProfile(user);
-    }
-  }
+  await syncUserProfile();
 
-  return <>{children}</>;
+  return children;
 }

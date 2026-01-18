@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-import { createSupabaseClient } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
 const selectFields = 'id, title, description, location, date, time, image_url, event_type, is_virtual, created_at';
 const defaultEventImage = '/images/logo1.png';
@@ -14,15 +14,14 @@ const isAdminRole = (role?: string | null) => {
 
 const assertAdmin = async () => {
   const { userId } = await auth();
-  const supabase = await createSupabaseClient();
 
   if (!userId) {
-    return { supabase, errorResponse: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) };
+    return { errorResponse: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) };
   }
 
   const [profileResult, membershipResult] = await Promise.all([
-    supabase.from('profiles').select('*').eq('clerk_id', userId).maybeSingle(),
-    supabase.from('academy_memberships').select('*').eq('clerk_id', userId).maybeSingle(),
+    supabaseAdmin.from('profiles').select('*').eq('clerk_id', userId).maybeSingle(),
+    supabaseAdmin.from('academy_memberships').select('*').eq('clerk_id', userId).maybeSingle(),
   ]);
 
   const profileRole = normalizeRole(
@@ -34,17 +33,20 @@ const assertAdmin = async () => {
   const isAdmin = isAdminRole(profileRole) || isAdminRole(membershipRole);
 
   if (profileResult.error || membershipResult.error || !isAdmin) {
-    return { supabase, errorResponse: NextResponse.json({ error: 'Forbidden' }, { status: 403 }) };
+    return { errorResponse: NextResponse.json({ error: 'Forbidden' }, { status: 403 }) };
   }
 
-  return { supabase, userId };
+  return { userId };
 };
 
 export async function GET() {
-  const { supabase, errorResponse } = await assertAdmin();
+  const { errorResponse } = await assertAdmin();
   if (errorResponse) return errorResponse;
 
-  const { data, error } = await supabase.from('events').select(selectFields).order('date', { ascending: true });
+  const { data, error } = await supabaseAdmin
+    .from('events')
+    .select(selectFields)
+    .order('date', { ascending: true });
 
   if (error) {
     return NextResponse.json({ error: 'Unable to fetch events.' }, { status: 500 });
@@ -54,7 +56,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const { supabase, errorResponse, userId } = await assertAdmin();
+  const { errorResponse, userId } = await assertAdmin();
   if (errorResponse) return errorResponse;
 
   const payload = (await request.json()) as {
@@ -73,7 +75,7 @@ export async function POST(request: Request) {
   const normalizedTime = payload.time || null;
   const normalizedImage = payload.image_url?.trim() || defaultEventImage;
 
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from('events')
     .insert({
       title: payload.title.trim(),

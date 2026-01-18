@@ -1,6 +1,6 @@
 'use server';
 
-import { createSupabaseClient } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import type { AcademyMembership, Profile } from '@/types/auth-profile';
 
 export type AuthProfileResult = {
@@ -9,9 +9,7 @@ export type AuthProfileResult = {
 };
 
 export async function fetchAuthProfileByClerkId(clerkId: string): Promise<AuthProfileResult> {
-  const supabase = await createSupabaseClient();
-
-  const profileResult = await supabase
+  const profileResult = await supabaseAdmin
     .from('profiles')
     .select('*')
     .eq('clerk_id', clerkId)
@@ -26,7 +24,7 @@ export async function fetchAuthProfileByClerkId(clerkId: string): Promise<AuthPr
     ? `clerk_id.eq.${clerkId},user_id.eq.${profile.id}`
     : `clerk_id.eq.${clerkId}`;
 
-  const membershipResult = await supabase
+  const membershipResult = await supabaseAdmin
     .from('academy_memberships')
     .select('*')
     .or(membershipFilter)
