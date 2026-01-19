@@ -4,8 +4,8 @@ import { syncUserToSupabase } from '@/app/actions/syncUser';
 import { getServerProfile } from '@/lib/auth-server';
 
 export default async function DashboardPage() {
-  // 1. Sync user data (non-blocking if it fails, as we handled errors inside)
-  await syncUserToSupabase();
+  // 1. Sync user data (fire and forget to not block UI)
+  void syncUserToSupabase();
 
   // 2. Check role server-side
   const { isAdmin } = await getServerProfile();
