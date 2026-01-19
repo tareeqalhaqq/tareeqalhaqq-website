@@ -48,12 +48,15 @@ export async function POST(request: Request) {
       date: normalizedDate,
       time: normalizedTime,
       image_url: normalizedImage,
+      event_type: payload.event_type ?? 'tareeq',
+      is_virtual: payload.is_virtual ?? false,
       created_by_clerk: userId,
     })
     .select(selectFields)
     .single();
 
   if (error) {
+    console.error('Error creating event:', error);
     return NextResponse.json({ error: 'Unable to create event.' }, { status: 500 });
   }
 
