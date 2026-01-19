@@ -10,7 +10,9 @@ export const clerkAuthAppearance = {
   elements: {
     rootBox: 'w-full',
     cardBox: 'w-full',
-    card: 'w-full rounded-3xl border border-white/10 bg-slate-950 p-8 shadow-2xl shadow-black/50',
+    card: 'w-full rounded-3xl border border-white/10 bg-slate-950 px-8 py-7 shadow-2xl shadow-black/50',
+    logoBox: 'mb-4 flex justify-center',
+    logoImage: 'h-10 w-auto',
     headerTitle: 'text-2xl font-headline text-white',
     headerSubtitle: 'text-sm text-white/70',
     socialButtonsBlockButton:
