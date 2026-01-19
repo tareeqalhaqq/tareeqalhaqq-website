@@ -117,7 +117,10 @@ export function EventsManager({ adminName }: EventsManagerProps) {
     } finally {
       setStatus('ready');
     }
-  }, [supabase, toast]);
+    
+    setEvents(data ?? []);
+    setStatus('ready');
+  }, [supabase]);
 
   useEffect(() => {
     if (supabase) {
