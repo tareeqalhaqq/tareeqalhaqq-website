@@ -94,25 +94,16 @@ export function EventsManager({ adminName }: EventsManagerProps) {
       return;
     }
     setStatus('loading');
-    try {
-      const { data, error } = await supabase
-        .from('events')
-        .select('id, title, description, location, date, time, image_url, created_at')
-        .order('date', { ascending: true });
-      if (error) {
-        throw new Error(error.message);
-      }
-      setEvents(data ?? []);
-    } catch (error) {
-      toast({
-        title: 'Unable to load events',
-        description: error instanceof Error ? error.message : 'Please try again shortly.',
-        variant: 'destructive',
-      });
-    } finally {
-      setStatus('ready');
+    
+    const { data, error } = await supabase.from('events').select('*');
+    
+    if (error) {
+      console.error('Supabase error:', error);
     }
-  }, [supabase, toast]);
+    
+    setEvents(data ?? []);
+    setStatus('ready');
+  }, [supabase]);
 
   useEffect(() => {
     if (supabase) {
