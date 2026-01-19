@@ -107,16 +107,6 @@
     @apply relative py-20 px-4 sm:px-6 lg:px-8;
   }
 
-  .page-section::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background:
-      radial-gradient(circle at top center, rgba(245, 149, 66, 0.12), transparent 55%),
-      radial-gradient(circle at 20% 20%, rgba(86, 189, 196, 0.1), transparent 50%);
-    pointer-events: none;
-  }
-
   .page-section__inner {
     @apply relative z-10 mx-auto w-full max-w-6xl;
   }

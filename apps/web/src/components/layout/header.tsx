@@ -117,7 +117,7 @@ export default function Header() {
                   asChild
                   className="rounded-full bg-primary px-6 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-primary-foreground shadow-lg shadow-black/30 transition hover:shadow-xl hover:shadow-black/40"
                 >
-                  <Link href="/signin">Sign In</Link>
+                  <Link href="/sign-in">Sign In</Link>
                 </Button>
               </div>
             </SignedOut>
@@ -163,40 +163,42 @@ export default function Header() {
                         </div>
                       </div>
                     </SignedIn>
-                    {navLinks.map((link) => (
-                      <div key={link.name}>
-                        {link.subLinks ? (
-                          <div className="space-y-3">
-                            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-primary/80">
-                              {link.name}
-                            </p>
-                            <div className="ml-2 flex flex-col space-y-2">
-                              {link.subLinks.map((subLink) => (
-                                <Link
-                                  key={subLink.name}
-                                  href={subLink.href}
-                                  className="rounded-full px-4 py-2 text-sm text-muted-foreground transition hover:bg-white/10 hover:text-foreground"
-                                  onClick={() => setMobileMenuOpen(false)}
-                                >
-                                  {subLink.name}
-                                </Link>
-                              ))}
+                    <SignedOut>
+                      {navLinks.map((link) => (
+                        <div key={link.name}>
+                          {link.subLinks ? (
+                            <div className="space-y-3">
+                              <p className="text-xs font-semibold uppercase tracking-[0.35em] text-primary/80">
+                                {link.name}
+                              </p>
+                              <div className="ml-2 flex flex-col space-y-2">
+                                {link.subLinks.map((subLink) => (
+                                  <Link
+                                    key={subLink.name}
+                                    href={subLink.href}
+                                    className="rounded-full px-4 py-2 text-sm text-muted-foreground transition hover:bg-white/10 hover:text-foreground"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                  >
+                                    {subLink.name}
+                                  </Link>
+                                ))}
+                              </div>
                             </div>
-                          </div>
-                        ) : (
-                          <Link
-                            href={link.href!}
-                            className={cn(
-                              "rounded-full px-4 py-2 text-sm uppercase tracking-[0.3em] text-muted-foreground transition hover:bg-white/10 hover:text-foreground",
-                              pathname === link.href && "bg-white/10 text-foreground"
-                            )}
-                            onClick={() => setMobileMenuOpen(false)}
-                          >
-                            {link.name}
-                          </Link>
-                        )}
-                      </div>
-                    ))}
+                          ) : (
+                            <Link
+                              href={link.href!}
+                              className={cn(
+                                "rounded-full px-4 py-2 text-sm uppercase tracking-[0.3em] text-muted-foreground transition hover:bg-white/10 hover:text-foreground",
+                                pathname === link.href && "bg-white/10 text-foreground"
+                              )}
+                              onClick={() => setMobileMenuOpen(false)}
+                            >
+                              {link.name}
+                            </Link>
+                          )}
+                        </div>
+                      ))}
+                    </SignedOut>
                   </nav>
                   <div className="mt-8 space-y-3">
                     <SignedOut>
@@ -204,7 +206,7 @@ export default function Header() {
                         asChild
                         className="w-full rounded-full bg-primary px-6 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-primary-foreground shadow-lg shadow-black/30 transition hover:shadow-xl hover:shadow-black/40"
                       >
-                        <Link href="/signin">Sign In</Link>
+                        <Link href="/sign-in">Sign In</Link>
                       </Button>
                     </SignedOut>
                     <SignedIn>
@@ -226,3 +228,4 @@ export default function Header() {
     </>
   );
 }
+
