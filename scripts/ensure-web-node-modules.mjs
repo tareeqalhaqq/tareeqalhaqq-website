@@ -1,12 +1,18 @@
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
 
-const repoRoot = process.cwd();
-const workspaceDir = path.join(repoRoot, "apps/web");
+const scriptDir = path.dirname(fileURLToPath(import.meta.url));
+const repoRoot = path.resolve(scriptDir, "..");
+const workspaceDir = path.join(repoRoot, "apps", "web");
 const workspaceNodeModules = path.join(workspaceDir, "node_modules");
 const rootNodeModules = path.join(repoRoot, "node_modules");
 
 const packagesToLink = ["@swc/helpers", "scheduler"];
+
+if (!fs.existsSync(workspaceDir)) {
+  process.exit(0);
+}
 
 fs.mkdirSync(workspaceNodeModules, { recursive: true });
 
