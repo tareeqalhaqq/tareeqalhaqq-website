@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
+import { useEffect, useState } from 'react';
 import { Calendar, Clock, MapPin } from 'lucide-react';
+import { useSupabase } from '@/lib/supabaseClient';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,14 +32,7 @@ export default function EventsPage() {
   const [events, setEvents] = useState<EventRecord[]>([]);
   const [error, setError] = useState<Error | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const supabase = useMemo(
-    () =>
-      createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      ),
-    [],
-  );
+  const supabase = useSupabase();
 
   useEffect(() => {
     let isMounted = true;
