@@ -10,7 +10,7 @@ export default function LogoutPage() {
 
   useEffect(() => {
     signOut().finally(() => {
-      router.replace('/signin');
+      router.replace('/sign-in');
     });
   }, [router, signOut]);
 
@@ -20,3 +20,4 @@ export default function LogoutPage() {
     </main>
   );
 }
+

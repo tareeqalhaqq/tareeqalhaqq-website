@@ -14,7 +14,7 @@ export default function AccountPreferencesPage() {
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.replace('/signin');
+      router.replace('/sign-in');
     }
   }, [router, status]);
 
@@ -77,3 +77,4 @@ export default function AccountPreferencesPage() {
     </section>
   );
 }
+

@@ -28,7 +28,7 @@ export default function UserDashboardPage() {
               Please sign in to access your dashboard tools and account settings.
             </p>
             <Button asChild>
-              <Link href="/signin">Go to sign in</Link>
+              <Link href="/sign-in">Go to sign in</Link>
             </Button>
           </div>
         )}
@@ -143,3 +143,4 @@ export default function UserDashboardPage() {
     </section>
   );
 }
+

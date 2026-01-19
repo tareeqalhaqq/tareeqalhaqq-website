@@ -27,7 +27,7 @@ export default function StudentDashboardPage() {
               This area is reserved for enrolled students. Please sign in to verify your credentials.
             </p>
             <Button asChild>
-              <Link href="/signin">Go to sign in</Link>
+              <Link href="/sign-in">Go to sign in</Link>
             </Button>
           </div>
         )}
@@ -84,3 +84,4 @@ export default function StudentDashboardPage() {
     </section>
   );
 }
+

@@ -117,7 +117,7 @@ export default function Header() {
                   asChild
                   className="rounded-full bg-primary px-6 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-primary-foreground shadow-lg shadow-black/30 transition hover:shadow-xl hover:shadow-black/40"
                 >
-                  <Link href="/signin">Sign In</Link>
+                  <Link href="/sign-in">Sign In</Link>
                 </Button>
               </div>
             </SignedOut>
@@ -206,7 +206,7 @@ export default function Header() {
                         asChild
                         className="w-full rounded-full bg-primary px-6 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-primary-foreground shadow-lg shadow-black/30 transition hover:shadow-xl hover:shadow-black/40"
                       >
-                        <Link href="/signin">Sign In</Link>
+                        <Link href="/sign-in">Sign In</Link>
                       </Button>
                     </SignedOut>
                     <SignedIn>
@@ -228,3 +228,4 @@ export default function Header() {
     </>
   );
 }
+

@@ -1,4 +1,4 @@
-import DashboardRouterClient from '@/app/dashboard/DashboardRouterClient';
+import DashboardRouterClient from './DashboardRouterClient';
 import { syncUserToSupabase } from '@/app/actions/syncUser';
 
 export default async function DashboardRouter() {

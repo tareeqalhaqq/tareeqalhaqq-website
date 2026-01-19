@@ -11,7 +11,7 @@ export default function DashboardRouterClient() {
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.replace('/signin');
+      router.replace('/sign-in');
       return;
     }
 
@@ -45,3 +45,4 @@ export default function DashboardRouterClient() {
     </section>
   );
 }
+

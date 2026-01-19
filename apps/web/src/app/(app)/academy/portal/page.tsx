@@ -28,7 +28,7 @@ export default function AcademyPortalPage() {
               This portal is reserved for enrolled students. Please sign in to verify your credentials.
             </p>
             <Button asChild>
-              <Link href="/signin">Go to sign in</Link>
+              <Link href="/sign-in">Go to sign in</Link>
             </Button>
           </div>
         )}
@@ -67,3 +67,4 @@ export default function AcademyPortalPage() {
     </section>
   );
 }
+

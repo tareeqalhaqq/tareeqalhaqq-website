@@ -15,7 +15,7 @@ export default function AdminDashboardPage() {
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.replace('/signin');
+      router.replace('/sign-in');
     }
   }, [router, status]);
 
@@ -37,7 +37,7 @@ export default function AdminDashboardPage() {
               This area is reserved for administrators. Please sign in to verify your credentials.
             </p>
             <Button asChild>
-              <Link href="/signin">Go to sign in</Link>
+              <Link href="/sign-in">Go to sign in</Link>
             </Button>
           </div>
         )}
@@ -99,3 +99,4 @@ export default function AdminDashboardPage() {
     </section>
   );
 }
+
