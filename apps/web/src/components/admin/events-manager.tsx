@@ -128,7 +128,8 @@ export function EventsManager({ adminName }: EventsManagerProps) {
 
   const openEditDialog = (event: EventRecord) => {
     const normalizedTime = event.time ? event.time.slice(0, 5) : '';
-    const isVirtual = Boolean(event.is_virtual);
+    // DB doesn't have is_virtual column, so we derive it from location string
+    const isVirtual = event.location === 'Virtual';
     const isTbaLocation = !event.location || event.location.toLowerCase() === 'to be announced';
     setEditingEvent(event);
     setFormState({
@@ -138,7 +139,8 @@ export function EventsManager({ adminName }: EventsManagerProps) {
       date: event.date ?? '',
       time: normalizedTime,
       image_url: event.image_url ?? '',
-      event_type: event.event_type ?? 'tareeq',
+      // Default to tareeq since we can't save/load type in DB
+      event_type: 'tareeq',
       is_virtual: isVirtual,
     });
     setTbaState({
@@ -286,15 +288,19 @@ export function EventsManager({ adminName }: EventsManagerProps) {
 
   const formattedEvents = useMemo(
     () =>
-      events.map((event) => ({
-        ...event,
-        eventLabel: event.event_type === 'markaz' ? 'Markaz Al Haqq' : 'Tareeq Al Haqq',
-        formattedDate: event.date
-          ? new Date(event.date).toLocaleDateString('en-GB', { dateStyle: 'medium' })
-          : 'To be announced',
-        formattedTime: event.time || 'To be announced',
-        formattedLocation: event.is_virtual ? 'Virtual' : event.location || 'To be announced',
-      })),
+      events.map((event) => {
+        // Derive virtual status for display
+        const isVirtual = event.location === 'Virtual';
+        return {
+          ...event,
+          eventLabel: 'Tareeq Al Haqq', // Default since DB has no column
+          formattedDate: event.date
+            ? new Date(event.date).toLocaleDateString('en-GB', { dateStyle: 'medium' })
+            : 'To be announced',
+          formattedTime: event.time || 'To be announced',
+          formattedLocation: isVirtual ? 'Virtual' : event.location || 'To be announced',
+        };
+      }),
     [events],
   );
 
