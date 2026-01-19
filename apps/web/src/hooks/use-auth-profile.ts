@@ -4,9 +4,9 @@ import { useEffect, useState } from 'react';
 import { useAuth, useUser } from '@clerk/nextjs';
 import { useSupabase } from '@/lib/supabaseClient';
 
-type Role = 'admin' | 'student' | 'member';
+export type Role = 'admin' | 'student' | 'member';
 
-type User = {
+export type User = {
   id: string;
   email: string | null;
 };
@@ -20,12 +20,12 @@ export type Profile = {
   created_at: string;
 };
 
-type AcademyMembership = {
+export type AcademyMembership = {
   academy_role: string | null;
   active: boolean | null;
 };
 
-type AuthStatus = 'loading' | 'unauthenticated' | 'authenticated';
+export type AuthStatus = 'loading' | 'unauthenticated' | 'authenticated';
 
 type AuthState = {
   status: AuthStatus;

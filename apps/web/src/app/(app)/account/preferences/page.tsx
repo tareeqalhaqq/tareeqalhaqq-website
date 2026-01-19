@@ -47,7 +47,7 @@ export default function AccountPreferencesPage() {
               Signed in as <span className="text-white">{user?.email ?? 'Unknown'}</span>
             </span>
             <Button asChild variant="ghost" size="sm">
-              <Link href="/dashboard/user">Back to dashboard</Link>
+              <Link href="/dashboard">Back to dashboard</Link>
             </Button>
           </div>
           <UserProfile
