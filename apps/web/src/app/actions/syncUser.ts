@@ -1,54 +1,40 @@
-'use server';
-
 import { auth, currentUser } from '@clerk/nextjs/server';
-import { createClient } from '@supabase/supabase-js';
+import { createSupabaseClient } from '@/lib/supabase';
 
 export async function syncUserToSupabase() {
-  const { userId, getToken } = await auth();
-  const user = await currentUser();
+  try {
+    const { userId } = await auth();
+    const user = await currentUser();
 
-  if (!userId || !user) {
-    console.log('No user, skipping sync');
-    return;
-  }
+    if (!userId || !user) {
+      console.log('No user, skipping sync');
+      return;
+    }
 
-  const token = await getToken();
+    const email = user.emailAddresses[0]?.emailAddress;
+    const fullName = user.fullName ?? null;
+    const avatarUrl = user.imageUrl ?? null;
 
-  if (!token) {
-    console.error('No Clerk token generated');
-    return;
-  }
+    const supabase = await createSupabaseClient();
 
-  const email = user.emailAddresses[0]?.emailAddress;
-  const fullName = user.fullName ?? null;
-  const avatarUrl = user.imageUrl ?? null;
-
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      global: {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+    const { error } = await supabase.from('profiles').upsert(
+      {
+        clerk_id: userId,
+        email,
+        full_name: fullName,
+        avatar_url: avatarUrl,
       },
-    },
-  );
+      { onConflict: 'clerk_id' },
+    );
 
-  const { error } = await supabase.from('profiles').upsert(
-    {
-      clerk_id: userId,
-      email,
-      full_name: fullName,
-      avatar_url: avatarUrl,
-    },
-    { onConflict: 'clerk_id' },
-  );
-
-  if (error) {
-    console.error('SUPABASE SYNC FAILED:', error);
-    throw error;
+    if (error) {
+      // Log but don't throw to prevent blocking the UI
+      console.error('SUPABASE SYNC FAILED:', error);
+    } else {
+      console.log('Supabase sync successful for', userId);
+    }
+  } catch (err) {
+    console.error('Unexpected error during user sync:', err);
   }
-
-  console.log('Supabase sync successful for', userId);
 }
+
