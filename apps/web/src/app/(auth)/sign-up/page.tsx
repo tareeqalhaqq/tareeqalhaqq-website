@@ -6,7 +6,7 @@ import { clerkAuthAppearance } from '@/lib/clerk-appearance';
 
 export default function SignUpPage() {
   return (
-    <div className="w-full max-w-md">
+    <div className="w-full max-w-sm">
       <SignUp
         appearance={clerkAuthAppearance}
         routing="path"

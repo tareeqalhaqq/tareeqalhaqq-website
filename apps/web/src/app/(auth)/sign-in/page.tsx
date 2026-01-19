@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 
 export default function SignInPage() {
   return (
-    <div className="w-full max-w-md">
+    <div className="w-full max-w-sm">
       <SignIn
         appearance={clerkAuthAppearance}
         path="/sign-in"
