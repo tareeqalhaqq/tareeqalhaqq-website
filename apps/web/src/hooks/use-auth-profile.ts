@@ -99,10 +99,30 @@ export function useAuthProfile() {
     const avatarUrl = clerkUser?.imageUrl ?? null;
     const nextUser = { id: userId, email };
 
-    // We rely on the server-side syncUser action to create the profile.
-    // Client-side upsert is removed to prevent RLS 403 errors and redundancy.
+    const ensureProfile = async () => {
+      const existingProfile = await supabase
+        .from('profiles')
+        .select('app_role')
+        .eq('clerk_id', userId)
+        .maybeSingle();
+      const appRole = existingProfile.data?.app_role ?? 'member';
+
+      await supabase
+        .from('profiles')
+        .upsert(
+          {
+            clerk_id: userId,
+            email,
+            full_name: fullName,
+            avatar_url: avatarUrl,
+            app_role: appRole,
+          },
+          { onConflict: 'clerk_id' },
+        );
+    };
 
     void (async () => {
+      await ensureProfile();
       await loadProfile(nextUser);
     })();
   }, [
