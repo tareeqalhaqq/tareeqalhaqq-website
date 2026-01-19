@@ -96,6 +96,7 @@ export function EventsManager({ adminName }: EventsManagerProps) {
 
   const loadEvents = useCallback(async () => {
     if (!supabase) {
+      setStatus('ready');
       return;
     }
     setStatus('loading');
@@ -109,6 +110,7 @@ export function EventsManager({ adminName }: EventsManagerProps) {
       }
       setEvents(data ?? []);
     } catch (error) {
+      setEvents([]);
       toast({
         title: 'Unable to load events',
         description: error instanceof Error ? error.message : 'Please try again shortly.',
@@ -117,10 +119,7 @@ export function EventsManager({ adminName }: EventsManagerProps) {
     } finally {
       setStatus('ready');
     }
-    
-    setEvents(data ?? []);
-    setStatus('ready');
-  }, [supabase]);
+  }, [supabase, toast]);
 
   useEffect(() => {
     if (supabase) {
