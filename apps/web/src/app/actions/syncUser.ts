@@ -1,5 +1,6 @@
 import { auth, currentUser } from '@clerk/nextjs/server';
 import { createSupabaseClient } from '@/lib/supabase';
+import { resolveRoleFromMetadata } from '@/lib/roles';
 
 export async function syncUserToSupabase() {
   try {
@@ -16,6 +17,7 @@ export async function syncUserToSupabase() {
     const avatarUrl = user.imageUrl ?? null;
 
     const supabase = await createSupabaseClient();
+    const clerkRole = resolveRoleFromMetadata(user.publicMetadata, user.unsafeMetadata);
 
     const { error } = await supabase.from('profiles').upsert(
       {
@@ -23,6 +25,7 @@ export async function syncUserToSupabase() {
         email,
         full_name: fullName,
         avatar_url: avatarUrl,
+        ...(clerkRole ? { app_role: clerkRole } : {}),
       },
       { onConflict: 'clerk_id' },
     );
@@ -37,4 +40,3 @@ export async function syncUserToSupabase() {
     console.error('Unexpected error during user sync:', err);
   }
 }
-
