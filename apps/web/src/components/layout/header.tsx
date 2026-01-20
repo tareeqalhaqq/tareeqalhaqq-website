@@ -30,8 +30,7 @@ const SearchDialog = dynamic(
 
 const dashboardLinks = [
   { name: "Dashboard", href: "/dashboard" },
-  { name: "Profile", href: "/profile" },
-  { name: "Settings", href: "/account/preferences" },
+  { name: "Profile", href: "/account/preferences" },
 ];
 
 export default function Header() {
@@ -228,4 +227,3 @@ export default function Header() {
     </>
   );
 }
-
