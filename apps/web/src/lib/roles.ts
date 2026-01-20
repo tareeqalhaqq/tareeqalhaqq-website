@@ -21,7 +21,7 @@ export const resolveRoleFromMetadata = (
       continue;
     }
 
-    const role = normalizeRole(source.app_role ?? source.role);
+    const role = normalizeRole(source.app_role ?? source.appRole ?? source.role);
     if (role) {
       return role;
     }
