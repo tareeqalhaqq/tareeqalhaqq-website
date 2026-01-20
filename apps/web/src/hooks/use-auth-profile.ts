@@ -3,8 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth, useUser } from '@clerk/nextjs';
 import { useSupabase } from '@/lib/supabaseClient';
-
-type Role = 'admin' | 'student' | 'member';
+import { resolveRoleFromMetadata, type Role } from '@/lib/roles';
 
 type User = {
   id: string;
@@ -34,11 +33,16 @@ type AuthState = {
   membership: AcademyMembership | null;
 };
 
-const deriveRole = (profile: Profile | null, membership: AcademyMembership | null): Role => {
-  const isAdmin = profile?.app_role === 'admin' || membership?.academy_role === 'admin';
+const deriveRole = (
+  profile: Profile | null,
+  membership: AcademyMembership | null,
+  clerkRole: Role | null,
+): Role => {
+  const isAdmin = clerkRole === 'admin' || profile?.app_role === 'admin' || membership?.academy_role === 'admin';
   if (isAdmin) return 'admin';
 
-  const isStudent = Boolean(membership?.active) && membership?.academy_role === 'student';
+  const isStudent =
+    clerkRole === 'student' || (Boolean(membership?.active) && membership?.academy_role === 'student');
   if (isStudent) return 'student';
 
   return profile?.app_role === 'student' ? 'student' : 'member';
@@ -46,7 +50,7 @@ const deriveRole = (profile: Profile | null, membership: AcademyMembership | nul
 
 export function useAuthProfile() {
   const supabase = useSupabase();
-  const { isLoaded, isSignedIn, userId } = useAuth();
+  const { isLoaded, isSignedIn, sessionClaims, userId } = useAuth();
   const { user: clerkUser } = useUser();
   const [state, setState] = useState<AuthState>({
     status: 'loading',
@@ -115,7 +119,14 @@ export function useAuthProfile() {
     userId,
   ]);
 
-  const role = deriveRole(state.profile, state.membership);
+  const clerkRole = resolveRoleFromMetadata(
+    clerkUser?.publicMetadata as Record<string, unknown> | null,
+    clerkUser?.unsafeMetadata as Record<string, unknown> | null,
+    sessionClaims?.publicMetadata as Record<string, unknown> | null,
+    sessionClaims?.unsafeMetadata as Record<string, unknown> | null,
+  );
+
+  const role = deriveRole(state.profile, state.membership, clerkRole);
   const isAdmin = role === 'admin';
   const isStudent = role === 'student';
 

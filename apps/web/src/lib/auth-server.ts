@@ -1,11 +1,10 @@
 import { auth } from '@clerk/nextjs/server';
 import { createSupabaseClient } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
-
-export type Role = 'admin' | 'student' | 'member';
+import { resolveRoleFromMetadata, type Role } from '@/lib/roles';
 
 export async function getServerProfile() {
-  const { userId } = await auth();
+  const { userId, sessionClaims } = await auth();
 
   if (!userId) {
     return { userId: null, role: null, profile: null, isAdmin: false };
@@ -42,11 +41,18 @@ export async function getServerProfile() {
   // The .maybeSingle() usually handles 0 rows, but RLS error might be different.
   const membership = membershipResult.data; // .error is available if needed
 
-  const isAdmin = profile?.app_role === 'admin' || membership?.academy_role === 'admin';
+  const clerkRole = resolveRoleFromMetadata(
+    sessionClaims?.publicMetadata as Record<string, unknown> | null,
+    sessionClaims?.unsafeMetadata as Record<string, unknown> | null,
+  );
+
+  const isAdmin = clerkRole === 'admin' || profile?.app_role === 'admin' || membership?.academy_role === 'admin';
 
   let role: Role = 'member';
   if (isAdmin) {
     role = 'admin';
+  } else if (clerkRole === 'student') {
+    role = 'student';
   } else if (membership?.active && membership?.academy_role === 'student') {
     role = 'student';
   } else if (profile?.app_role === 'student') {
