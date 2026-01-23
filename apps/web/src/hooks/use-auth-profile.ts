@@ -38,7 +38,8 @@ const deriveRole = (
   membership: AcademyMembership | null,
   clerkRole: Role | null,
 ): Role => {
-  const isAdmin = clerkRole === 'admin' || profile?.app_role === 'admin' || membership?.academy_role === 'admin';
+  const hasActiveAdminMembership = Boolean(membership?.active) && membership?.academy_role === 'admin';
+  const isAdmin = clerkRole === 'admin' || profile?.app_role === 'admin' || hasActiveAdminMembership;
   if (isAdmin) return 'admin';
 
   const isStudent =
