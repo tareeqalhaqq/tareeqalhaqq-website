@@ -23,7 +23,7 @@ export async function getServerProfile() {
   // Let's optimize by handling the possibility of RLS failure gracefully or just fetching profile first if meaningful.
   // Actually, better: if the user JUST authenticated, Clerk might be fast, but Supabase might be cold.
 
-  const [profileResult, membershipResult] = await Promise.all([
+  const [profileResult, membershipResult, jwtResult] = await Promise.all([
     supabase
       .from('profiles')
       .select('app_role, full_name, email')
@@ -34,19 +34,27 @@ export async function getServerProfile() {
       .select('academy_role, active')
       .eq('clerk_id', userId)
       .maybeSingle(),
+    supabase.rpc('auth_jwt'),
   ]);
 
   const profile = profileResult.data;
   // If membership RLS fails (returns error due to policy), treating it as null is safer than hanging/crashing.
   // The .maybeSingle() usually handles 0 rows, but RLS error might be different.
   const membership = membershipResult.data; // .error is available if needed
+  const supabaseRole = resolveRoleFromMetadata(
+    jwtResult.data?.app_metadata as Record<string, unknown> | null,
+    jwtResult.data?.user_metadata as Record<string, unknown> | null,
+    jwtResult.data as Record<string, unknown> | null,
+  );
 
   const clerkRole = resolveRoleFromMetadata(
     sessionClaims?.publicMetadata as Record<string, unknown> | null,
     sessionClaims?.unsafeMetadata as Record<string, unknown> | null,
   );
 
-  const isAdmin = clerkRole === 'admin' || profile?.app_role === 'admin' || membership?.academy_role === 'admin';
+  const hasActiveAdminMembership = Boolean(membership?.active) && membership?.academy_role === 'admin';
+  const isAdmin =
+    clerkRole === 'admin' || supabaseRole === 'admin' || profile?.app_role === 'admin' || hasActiveAdminMembership;
 
   let role: Role = 'member';
   if (isAdmin) {
