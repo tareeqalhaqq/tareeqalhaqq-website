@@ -31,14 +31,18 @@ type AuthState = {
   user: User | null;
   profile: Profile | null;
   membership: AcademyMembership | null;
+  supabaseRole: Role | null;
 };
 
 const deriveRole = (
   profile: Profile | null,
   membership: AcademyMembership | null,
   clerkRole: Role | null,
+  supabaseRole: Role | null,
 ): Role => {
-  const isAdmin = clerkRole === 'admin' || profile?.app_role === 'admin' || membership?.academy_role === 'admin';
+  const hasActiveAdminMembership = Boolean(membership?.active) && membership?.academy_role === 'admin';
+  const isAdmin =
+    clerkRole === 'admin' || supabaseRole === 'admin' || profile?.app_role === 'admin' || hasActiveAdminMembership;
   if (isAdmin) return 'admin';
 
   const isStudent =
@@ -57,12 +61,13 @@ export function useAuthProfile() {
     user: null,
     profile: null,
     membership: null,
+    supabaseRole: null,
   });
 
   const loadProfile = async (user: User) => {
     if (!supabase) return;
 
-    const [profileResult, membershipResult] = await Promise.all([
+    const [profileResult, membershipResult, jwtResult] = await Promise.all([
       supabase
         .from('profiles')
         .select('clerk_id, email, app_role, full_name, avatar_url, created_at')
@@ -73,13 +78,21 @@ export function useAuthProfile() {
         .select('academy_role, active')
         .eq('clerk_id', user.id)
         .maybeSingle(),
+      supabase.rpc('auth_jwt'),
     ]);
+
+    const supabaseRole = resolveRoleFromMetadata(
+      jwtResult.data?.app_metadata as Record<string, unknown> | null,
+      jwtResult.data?.user_metadata as Record<string, unknown> | null,
+      jwtResult.data as Record<string, unknown> | null,
+    );
 
     setState({
       status: 'authenticated',
       user,
       profile: profileResult.data ?? null,
       membership: membershipResult.data ?? null,
+      supabaseRole,
     });
   };
 
@@ -89,7 +102,7 @@ export function useAuthProfile() {
     }
 
     if (!isSignedIn || !userId) {
-      setState({ status: 'unauthenticated', user: null, profile: null, membership: null });
+      setState({ status: 'unauthenticated', user: null, profile: null, membership: null, supabaseRole: null });
       return;
     }
 
@@ -126,7 +139,7 @@ export function useAuthProfile() {
     sessionClaims?.unsafeMetadata as Record<string, unknown> | null,
   );
 
-  const role = deriveRole(state.profile, state.membership, clerkRole);
+  const role = deriveRole(state.profile, state.membership, clerkRole, state.supabaseRole);
   const isAdmin = role === 'admin';
   const isStudent = role === 'student';
 
