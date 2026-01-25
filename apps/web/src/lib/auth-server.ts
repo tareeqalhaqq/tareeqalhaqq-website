@@ -40,13 +40,13 @@ export async function getServerProfile() {
   // If membership RLS fails (returns error due to policy), treating it as null is safer than hanging/crashing.
   // The .maybeSingle() usually handles 0 rows, but RLS error might be different.
   const membership = membershipResult.data; // .error is available if needed
-
   const clerkRole = resolveRoleFromMetadata(
     sessionClaims?.publicMetadata as Record<string, unknown> | null,
     sessionClaims?.unsafeMetadata as Record<string, unknown> | null,
   );
 
-  const isAdmin = clerkRole === 'admin' || profile?.app_role === 'admin' || membership?.academy_role === 'admin';
+  const hasActiveAdminMembership = Boolean(membership?.active) && membership?.academy_role === 'admin';
+  const isAdmin = clerkRole === 'admin' || profile?.app_role === 'admin' || hasActiveAdminMembership;
 
   let role: Role = 'member';
   if (isAdmin) {
