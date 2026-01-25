@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { useAuth, useUser } from '@clerk/nextjs';
-import { useSupabase } from '@/lib/supabaseClient';
 import { resolveRoleFromMetadata, type Role } from '@/lib/roles';
 
 type User = {
@@ -31,28 +30,10 @@ type AuthState = {
   user: User | null;
   profile: Profile | null;
   membership: AcademyMembership | null;
-  supabaseRole: Role | null;
-};
-
-const deriveRole = (
-  profile: Profile | null,
-  membership: AcademyMembership | null,
-  clerkRole: Role | null,
-  supabaseRole: Role | null,
-): Role => {
-  const hasActiveAdminMembership = Boolean(membership?.active) && membership?.academy_role === 'admin';
-  const isAdmin = clerkRole === 'admin' || profile?.app_role === 'admin' || hasActiveAdminMembership;
-  if (isAdmin) return 'admin';
-
-  const isStudent =
-    clerkRole === 'student' || (Boolean(membership?.active) && membership?.academy_role === 'student');
-  if (isStudent) return 'student';
-
-  return profile?.app_role === 'student' ? 'student' : 'member';
+  role: Role | null;
 };
 
 export function useAuthProfile() {
-  const supabase = useSupabase();
   const { isLoaded, isSignedIn, sessionClaims, userId } = useAuth();
   const { user: clerkUser } = useUser();
   const [state, setState] = useState<AuthState>({
@@ -60,39 +41,46 @@ export function useAuthProfile() {
     user: null,
     profile: null,
     membership: null,
-    supabaseRole: null,
+    role: null,
   });
+  const clerkRole = resolveRoleFromMetadata(
+    clerkUser?.publicMetadata as Record<string, unknown> | null,
+    clerkUser?.unsafeMetadata as Record<string, unknown> | null,
+    sessionClaims?.publicMetadata as Record<string, unknown> | null,
+    sessionClaims?.unsafeMetadata as Record<string, unknown> | null,
+  );
 
-  const loadProfile = async (user: User) => {
-    if (!supabase) return;
+  const loadProfile = async (user: User, fallbackRole: Role | null) => {
+    try {
+      const response = await fetch('/api/profile', { method: 'GET' });
 
-    const [profileResult, membershipResult, jwtResult] = await Promise.all([
-      supabase
-        .from('profiles')
-        .select('clerk_id, email, app_role, full_name, avatar_url, created_at')
-        .eq('clerk_id', user.id)
-        .maybeSingle(),
-      supabase
-        .from('academy_memberships')
-        .select('academy_role, active')
-        .eq('clerk_id', user.id)
-        .maybeSingle(),
-      supabase.rpc('auth_jwt'),
-    ]);
+      if (!response.ok) {
+        throw new Error(`Profile fetch failed: ${response.status}`);
+      }
 
-    const supabaseRole = resolveRoleFromMetadata(
-      jwtResult.data?.app_metadata as Record<string, unknown> | null,
-      jwtResult.data?.user_metadata as Record<string, unknown> | null,
-      jwtResult.data as Record<string, unknown> | null,
-    );
+      const data = (await response.json()) as {
+        profile: Profile | null;
+        membership: AcademyMembership | null;
+        role: Role | null;
+      };
 
-    setState({
-      status: 'authenticated',
-      user,
-      profile: profileResult.data ?? null,
-      membership: membershipResult.data ?? null,
-      supabaseRole,
-    });
+      setState({
+        status: 'authenticated',
+        user,
+        profile: data.profile ?? null,
+        membership: data.membership ?? null,
+        role: data.role ?? fallbackRole ?? null,
+      });
+    } catch (error) {
+      console.error('Failed to load profile from API:', error);
+      setState({
+        status: 'authenticated',
+        user,
+        profile: null,
+        membership: null,
+        role: fallbackRole ?? null,
+      });
+    }
   };
 
   useEffect(() => {
@@ -101,44 +89,28 @@ export function useAuthProfile() {
     }
 
     if (!isSignedIn || !userId) {
-      setState({ status: 'unauthenticated', user: null, profile: null, membership: null, supabaseRole: null });
-      return;
-    }
-
-    if (!supabase) {
-      setState((prev) => ({ ...prev, status: 'loading' }));
+      setState({ status: 'unauthenticated', user: null, profile: null, membership: null, role: null });
       return;
     }
 
     const email = clerkUser?.primaryEmailAddress?.emailAddress ?? null;
-    const fullName = clerkUser?.fullName ?? null;
-    const avatarUrl = clerkUser?.imageUrl ?? null;
     const nextUser = { id: userId, email };
 
     // We rely on the server-side syncUser action to create the profile.
     // Client-side upsert is removed to prevent RLS 403 errors because standard users cannot freely UPSERT into profiles.
 
     void (async () => {
-      await loadProfile(nextUser);
+      await loadProfile(nextUser, clerkRole);
     })();
   }, [
     clerkUser?.primaryEmailAddress?.emailAddress,
-    clerkUser?.fullName,
-    clerkUser?.imageUrl,
     isLoaded,
     isSignedIn,
-    supabase,
     userId,
+    clerkRole,
   ]);
 
-  const clerkRole = resolveRoleFromMetadata(
-    clerkUser?.publicMetadata as Record<string, unknown> | null,
-    clerkUser?.unsafeMetadata as Record<string, unknown> | null,
-    sessionClaims?.publicMetadata as Record<string, unknown> | null,
-    sessionClaims?.unsafeMetadata as Record<string, unknown> | null,
-  );
-
-  const role = deriveRole(state.profile, state.membership, clerkRole, state.supabaseRole);
+  const role = state.role ?? clerkRole ?? 'member';
   const isAdmin = role === 'admin';
   const isStudent = role === 'student';
 

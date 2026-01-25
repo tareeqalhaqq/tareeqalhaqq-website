@@ -1,5 +1,5 @@
 import { auth, currentUser } from '@clerk/nextjs/server';
-import { createSupabaseClient } from '@/lib/supabase';
+import { createSupabaseServiceClient } from '@/lib/supabase';
 import { resolveRoleFromMetadata } from '@/lib/roles';
 
 export async function syncUserToSupabase() {
@@ -16,7 +16,7 @@ export async function syncUserToSupabase() {
     const fullName = user.fullName ?? null;
     const avatarUrl = user.imageUrl ?? null;
 
-    const supabase = await createSupabaseClient();
+    const supabase = createSupabaseServiceClient();
     const clerkRole = resolveRoleFromMetadata(user.publicMetadata, user.unsafeMetadata);
 
     const { error } = await supabase.from('profiles').upsert(

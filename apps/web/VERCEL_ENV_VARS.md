@@ -18,6 +18,28 @@ These are **REQUIRED** for Clerk authentication to work:
    - **Where to find it**: Clerk Dashboard → API Keys → Secret Key
    - **Example**: `sk_test_...` or `sk_live_...`
 
+## Supabase Variables
+
+These are **REQUIRED** for database access and admin/server-side authorization:
+
+1. **`NEXT_PUBLIC_SUPABASE_URL`**
+   - **Type**: Public (visible in client-side code)
+   - **Description**: Your Supabase project URL.
+   - **Where to find it**: Supabase Dashboard → Project Settings → API
+   - **Example**: `https://xyzcompany.supabase.co`
+
+2. **`NEXT_PUBLIC_SUPABASE_ANON_KEY`**
+   - **Type**: Public (visible in client-side code)
+   - **Description**: Supabase anonymous public key for client-side reads.
+   - **Where to find it**: Supabase Dashboard → Project Settings → API
+   - **Example**: `eyJhbGciOi...`
+
+3. **`SUPABASE_SERVICE_ROLE_KEY`**
+   - **Type**: Secret (server-side only)
+   - **Description**: Service role key used for admin/server actions (bypasses RLS).
+   - **Where to find it**: Supabase Dashboard → Project Settings → API
+   - **Example**: `eyJhbGciOi...`
+
 ## How to Set Environment Variables in Vercel
 
 1. Go to your Vercel project dashboard
