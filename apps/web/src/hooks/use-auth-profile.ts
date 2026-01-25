@@ -41,8 +41,7 @@ const deriveRole = (
   supabaseRole: Role | null,
 ): Role => {
   const hasActiveAdminMembership = Boolean(membership?.active) && membership?.academy_role === 'admin';
-  const isAdmin =
-    clerkRole === 'admin' || supabaseRole === 'admin' || profile?.app_role === 'admin' || hasActiveAdminMembership;
+  const isAdmin = clerkRole === 'admin' || profile?.app_role === 'admin' || hasActiveAdminMembership;
   if (isAdmin) return 'admin';
 
   const isStudent =
