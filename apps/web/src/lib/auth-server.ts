@@ -23,7 +23,7 @@ export async function getServerProfile() {
   // Let's optimize by handling the possibility of RLS failure gracefully or just fetching profile first if meaningful.
   // Actually, better: if the user JUST authenticated, Clerk might be fast, but Supabase might be cold.
 
-  const [profileResult, membershipResult] = await Promise.all([
+  const [profileResult, membershipResult, jwtResult] = await Promise.all([
     supabase
       .from('profiles')
       .select('app_role, full_name, email')
@@ -34,6 +34,7 @@ export async function getServerProfile() {
       .select('academy_role, active')
       .eq('clerk_id', userId)
       .maybeSingle(),
+    supabase.rpc('auth_jwt'),
   ]);
 
   const profile = profileResult.data;
