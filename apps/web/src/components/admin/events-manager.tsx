@@ -30,7 +30,6 @@ type EventRecord = {
   time: string | null;
   image_url: string | null;
   event_type: string | null;
-  is_virtual: boolean | null;
   created_at: string;
 };
 
@@ -139,8 +138,7 @@ export function EventsManager({ adminName }: EventsManagerProps) {
       date: event.date ?? '',
       time: normalizedTime,
       image_url: event.image_url ?? '',
-      // Default to tareeq since we can't save/load type in DB
-      event_type: 'tareeq',
+      event_type: event.event_type ?? 'tareeq',
       is_virtual: isVirtual,
     });
     setTbaState({
@@ -217,7 +215,6 @@ export function EventsManager({ adminName }: EventsManagerProps) {
         time: normalizedTime,
         image_url: normalizedImage,
         event_type: formState.event_type,
-        is_virtual: formState.is_virtual,
       };
 
       const endpoint = editingEvent ? `/api/admin/events/${editingEvent.id}` : '/api/admin/events';
@@ -293,7 +290,7 @@ export function EventsManager({ adminName }: EventsManagerProps) {
         const isVirtual = event.location === 'Virtual';
         return {
           ...event,
-          eventLabel: 'Tareeq Al Haqq', // Default since DB has no column
+          eventLabel: event.event_type === 'markaz' ? 'Markaz Al Haqq' : 'Tareeq Al Haqq',
           formattedDate: event.date
             ? new Date(event.date).toLocaleDateString('en-GB', { dateStyle: 'medium' })
             : 'To be announced',

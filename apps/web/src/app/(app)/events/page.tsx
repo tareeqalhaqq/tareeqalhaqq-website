@@ -15,7 +15,6 @@ type EventRecord = {
   time: string | null;
   image_url: string | null;
   event_type: string | null;
-  is_virtual: boolean | null;
 };
 
 const formatDate = (date: string | null) => {
@@ -92,7 +91,8 @@ export default function EventsPage() {
             events.map((event: EventRecord) => {
               const eventLabel =
                 event.event_type === 'markaz' ? 'Markaz Al Haqq Event' : 'Tareeq Al Haqq Event';
-              const locationLabel = event.is_virtual ? 'Virtual' : event.location ?? 'Location TBA';
+              const isVirtual = event.location === 'Virtual';
+              const locationLabel = isVirtual ? 'Virtual' : event.location ?? 'Location TBA';
               return (
                 <div key={event.id} className="glass-panel overflow-hidden p-0">
                   <div className="grid gap-0 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] md:items-stretch">
@@ -142,7 +142,7 @@ export default function EventsPage() {
                             {locationLabel}
                           </span>
                         </div>
-                        {event.is_virtual && (
+                        {isVirtual && (
                           <span className="inline-flex w-fit rounded-full border border-primary/30 px-3 py-1 text-xs uppercase tracking-[0.3em] text-primary/80">
                             Virtual Event
                           </span>
