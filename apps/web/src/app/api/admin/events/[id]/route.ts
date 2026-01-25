@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
 import { assertAdmin } from '@/lib/auth-server';
 
-// Verified against schema: 'event_type' and 'is_virtual' do NOT exist.
-const selectFields = 'id, title, description, location, date, time, image_url, created_at';
+const selectFields = 'id, title, description, location, date, time, image_url, event_type, created_at';
 const defaultEventImage = '/images/logo1.png';
 
 type RouteParams = {
@@ -28,7 +27,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
       return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
     }
 
-    const { title, description, location, date, time, image_url } = payload || {};
+    const { title, description, location, date, time, image_url, event_type } = payload || {};
 
     if (!title || !description) {
       return NextResponse.json({ error: 'Missing required fields: title, description' }, { status: 400 });
@@ -38,6 +37,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
     const normalizedDate = date || null;
     const normalizedTime = time || null;
     const normalizedImage = image_url === null ? null : image_url?.trim() || defaultEventImage;
+    const normalizedEventType = event_type === 'markaz' ? 'markaz' : 'tareeq';
 
     const { data, error } = await supabase
       .from('events')
@@ -48,6 +48,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
         date: normalizedDate,
         time: normalizedTime,
         image_url: normalizedImage,
+        event_type: normalizedEventType,
       })
       .eq('id', eventId)
       .select(selectFields)

@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
 import { assertAdmin } from '@/lib/auth-server';
 
-// Verified against schema: 'event_type' and 'is_virtual' do NOT exist.
-const selectFields = 'id, title, description, location, date, time, image_url, created_at';
+const selectFields = 'id, title, description, location, date, time, image_url, event_type, created_at';
 const defaultEventImage = '/images/logo1.png';
 
 export async function GET() {
@@ -45,14 +44,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
     }
 
-    const {
-      title,
-      description,
-      location,
-      date,
-      time,
-      image_url,
-    } = payload || {};
+    const { title, description, location, date, time, image_url, event_type } = payload || {};
 
     // Basic validation
     if (!title || !description) {
@@ -63,9 +55,7 @@ export async function POST(request: Request) {
     const normalizedDate = date || null;
     const normalizedTime = time || null;
     const normalizedImage = image_url?.trim() || defaultEventImage;
-
-    // NOTE: Schema confirmed: 'events' table does NOT have event_type or is_virtual.
-    // We strictly insert only the columns shown in the user's schema screenshot.
+    const normalizedEventType = event_type === 'markaz' ? 'markaz' : 'tareeq';
 
     const { data, error } = await supabase
       .from('events')
@@ -76,6 +66,7 @@ export async function POST(request: Request) {
         date: normalizedDate,
         time: normalizedTime,
         image_url: normalizedImage,
+        event_type: normalizedEventType,
         created_by_clerk: userId,
       })
       .select(selectFields)
