@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { Calendar, Clock, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 export const dynamic = 'force-dynamic';
 
@@ -163,19 +164,27 @@ export default function EventsPage() {
                       <p className="text-sm text-white/70">{event.description}</p>
                       {isVirtual && event.form_embed_url && (
                         <div className="space-y-4">
-                          <Button asChild className="w-full sm:w-auto">
-                            <a href={event.form_embed_url} target="_blank" rel="noreferrer">
-                              Fill out form now
-                            </a>
-                          </Button>
-                          <div className="overflow-hidden rounded-xl border border-white/10 bg-black/40">
-                            <iframe
-                              title={`${event.title} registration form`}
-                              src={event.form_embed_url}
-                              className="h-[520px] w-full"
-                              loading="lazy"
-                            />
-                          </div>
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button className="w-full sm:w-auto">Open registration form</Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-h-[90vh] w-[calc(100%-2rem)] max-w-4xl gap-6 overflow-hidden border-white/10 bg-neutral-950 p-4 text-white sm:p-6">
+                              <DialogHeader className="text-left">
+                                <DialogTitle className="text-xl text-white">Register for {event.title}</DialogTitle>
+                                <DialogDescription className="text-sm text-white/70">
+                                  Complete the form below to confirm your attendance.
+                                </DialogDescription>
+                              </DialogHeader>
+                              <div className="overflow-hidden rounded-xl border border-white/10 bg-black/40">
+                                <iframe
+                                  title={`${event.title} registration form`}
+                                  src={event.form_embed_url}
+                                  className="h-[70vh] w-full"
+                                  loading="lazy"
+                                />
+                              </div>
+                            </DialogContent>
+                          </Dialog>
                         </div>
                       )}
                     </div>
