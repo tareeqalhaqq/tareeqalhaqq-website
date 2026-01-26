@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { Calendar, Clock, MapPin } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,6 +16,8 @@ type EventRecord = {
   time: string | null;
   image_url: string | null;
   event_type: string | null;
+  is_ongoing: boolean | null;
+  form_embed_url: string | null;
 };
 
 const formatDate = (date: string | null) => {
@@ -93,6 +96,8 @@ export default function EventsPage() {
                 event.event_type === 'markaz' ? 'Markaz Al Haqq Event' : 'Tareeq Al Haqq Event';
               const isVirtual = event.location === 'Virtual';
               const locationLabel = isVirtual ? 'Virtual' : event.location ?? 'Location TBA';
+              const displayDate = event.is_ongoing ? 'Ongoing' : formatDate(event.date);
+              const displayTime = event.is_ongoing ? 'In progress' : event.time ?? 'Time TBA';
               return (
                 <div key={event.id} className="glass-panel overflow-hidden p-0">
                   <div className="grid gap-0 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] md:items-stretch">
@@ -129,12 +134,12 @@ export default function EventsPage() {
                         <div className="flex flex-col gap-3 text-sm text-white/70 md:flex-row md:items-center">
                           <span className="flex items-center gap-2">
                             <Calendar className="h-4 w-4 text-primary" />
-                            {formatDate(event.date)}
+                            {displayDate}
                           </span>
                           <span className="hidden h-1 w-1 rounded-full bg-primary/60 md:inline-block" />
                           <span className="flex items-center gap-2">
                             <Clock className="h-4 w-4 text-primary" />
-                            {event.time ?? 'Time TBA'}
+                            {displayTime}
                           </span>
                           <span className="hidden h-1 w-1 rounded-full bg-primary/60 md:inline-block" />
                           <span className="flex items-center gap-2">
@@ -142,13 +147,37 @@ export default function EventsPage() {
                             {locationLabel}
                           </span>
                         </div>
-                        {isVirtual && (
-                          <span className="inline-flex w-fit rounded-full border border-primary/30 px-3 py-1 text-xs uppercase tracking-[0.3em] text-primary/80">
-                            Virtual Event
-                          </span>
-                        )}
+                        <div className="flex flex-wrap gap-2">
+                          {event.is_ongoing && (
+                            <span className="inline-flex w-fit rounded-full border border-primary/30 px-3 py-1 text-xs uppercase tracking-[0.3em] text-primary/80">
+                              Ongoing Event
+                            </span>
+                          )}
+                          {isVirtual && (
+                            <span className="inline-flex w-fit rounded-full border border-primary/30 px-3 py-1 text-xs uppercase tracking-[0.3em] text-primary/80">
+                              Virtual Event
+                            </span>
+                          )}
+                        </div>
                       </div>
                       <p className="text-sm text-white/70">{event.description}</p>
+                      {isVirtual && event.form_embed_url && (
+                        <div className="space-y-4">
+                          <Button asChild className="w-full sm:w-auto">
+                            <a href={event.form_embed_url} target="_blank" rel="noreferrer">
+                              Fill out form now
+                            </a>
+                          </Button>
+                          <div className="overflow-hidden rounded-xl border border-white/10 bg-black/40">
+                            <iframe
+                              title={`${event.title} registration form`}
+                              src={event.form_embed_url}
+                              className="h-[520px] w-full"
+                              loading="lazy"
+                            />
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

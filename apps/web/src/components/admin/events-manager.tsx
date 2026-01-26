@@ -30,6 +30,8 @@ type EventRecord = {
   time: string | null;
   image_url: string | null;
   event_type: string | null;
+  is_ongoing: boolean | null;
+  form_embed_url: string | null;
   created_at: string;
 };
 
@@ -42,6 +44,8 @@ const emptyForm = {
   image_url: '',
   event_type: 'tareeq',
   is_virtual: false,
+  is_ongoing: false,
+  form_embed_url: '',
 };
 
 type FormState = typeof emptyForm;
@@ -51,7 +55,7 @@ type TBAState = {
   time: boolean;
   image_url: boolean;
 };
-type TextField = Exclude<keyof FormState, 'is_virtual'>;
+type TextField = Exclude<keyof FormState, 'is_virtual' | 'is_ongoing'>;
 
 type EventsManagerProps = {
   adminName?: string;
@@ -140,6 +144,8 @@ export function EventsManager({ adminName }: EventsManagerProps) {
       image_url: event.image_url ?? '',
       event_type: event.event_type ?? 'tareeq',
       is_virtual: isVirtual,
+      is_ongoing: Boolean(event.is_ongoing),
+      form_embed_url: event.form_embed_url ?? '',
     });
     setTbaState({
       location: !isVirtual && isTbaLocation,
@@ -207,6 +213,7 @@ export function EventsManager({ adminName }: EventsManagerProps) {
       const normalizedDate = tbaState.date ? null : formState.date || null;
       const normalizedTime = tbaState.time ? null : formState.time || null;
       const normalizedImage = tbaState.image_url ? null : formState.image_url || null;
+      const normalizedFormEmbedUrl = formState.is_virtual ? formState.form_embed_url.trim() || null : null;
       const payload = {
         title: formState.title,
         description: formState.description,
@@ -215,6 +222,8 @@ export function EventsManager({ adminName }: EventsManagerProps) {
         time: normalizedTime,
         image_url: normalizedImage,
         event_type: formState.event_type,
+        is_ongoing: formState.is_ongoing,
+        form_embed_url: normalizedFormEmbedUrl,
       };
 
       const endpoint = editingEvent ? `/api/admin/events/${editingEvent.id}` : '/api/admin/events';
@@ -291,11 +300,14 @@ export function EventsManager({ adminName }: EventsManagerProps) {
         return {
           ...event,
           eventLabel: event.event_type === 'markaz' ? 'Markaz Al Haqq' : 'Tareeq Al Haqq',
-          formattedDate: event.date
-            ? new Date(event.date).toLocaleDateString('en-GB', { dateStyle: 'medium' })
-            : 'To be announced',
-          formattedTime: event.time || 'To be announced',
+          formattedDate: event.is_ongoing
+            ? 'Ongoing'
+            : event.date
+              ? new Date(event.date).toLocaleDateString('en-GB', { dateStyle: 'medium' })
+              : 'To be announced',
+          formattedTime: event.is_ongoing ? 'In progress' : event.time || 'To be announced',
           formattedLocation: isVirtual ? 'Virtual' : event.location || 'To be announced',
+          hasFormEmbed: Boolean(event.form_embed_url),
         };
       }),
     [events],
@@ -436,20 +448,33 @@ export function EventsManager({ adminName }: EventsManagerProps) {
                   <div className="space-y-2">
                     <div className="flex items-center justify-between gap-3">
                       <Label htmlFor="event-date">Date</Label>
-                      <label className="flex items-center gap-2 text-xs text-white/60">
-                        <input
-                          type="checkbox"
-                          checked={tbaState.date}
-                          onChange={(event) => {
-                            const checked = event.target.checked;
-                            setTbaState((prev) => ({ ...prev, date: checked }));
-                            if (checked) {
-                              setFormState((prev) => ({ ...prev, date: '' }));
-                            }
-                          }}
-                        />
-                        To be announced
-                      </label>
+                      <div className="flex flex-wrap items-center gap-4 text-xs text-white/60">
+                        <label className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            checked={formState.is_ongoing}
+                            onChange={(event) => {
+                              const checked = event.target.checked;
+                              setFormState((prev) => ({ ...prev, is_ongoing: checked }));
+                            }}
+                          />
+                          Ongoing
+                        </label>
+                        <label className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            checked={tbaState.date}
+                            onChange={(event) => {
+                              const checked = event.target.checked;
+                              setTbaState((prev) => ({ ...prev, date: checked }));
+                              if (checked) {
+                                setFormState((prev) => ({ ...prev, date: '' }));
+                              }
+                            }}
+                          />
+                          To be announced
+                        </label>
+                      </div>
                     </div>
                     <Input
                       id="event-date"
@@ -486,6 +511,21 @@ export function EventsManager({ adminName }: EventsManagerProps) {
                       disabled={tbaState.time}
                     />
                   </div>
+                  {formState.is_virtual && (
+                    <div className="space-y-2 md:col-span-2">
+                      <Label htmlFor="event-form-embed">Virtual form embed URL</Label>
+                      <Input
+                        id="event-form-embed"
+                        value={formState.form_embed_url}
+                        onChange={(event) => handleChange('form_embed_url', event.target.value)}
+                        placeholder="https://docs.google.com/forms/..."
+                      />
+                      <p className="text-xs text-white/50">
+                        Paste the embed URL (iframe src) for your virtual event registration form. This will show a
+                        “Fill out form now” button on the public events page.
+                      </p>
+                    </div>
+                  )}
                   <div className="space-y-2 md:col-span-2">
                     <div className="flex items-center justify-between gap-3">
                       <Label htmlFor="event-image">Image URL</Label>
@@ -543,6 +583,7 @@ export function EventsManager({ adminName }: EventsManagerProps) {
             <TableRow>
               <TableHead className="text-white/60">Event</TableHead>
               <TableHead className="text-white/60">Label</TableHead>
+              <TableHead className="text-white/60">Status</TableHead>
               <TableHead className="text-white/60">Date</TableHead>
               <TableHead className="text-white/60">Time</TableHead>
               <TableHead className="text-white/60">Location</TableHead>
@@ -552,14 +593,14 @@ export function EventsManager({ adminName }: EventsManagerProps) {
           <TableBody>
             {status === 'loading' && (
               <TableRow>
-                <TableCell colSpan={6} className="text-center text-sm text-white/60">
+                <TableCell colSpan={7} className="text-center text-sm text-white/60">
                   Loading events…
                 </TableCell>
               </TableRow>
             )}
             {status === 'ready' && events.length === 0 && (
               <TableRow>
-                <TableCell colSpan={6} className="text-center text-sm text-white/60">
+                <TableCell colSpan={7} className="text-center text-sm text-white/60">
                   No events available yet.
                 </TableCell>
               </TableRow>
@@ -577,6 +618,20 @@ export function EventsManager({ adminName }: EventsManagerProps) {
                     <span className="inline-flex rounded-full border border-white/10 px-3 py-1 text-xs uppercase tracking-[0.3em] text-white/70">
                       {event.eventLabel}
                     </span>
+                  </TableCell>
+                  <TableCell className="align-top text-sm text-white/70">
+                    <div className="flex flex-col gap-2">
+                      {event.is_ongoing && (
+                        <span className="inline-flex w-fit rounded-full border border-primary/30 px-3 py-1 text-xs uppercase tracking-[0.3em] text-primary/80">
+                          Ongoing
+                        </span>
+                      )}
+                      {event.hasFormEmbed && (
+                        <span className="inline-flex w-fit rounded-full border border-white/10 px-3 py-1 text-xs uppercase tracking-[0.3em] text-white/60">
+                          Form embedded
+                        </span>
+                      )}
+                    </div>
                   </TableCell>
                   <TableCell className="align-top text-sm text-white/70">{event.formattedDate}</TableCell>
                   <TableCell className="align-top text-sm text-white/70">{event.formattedTime}</TableCell>

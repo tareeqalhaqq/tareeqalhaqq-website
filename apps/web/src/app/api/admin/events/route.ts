@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { assertAdmin } from '@/lib/auth-server';
 
-const selectFields = 'id, title, description, location, date, time, image_url, event_type, created_at';
+const selectFields =
+  'id, title, description, location, date, time, image_url, event_type, is_ongoing, form_embed_url, created_at';
 const defaultEventImage = '/images/logo1.png';
 
 export async function GET() {
@@ -44,7 +45,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
     }
 
-    const { title, description, location, date, time, image_url, event_type } = payload || {};
+    const { title, description, location, date, time, image_url, event_type, is_ongoing, form_embed_url } =
+      payload || {};
 
     // Basic validation
     if (!title || !description) {
@@ -56,6 +58,8 @@ export async function POST(request: Request) {
     const normalizedTime = time || null;
     const normalizedImage = image_url?.trim() || defaultEventImage;
     const normalizedEventType = event_type === 'markaz' ? 'markaz' : 'tareeq';
+    const normalizedFormEmbedUrl = form_embed_url?.trim() || null;
+    const normalizedOngoing = Boolean(is_ongoing);
 
     const { data, error } = await supabase
       .from('events')
@@ -67,6 +71,8 @@ export async function POST(request: Request) {
         time: normalizedTime,
         image_url: normalizedImage,
         event_type: normalizedEventType,
+        is_ongoing: normalizedOngoing,
+        form_embed_url: normalizedFormEmbedUrl,
         created_by_clerk: userId,
       })
       .select(selectFields)
