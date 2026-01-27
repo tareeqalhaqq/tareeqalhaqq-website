@@ -76,18 +76,18 @@ export default function EventsPage() {
 
   return (
     <section className="page-section">
-      <div className="page-section__inner space-y-12">
-        <div className="space-y-4 text-center">
+      <div className="page-section__inner space-y-10">
+        <div className="space-y-3 text-center">
           <p className="eyebrow">Gatherings</p>
-          <h1 className="text-4xl uppercase tracking-[0.2em] text-white md:text-5xl">Upcoming Events</h1>
-          <p className="mx-auto max-w-3xl text-base text-white/70">
+          <h1 className="text-3xl uppercase tracking-[0.16em] text-white md:text-4xl">Upcoming Events</h1>
+          <p className="mx-auto max-w-2xl text-sm text-white/70 md:text-base">
             Join us for workshops and seminars focused on practical learning, research skills, and applying authentic guidance in everyday life.
           </p>
         </div>
 
-        <div className="space-y-10">
+        <div className="space-y-6">
           {showUnableToLoad && (
-            <div className="glass-panel p-8 text-center text-sm text-white/70">
+            <div className="glass-panel p-6 text-center text-sm text-white/70">
               Unable to load events right now. Please check back soon.
             </div>
           )}
@@ -102,7 +102,7 @@ export default function EventsPage() {
               return (
                 <div key={event.id} className="glass-panel overflow-hidden p-0">
                   <div className="grid gap-0 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] md:items-stretch">
-                    <div className="relative min-h-[220px] overflow-hidden md:min-h-[300px]">
+                    <div className="relative min-h-[200px] overflow-hidden md:min-h-[240px]">
                       {event.image_url ? (
                         <>
                           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -120,19 +120,19 @@ export default function EventsPage() {
                             <img
                               src="/images/logo1.png"
                               alt="Tareeq Al Haqq logo"
-                              className="h-24 w-24 object-contain md:h-32 md:w-32"
+                              className="h-20 w-20 object-contain md:h-24 md:w-24"
                             />
                           </div>
                         </>
                       )}
                     </div>
-                    <div className="flex flex-col justify-between space-y-6 p-8">
-                      <div className="space-y-4">
-                        <p className="text-xs uppercase tracking-[0.4em] text-primary/80">{eventLabel}</p>
-                        <h2 className="text-2xl font-headline uppercase tracking-[0.2em] text-white">
+                    <div className="flex flex-col justify-between space-y-5 p-6 md:p-7">
+                      <div className="space-y-3">
+                        <p className="text-[0.65rem] uppercase tracking-[0.32em] text-primary/80">{eventLabel}</p>
+                        <h2 className="text-xl font-headline uppercase tracking-[0.16em] text-white md:text-2xl">
                           {event.title}
                         </h2>
-                        <div className="flex flex-col gap-3 text-sm text-white/70 md:flex-row md:items-center">
+                        <div className="flex flex-col gap-3 text-xs text-white/70 md:flex-row md:items-center md:text-sm">
                           <span className="flex items-center gap-2">
                             <Calendar className="h-4 w-4 text-primary" />
                             {displayDate}
@@ -150,18 +150,18 @@ export default function EventsPage() {
                         </div>
                         <div className="flex flex-wrap gap-2">
                           {event.is_ongoing && (
-                            <span className="inline-flex w-fit rounded-full border border-primary/30 px-3 py-1 text-xs uppercase tracking-[0.3em] text-primary/80">
+                            <span className="inline-flex w-fit rounded-full border border-primary/30 px-3 py-1 text-[0.65rem] uppercase tracking-[0.28em] text-primary/80">
                               Ongoing Event
                             </span>
                           )}
                           {isVirtual && (
-                            <span className="inline-flex w-fit rounded-full border border-primary/30 px-3 py-1 text-xs uppercase tracking-[0.3em] text-primary/80">
+                            <span className="inline-flex w-fit rounded-full border border-primary/30 px-3 py-1 text-[0.65rem] uppercase tracking-[0.28em] text-primary/80">
                               Virtual Event
                             </span>
                           )}
                         </div>
                       </div>
-                      <p className="text-sm text-white/70">{event.description}</p>
+                      <p className="text-sm leading-relaxed text-white/70">{event.description}</p>
                       {isVirtual && event.form_embed_url && (
                         <div className="space-y-4">
                           <Dialog>
