@@ -17,17 +17,19 @@ export default function AboutPage() {
         </div>
 
         {aboutImage && (
-          <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 shadow-2xl shadow-black/40">
+          <div className="relative mx-auto w-full max-w-4xl overflow-hidden rounded-3xl border border-white/10 bg-white/5 shadow-2xl shadow-black/40 aspect-[3/2]">
             <Image
               src={aboutImage.imageUrl}
               alt={aboutImage.description}
               data-ai-hint={aboutImage.imageHint}
-              width={1200}
-              height={800}
-              className="h-full w-full object-cover"
+              fill
+              sizes="(min-width: 1024px) 768px, (min-width: 640px) 80vw, 100vw"
+              className="object-cover"
             />
-            <div className="absolute bottom-0 left-0 right-0 p-6">
-              <p className="text-xs uppercase tracking-[0.4em] text-white/70">Documenting authentic scholarship in action</p>
+            <div className="absolute bottom-0 left-0 right-0 p-5">
+              <p className="text-[0.65rem] uppercase tracking-[0.32em] text-white/70">
+                Documenting authentic scholarship in action
+              </p>
             </div>
           </div>
         )}
