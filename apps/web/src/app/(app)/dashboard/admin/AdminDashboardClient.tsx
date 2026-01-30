@@ -26,6 +26,9 @@ export function AdminDashboardClient({ profile }: AdminDashboardClientProps) {
             <Button asChild>
               <a href="https://markazalhaqq.org">View academy site</a>
             </Button>
+            <Button asChild variant="secondary">
+              <a href="/mobile">Open mobile app</a>
+            </Button>
             <Button asChild variant="outline">
               <a href="/logout">Sign out</a>
             </Button>
