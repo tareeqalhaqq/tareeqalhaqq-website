@@ -104,14 +104,7 @@ export default function MobileBridgePage() {
           />
         </div>
 
-        <p className="text-xs text-white/50">
-          If the app does not appear, start the Expo web server locally with
-          <code className="mx-1 rounded bg-white/10 px-2 py-1">npm --workspace apps/tareeqalhaqq-mobile run web</code>
-          or set <code className="mx-1 rounded bg-white/10 px-2 py-1">NEXT_PUBLIC_EXPO_WEB_URL</code> to your deployed Expo
-          web URL.
-        </p>
       </div>
     </main>
   );
 }
-
