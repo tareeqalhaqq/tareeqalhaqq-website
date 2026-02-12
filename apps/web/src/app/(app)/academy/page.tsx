@@ -9,7 +9,7 @@ export default function AcademyPage() {
           <p className="eyebrow">Tareeq Al Haqq Academy</p>
           <h1 className="text-4xl uppercase tracking-[0.2em] text-white md:text-5xl">Launching 2026</h1>
           <p className="mx-auto max-w-3xl text-base text-white/70">
-            The Academy will extend the Tareeq Al Haqq platform with structured courses, guided readings, and collaborative cohorts built around authenticated sources. Expect a full curriculum that blends live instruction, scholar-vetted materials, and consistent mentorship so learners can progress with clarity from foundations to advanced study.
+            The Academy will extend the Tareeq Al Haqq platform with structured courses, guided readings, and collaborative cohorts built around authenticated sources. The curriculum combines live instruction, scholar-vetted materials, and consistent mentorship so learners can progress with clarity from foundations to advanced study.
           </p>
         </div>
 
@@ -33,7 +33,7 @@ export default function AcademyPage() {
               ))}
             </div>
             <p className="text-sm text-white/70">
-              The Markaz Al Haqq academy experience is directed by Mustafa Asif, with scholars from the New Jersey and Pennsylvania area, ensuring the learning track stays anchored to authentic sources and a supportive student journey.
+              The academy programme is directed by Mustafa Asif in partnership with Markaz Al Haqq, working alongside qualified scholars to ensure every learning track stays anchored to authentic sources and a supportive student journey.
             </p>
           </div>
           <div className="glass-panel space-y-4">

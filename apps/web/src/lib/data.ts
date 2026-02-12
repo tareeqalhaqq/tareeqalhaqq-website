@@ -61,6 +61,18 @@ export const baseContent = [
     description: 'Discover courses and structured learning tracks.',
     href: '/academy',
   },
+  {
+    type: 'App Development',
+    title: 'App Development',
+    description: 'Purpose-driven mobile and web apps for the Muslim community.',
+    href: '/about#app-development',
+  },
+  {
+    type: 'App Development',
+    title: 'Mutoon AI',
+    description: 'AI-powered tool to navigate, search, and cross-reference classical Islamic texts.',
+    href: '/about#app-development',
+  },
   { type: 'Store', title: 'Store', description: 'Shop curated resources and support the mission.', href: 'https://store.tareeqalhaqq.org' },
   ...academyCourses.map((course) => ({
     type: 'Course',
