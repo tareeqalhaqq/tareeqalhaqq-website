@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { useAuthProfile } from '@/hooks/use-auth-profile';
 
+export const dynamic = 'force-dynamic';
+
 export default function AcademyPortalPage() {
   const { status, profile, user, isAdmin, role } = useAuthProfile();
   const displayName = profile?.full_name ?? user?.email ?? 'Student';
