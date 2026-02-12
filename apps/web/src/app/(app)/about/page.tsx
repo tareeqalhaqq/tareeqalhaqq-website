@@ -1,5 +1,6 @@
 
 import Image from "next/image";
+import { Smartphone, BrainCircuit } from "lucide-react";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 
 export default function AboutPage() {
@@ -12,7 +13,7 @@ export default function AboutPage() {
           <p className="eyebrow">Our Heritage</p>
           <h1 className="text-4xl uppercase tracking-[0.2em] text-white md:text-5xl">About Tareeq Al Haqq</h1>
           <p className="mx-auto max-w-3xl text-base text-white/70">
-            Tareeq Al Haqq is a neutral platform dedicated to making authentic Islamic knowledge accessible with clarity, context, and trustworthy sourcing. Founded by Mustafa Asif, the initiative prioritises verified scholarship and a calm, modern learning experience.
+            Tareeq Al Haqq is a platform dedicated to making authentic Islamic knowledge accessible with clarity, context, and trustworthy sourcing. Founded by Mustafa Asif, the initiative pairs verified scholarship with modern technology to create a focused learning experience.
           </p>
         </div>
 
@@ -36,7 +37,7 @@ export default function AboutPage() {
 
         <div className="glass-panel space-y-8 text-left text-white/80">
           <p>
-            Built by researchers, editors, and teachers, Tareeq Al Haqq curates dependable references, commentary, and learning experiences so anyone can explore the faith with confidence under the guidance of its founder, Mustafa Asif.
+            Tareeq Al Haqq curates dependable references, commentary, and learning tools so anyone can study the faith with confidence. The team combines traditional scholarship with thoughtful software to keep resources organised and accessible.
           </p>
 
           <div className="grid gap-8 md:grid-cols-3">
@@ -45,7 +46,7 @@ export default function AboutPage() {
                 <h2 className="text-lg font-headline uppercase tracking-[0.2em] text-white">{heading}</h2>
                 <p className="mt-3 text-sm text-white/70">
                   {heading === "Our History" &&
-                    "Founded as a response to scattered resources, the platform began by digitising trusted libraries and recording teacher-approved study plans for contemporary students."}
+                    "Founded to address scattered and unverified resources, the platform began by curating trusted libraries and structuring teacher-approved study plans for contemporary learners."}
                   {heading === "Our Mission" &&
                     "We verify sources, design intuitive study tools, and connect learners with specialists so authentic guidance is easy to access and apply."}
                   {heading === "Our Vision" &&
@@ -53,6 +54,33 @@ export default function AboutPage() {
                 </p>
               </div>
             ))}
+          </div>
+
+          <div id="app-development" className="space-y-6">
+            <h2 className="text-lg font-headline uppercase tracking-[0.2em] text-white">App Development</h2>
+            <p className="text-sm text-white/70">
+              Beyond curating knowledge, we build purpose-driven software that serves the Muslim community. Our development work focuses on tools that are simple, reliable, and rooted in authentic scholarship.
+            </p>
+            <div className="grid gap-6 md:grid-cols-2">
+              <div className="rounded-3xl border border-white/10 bg-black/40 p-6 shadow-lg shadow-black/30">
+                <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                  <BrainCircuit className="h-5 w-5 text-primary" />
+                </div>
+                <h3 className="text-base font-headline uppercase tracking-[0.18em] text-white">Mutoon AI</h3>
+                <p className="mt-2 text-sm text-white/70">
+                  An AI-powered tool designed to help learners navigate classical Islamic texts (mutoon). Mutoon AI assists with searching, understanding, and cross-referencing primary sources so students can study traditional works more efficiently.
+                </p>
+              </div>
+              <div className="rounded-3xl border border-white/10 bg-black/40 p-6 shadow-lg shadow-black/30">
+                <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                  <Smartphone className="h-5 w-5 text-primary" />
+                </div>
+                <h3 className="text-base font-headline uppercase tracking-[0.18em] text-white">Mobile &amp; Web Apps</h3>
+                <p className="mt-2 text-sm text-white/70">
+                  We design and develop mobile and web applications that support Islamic learning, from verified athkar and reference tools to structured study platforms. Each app is built with care for accuracy and a clean user experience.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>

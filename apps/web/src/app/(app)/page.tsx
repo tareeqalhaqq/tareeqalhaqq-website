@@ -120,9 +120,9 @@ export default function Home() {
           >
             <motion.div className="space-y-6 text-left" variants={fadeUp}>
               <p className="eyebrow">Why Learners Trust Us</p>
-              <h2 className="text-3xl uppercase tracking-[0.18em] text-white md:text-4xl">Built for calm, focused study</h2>
+              <h2 className="text-3xl uppercase tracking-[0.18em] text-white md:text-4xl">Built for focused study</h2>
               <p className="text-base text-white/75">
-                Every feature is designed to reduce noise. Browse verified references, organise insights, and revisit essential concepts with ease.
+                Every tool is designed to reduce noise. Browse verified references, organise insights, and revisit essential concepts without distraction.
               </p>
               <div className="space-y-4">
                 {trustPoints.map((item) => (
@@ -168,9 +168,9 @@ export default function Home() {
           >
             <motion.div className="space-y-4" variants={fadeUp}>
               <p className="eyebrow">Key Pillars</p>
-              <h2 className="text-3xl uppercase tracking-[0.18em] text-white md:text-4xl">Everything you need, nothing you don't</h2>
+              <h2 className="text-3xl uppercase tracking-[0.18em] text-white md:text-4xl">What We Provide</h2>
               <p className="mx-auto max-w-2xl text-base text-white/75">
-                These essentials keep the experience light while covering what matters for your learning journey.
+                Core pillars that keep the experience focused on what matters for your learning journey.
               </p>
             </motion.div>
             <div className="grid gap-8 md:grid-cols-3">
