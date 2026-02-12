@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { useAuthProfile } from '@/hooks/use-auth-profile';
 
+export const dynamic = 'force-dynamic';
+
 export default function StudentDashboardPage() {
   const { status, profile, role } = useAuthProfile();
   const isAuthorized = status === 'authenticated' && role === 'student';

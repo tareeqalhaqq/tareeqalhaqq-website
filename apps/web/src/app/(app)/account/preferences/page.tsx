@@ -8,6 +8,8 @@ import { UserProfile } from '@clerk/nextjs';
 import { Button } from '@/components/ui/button';
 import { useAuthProfile } from '@/hooks/use-auth-profile';
 
+export const dynamic = 'force-dynamic';
+
 export default function AccountPreferencesPage() {
   const router = useRouter();
   const { status, user } = useAuthProfile();

@@ -4,6 +4,8 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useClerk } from '@clerk/nextjs';
 
+export const dynamic = 'force-dynamic';
+
 export default function LogoutPage() {
   const router = useRouter();
   const { signOut } = useClerk();

@@ -10,6 +10,8 @@ const EXPO_WEB_URL =
   process.env.NEXT_PUBLIC_EXPO_WEB_URL || 'http://localhost:8081';
 const EXPO_ORIGIN = new URL(EXPO_WEB_URL).origin;
 
+export const dynamic = 'force-dynamic';
+
 export default function MobileBridgePage() {
   const router = useRouter();
   const iframeRef = useRef<HTMLIFrameElement>(null);
