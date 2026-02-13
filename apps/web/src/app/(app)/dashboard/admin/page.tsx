@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { redirect } from 'next/navigation';
 import { AdminDashboardClient } from './AdminDashboardClient';
 import { getServerProfile } from '@/lib/auth-server';
