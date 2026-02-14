@@ -16,17 +16,19 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Menu, Search, ChevronDown } from "lucide-react";
 import dynamic from "next/dynamic";
-import {
-  SignedIn,
-  SignedOut,
-  UserButton,
-} from "@clerk/nextjs";
+import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { clerkAuthAppearance } from "@/lib/clerk-appearance";
 
 const SearchDialog = dynamic(
   () => import("@/components/search-dialog").then((mod) => mod.SearchDialog),
   { ssr: false }
 );
+
+type HeaderLink = {
+  name: string;
+  href?: string;
+  subLinks?: Array<{ name: string; href: string }>;
+};
 
 const dashboardLinks = [
   { name: "Dashboard", href: "/dashboard" },
@@ -38,6 +40,8 @@ export default function Header() {
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isSearchOpen, setSearchOpen] = useState(false);
   const isClerkConfigured = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
+
+  const signedOutLinks: HeaderLink[] = navLinks;
 
   const SignedOutContent = ({ children }: { children: ReactNode }) =>
     isClerkConfigured ? <SignedOut>{children}</SignedOut> : <>{children}</>;
@@ -55,7 +59,7 @@ export default function Header() {
 
           <nav className="hidden items-center space-x-3 text-xs font-semibold uppercase tracking-[0.22em] md:flex lg:space-x-5">
             <SignedOutContent>
-              {navLinks.map((link) =>
+              {signedOutLinks.map((link) =>
                 link.subLinks ? (
                   <DropdownMenu key={link.name}>
                     <DropdownMenuTrigger asChild>
@@ -128,10 +132,7 @@ export default function Header() {
               </div>
             </SignedOutContent>
             <SignedInContent>
-              <UserButton
-                appearance={clerkAuthAppearance}
-                afterSignOutUrl="/"
-              />
+              <UserButton appearance={clerkAuthAppearance} afterSignOutUrl="/" />
             </SignedInContent>
             <Sheet open={isMobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild className="md:hidden">
@@ -170,7 +171,7 @@ export default function Header() {
                       </div>
                     </SignedInContent>
                     <SignedOutContent>
-                      {navLinks.map((link) => (
+                      {signedOutLinks.map((link) => (
                         <div key={link.name}>
                           {link.subLinks ? (
                             <div className="space-y-3">
@@ -217,10 +218,7 @@ export default function Header() {
                     </SignedOutContent>
                     <SignedInContent>
                       <div className="flex items-center justify-center">
-                        <UserButton
-                          appearance={clerkAuthAppearance}
-                          afterSignOutUrl="/"
-                        />
+                        <UserButton appearance={clerkAuthAppearance} afterSignOutUrl="/" />
                       </div>
                     </SignedInContent>
                   </div>
