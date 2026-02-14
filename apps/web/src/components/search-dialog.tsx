@@ -27,6 +27,11 @@ export function SearchDialog({ open, onOpenChange }: { open: boolean, onOpenChan
   const supabase = useSupabase();
 
   useEffect(() => {
+    if (!supabase) {
+      setEventResults([]);
+      return;
+    }
+
     let isMounted = true;
     const loadEvents = async () => {
       const { data } = await supabase

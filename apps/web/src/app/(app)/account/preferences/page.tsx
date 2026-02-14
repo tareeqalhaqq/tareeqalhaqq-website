@@ -11,7 +11,23 @@ import { useAuthProfile } from '@/hooks/use-auth-profile';
 export const dynamic = 'force-dynamic';
 
 export default function AccountPreferencesPage() {
+  const isClerkConfigured = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
   const router = useRouter();
+
+  if (!isClerkConfigured) {
+    return (
+      <section className="min-h-screen px-4 pb-16 pt-24 sm:px-6 lg:px-8">
+        <div className="mx-auto w-full max-w-6xl space-y-3 text-white">
+          <h1 className="text-3xl font-semibold">Account settings unavailable</h1>
+          <p className="text-sm text-white/70">Authentication is not configured for this environment.</p>
+          <Button asChild variant="ghost" size="sm">
+            <Link href="/">Return home</Link>
+          </Button>
+        </div>
+      </section>
+    );
+  }
+
   const { status, user } = useAuthProfile();
 
   useEffect(() => {
