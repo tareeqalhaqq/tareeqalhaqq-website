@@ -3,6 +3,7 @@ export const navLinks = [
   { name: 'About', href: '/about' },
   { name: 'Academy', href: '/academy' },
   { name: 'Events', href: '/events' },
+  { name: 'Active Projects', href: '/active-projects' },
   { name: 'Store', href: 'https://store.tareeqalhaqq.org' },
 ];
 
@@ -65,13 +66,13 @@ export const baseContent = [
     type: 'App Development',
     title: 'App Development',
     description: 'Purpose-driven mobile and web apps for the Muslim community.',
-    href: '/about#app-development',
+    href: '/active-projects',
   },
   {
     type: 'App Development',
     title: 'Mutoon AI',
     description: 'AI-powered tool to navigate, search, and cross-reference classical Islamic texts.',
-    href: '/about#app-development',
+    href: '/active-projects',
   },
   { type: 'Store', title: 'Store', description: 'Shop curated resources and support the mission.', href: 'https://store.tareeqalhaqq.org' },
   ...academyCourses.map((course) => ({

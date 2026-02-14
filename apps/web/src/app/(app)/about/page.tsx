@@ -1,6 +1,5 @@
-
 import Image from "next/image";
-import { Smartphone, BrainCircuit } from "lucide-react";
+import Link from "next/link";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 
 export default function AboutPage() {
@@ -18,7 +17,7 @@ export default function AboutPage() {
         </div>
 
         {aboutImage && (
-          <div className="relative mx-auto w-full max-w-4xl overflow-hidden rounded-3xl border border-white/10 bg-white/5 shadow-2xl shadow-black/40 aspect-[3/2]">
+          <div className="relative mx-auto aspect-[3/2] w-full max-w-4xl overflow-hidden rounded-3xl border border-white/10 bg-white/5 shadow-2xl shadow-black/40">
             <Image
               src={aboutImage.imageUrl}
               alt={aboutImage.description}
@@ -56,31 +55,17 @@ export default function AboutPage() {
             ))}
           </div>
 
-          <div id="app-development" className="space-y-6">
-            <h2 className="text-lg font-headline uppercase tracking-[0.2em] text-white">App Development</h2>
-            <p className="text-sm text-white/70">
-              Beyond curating knowledge, we build purpose-driven software that serves the Muslim community. Our development work focuses on tools that are simple, reliable, and rooted in authentic scholarship.
+          <div className="rounded-3xl border border-white/10 bg-black/40 p-6 shadow-lg shadow-black/30">
+            <h2 className="text-lg font-headline uppercase tracking-[0.2em] text-white">Active Projects</h2>
+            <p className="mt-2 text-sm text-white/70">
+              Explore the products we are actively building to support authentic Islamic learning.
             </p>
-            <div className="grid gap-6 md:grid-cols-2">
-              <div className="rounded-3xl border border-white/10 bg-black/40 p-6 shadow-lg shadow-black/30">
-                <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                  <BrainCircuit className="h-5 w-5 text-primary" />
-                </div>
-                <h3 className="text-base font-headline uppercase tracking-[0.18em] text-white">Mutoon AI</h3>
-                <p className="mt-2 text-sm text-white/70">
-                  An AI-powered tool designed to help learners navigate classical Islamic texts (mutoon). Mutoon AI assists with searching, understanding, and cross-referencing primary sources so students can study traditional works more efficiently.
-                </p>
-              </div>
-              <div className="rounded-3xl border border-white/10 bg-black/40 p-6 shadow-lg shadow-black/30">
-                <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                  <Smartphone className="h-5 w-5 text-primary" />
-                </div>
-                <h3 className="text-base font-headline uppercase tracking-[0.18em] text-white">Mobile &amp; Web Apps</h3>
-                <p className="mt-2 text-sm text-white/70">
-                  We design and develop mobile and web applications that support Islamic learning, from verified athkar and reference tools to structured study platforms. Each app is built with care for accuracy and a clean user experience.
-                </p>
-              </div>
-            </div>
+            <Link
+              href="/active-projects"
+              className="mt-4 inline-flex rounded-full border border-white/15 px-5 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-white transition hover:border-white/30 hover:bg-white/10"
+            >
+              View Active Projects
+            </Link>
           </div>
         </div>
       </div>
