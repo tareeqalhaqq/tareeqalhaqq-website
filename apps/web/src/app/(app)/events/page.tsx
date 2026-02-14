@@ -35,16 +35,20 @@ export default function EventsPage() {
   const [events, setEvents] = useState<EventRecord[]>([]);
   const [error, setError] = useState<Error | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const hasSupabaseConfig = Boolean(supabaseUrl && supabaseAnonKey);
   const supabase = useMemo(
-    () =>
-      createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      ),
-    [],
+    () => (hasSupabaseConfig ? createClient(supabaseUrl!, supabaseAnonKey!) : null),
+    [hasSupabaseConfig, supabaseAnonKey, supabaseUrl],
   );
 
   useEffect(() => {
+    if (!supabase) {
+      setIsLoading(false);
+      return;
+    }
+
     let isMounted = true;
     const fetchEvents = async () => {
       const { data, error } = await supabase.from('events').select('*').order('date', { ascending: true });

@@ -13,9 +13,15 @@ const EXPO_ORIGIN = new URL(EXPO_WEB_URL).origin;
 export const dynamic = 'force-dynamic';
 
 export default function MobileBridgePage() {
+  const isClerkConfigured = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
   const router = useRouter();
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [allowed, setAllowed] = useState(false);
+
+  if (!isClerkConfigured) {
+    return null;
+  }
+
   const { status, isAdmin } = useAuthProfile();
   const { getToken, isSignedIn, userId } = useAuth();
   const [supabaseToken, setSupabaseToken] = useState<string | null>(null);

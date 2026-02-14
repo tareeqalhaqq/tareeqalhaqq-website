@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 import { Logo } from "@/components/icons";
 import { navLinks } from "@/lib/data";
 import { cn } from "@/lib/utils";
@@ -37,6 +37,13 @@ export default function Header() {
   const pathname = usePathname();
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isSearchOpen, setSearchOpen] = useState(false);
+  const isClerkConfigured = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
+
+  const SignedOutContent = ({ children }: { children: ReactNode }) =>
+    isClerkConfigured ? <SignedOut>{children}</SignedOut> : <>{children}</>;
+
+  const SignedInContent = ({ children }: { children: ReactNode }) =>
+    isClerkConfigured ? <SignedIn>{children}</SignedIn> : null;
 
   return (
     <>
@@ -47,7 +54,7 @@ export default function Header() {
           </Link>
 
           <nav className="hidden items-center space-x-3 text-xs font-semibold uppercase tracking-[0.22em] md:flex lg:space-x-5">
-            <SignedOut>
+            <SignedOutContent>
               {navLinks.map((link) =>
                 link.subLinks ? (
                   <DropdownMenu key={link.name}>
@@ -83,8 +90,8 @@ export default function Header() {
                   </Link>
                 )
               )}
-            </SignedOut>
-            <SignedIn>
+            </SignedOutContent>
+            <SignedInContent>
               {dashboardLinks.map((link) => (
                 <Link
                   key={link.name}
@@ -97,7 +104,7 @@ export default function Header() {
                   {link.name}
                 </Link>
               ))}
-            </SignedIn>
+            </SignedInContent>
           </nav>
 
           <div className="flex items-center gap-2 sm:gap-3">
@@ -110,7 +117,7 @@ export default function Header() {
               <Search className="h-5 w-5" />
               <span className="sr-only">Search</span>
             </Button>
-            <SignedOut>
+            <SignedOutContent>
               <div className="hidden items-center gap-2 md:flex">
                 <Button
                   asChild
@@ -119,13 +126,13 @@ export default function Header() {
                   <Link href="/sign-in">Sign In</Link>
                 </Button>
               </div>
-            </SignedOut>
-            <SignedIn>
+            </SignedOutContent>
+            <SignedInContent>
               <UserButton
                 appearance={clerkAuthAppearance}
                 afterSignOutUrl="/"
               />
-            </SignedIn>
+            </SignedInContent>
             <Sheet open={isMobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild className="md:hidden">
                 <Button
@@ -143,7 +150,7 @@ export default function Header() {
                     <Logo className="text-left" />
                   </Link>
                   <nav className="flex flex-col space-y-4">
-                    <SignedIn>
+                    <SignedInContent>
                       <div className="space-y-3">
                         <p className="text-xs font-semibold uppercase tracking-[0.35em] text-primary/80">
                           Dashboard
@@ -161,8 +168,8 @@ export default function Header() {
                           ))}
                         </div>
                       </div>
-                    </SignedIn>
-                    <SignedOut>
+                    </SignedInContent>
+                    <SignedOutContent>
                       {navLinks.map((link) => (
                         <div key={link.name}>
                           {link.subLinks ? (
@@ -197,25 +204,25 @@ export default function Header() {
                           )}
                         </div>
                       ))}
-                    </SignedOut>
+                    </SignedOutContent>
                   </nav>
                   <div className="mt-8 space-y-3">
-                    <SignedOut>
+                    <SignedOutContent>
                       <Button
                         asChild
                         className="w-full rounded-full bg-primary px-6 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-primary-foreground shadow-lg shadow-black/30 transition hover:shadow-xl hover:shadow-black/40"
                       >
                         <Link href="/sign-in">Sign In</Link>
                       </Button>
-                    </SignedOut>
-                    <SignedIn>
+                    </SignedOutContent>
+                    <SignedInContent>
                       <div className="flex items-center justify-center">
                         <UserButton
                           appearance={clerkAuthAppearance}
                           afterSignOutUrl="/"
                         />
                       </div>
-                    </SignedIn>
+                    </SignedInContent>
                   </div>
                 </div>
               </SheetContent>

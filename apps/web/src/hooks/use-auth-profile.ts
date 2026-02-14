@@ -34,6 +34,20 @@ type AuthState = {
 };
 
 export function useAuthProfile() {
+  const isClerkConfigured = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
+
+  if (!isClerkConfigured) {
+    return {
+      status: 'unauthenticated' as const,
+      user: null,
+      profile: null,
+      membership: null,
+      role: 'member' as const,
+      isAdmin: false,
+      isStudent: false,
+    };
+  }
+
   const { isLoaded, isSignedIn, sessionClaims, userId } = useAuth();
   const { user: clerkUser } = useUser();
   const [state, setState] = useState<AuthState>({
