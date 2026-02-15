@@ -43,7 +43,7 @@ export default function MobileBridgePage() {
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.replace('/sign-in');
+      router.replace('/login');
       return;
     }
     if (status === 'authenticated' && isAdmin) {

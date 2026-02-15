@@ -76,7 +76,7 @@ export const baseContent = [
     type: 'Course',
     title: course.title,
     description: course.description,
-    href: '/sign-in',
+    href: '/login',
   })),
 ];
 
