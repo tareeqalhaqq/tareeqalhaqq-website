@@ -137,50 +137,18 @@
   }
 }
 
-/* ── Gradient background with animated orbs ── */
+/* ── Site background image from brand assets ── */
 .gradient-bg {
   position: fixed;
   inset: 0;
-  z-index: 0;
-  overflow: hidden;
+  z-index: -1;
   pointer-events: none;
-}
-
-.gradient-bg::before,
-.gradient-bg::after {
-  content: "";
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(120px);
-  opacity: 0.25;
-  animation: drift 20s ease-in-out infinite alternate;
-}
-
-.gradient-bg::before {
-  width: 60vw;
-  height: 60vw;
-  max-width: 800px;
-  max-height: 800px;
-  top: -20%;
-  left: -10%;
-  background: radial-gradient(circle, hsl(192 60% 30%) 0%, transparent 70%);
-}
-
-.gradient-bg::after {
-  width: 50vw;
-  height: 50vw;
-  max-width: 700px;
-  max-height: 700px;
-  bottom: -15%;
-  right: -10%;
-  background: radial-gradient(circle, hsl(260 40% 25%) 0%, transparent 70%);
-  animation-delay: -10s;
-}
-
-@keyframes drift {
-  0% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(30px, -20px) scale(1.05); }
-  100% { transform: translate(-20px, 30px) scale(0.95); }
+  background-image:
+    linear-gradient(180deg, hsl(223 75% 3% / 0.86) 0%, hsl(222 76% 4% / 0.88) 48%, hsl(223 74% 3% / 0.9) 100%),
+    url('/images/logo3.png');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
 }
 
 /* Auth page gradient */

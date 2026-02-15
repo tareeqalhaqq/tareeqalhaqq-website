@@ -2,6 +2,7 @@
 
 import { ArrowDown, BookOpen, Compass, Sparkles, Users } from 'lucide-react';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 import Footer from '@/components/layout/footer';
 
 const pillars = [
@@ -65,12 +66,16 @@ export default function Home() {
         <motion.div className="mx-auto flex w-full max-w-4xl flex-col items-center gap-8" {...fadeUp}>
           <div className="space-y-6">
             <p className="eyebrow text-primary">Begin Your Journey</p>
-            <h1 className="text-4xl font-headline tracking-tight text-white drop-shadow-[0_6px_32px_rgba(56,189,248,0.25)] md:text-6xl lg:text-7xl">
-              Learn with
-              <span className="block bg-gradient-to-r from-primary via-cyan-200 to-primary bg-clip-text text-transparent">
-                Clarity and Purpose
-              </span>
-            </h1>
+            <div className="mx-auto w-full max-w-3xl">
+              <Image
+                src="/images/logo.png"
+                alt="Tareeq Al Haqq catch phrase artwork"
+                width={1024}
+                height={1024}
+                priority
+                className="h-auto w-full"
+              />
+            </div>
             <p className="mx-auto max-w-2xl text-base leading-relaxed text-white/70 md:text-lg">
               Rooted in the Qur&apos;an and Sunnah, with structured pathways that help you build beneficial knowledge step
               by step.
