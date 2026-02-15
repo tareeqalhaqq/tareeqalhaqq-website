@@ -1,27 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect } from "react";
-import { Logo } from "@/components/icons";
+import { useState } from "react";
 import { navLinks } from "@/lib/data";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu } from "lucide-react";
+import { Menu, ArrowRight } from "lucide-react";
 import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { clerkAuthAppearance } from "@/lib/clerk-appearance";
 import { ReactNode } from "react";
 
 export default function Header() {
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
   const isClerkConfigured = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 60);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   const SignedOutContent = ({ children }: { children: ReactNode }) =>
     isClerkConfigured ? <SignedOut>{children}</SignedOut> : <>{children}</>;
@@ -30,60 +21,48 @@ export default function Header() {
     isClerkConfigured ? <SignedIn>{children}</SignedIn> : null;
 
   return (
-    <header
-      className={`fixed top-0 z-50 w-full transition-all duration-500 ${
-        scrolled
-          ? "bg-[hsl(220,20%,4%)]/80 backdrop-blur-lg border-b border-white/[0.04]"
-          : "bg-transparent"
-      }`}
-    >
-      <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4 sm:px-8">
-        {/* Logo - fades in on scroll */}
-        <Link
-          href="/"
-          className={`flex items-center transition-all duration-500 ${
-            scrolled ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2 pointer-events-none"
-          }`}
-        >
-          <Logo />
-        </Link>
-
-        {/* Desktop Nav */}
-        <nav className="hidden items-center gap-1 md:flex">
-          {navLinks.map((link) => (
-            <a
-              key={link.name}
-              href={link.href}
-              className="px-4 py-2 text-[0.7rem] font-medium uppercase tracking-[0.2em] text-white/60 transition-colors hover:text-white"
-            >
-              {link.name}
-            </a>
-          ))}
+    <header className="fixed inset-x-0 top-4 z-50 px-4 sm:px-6">
+      <div className="relative mx-auto flex w-full max-w-6xl items-center justify-center">
+        <nav className="hidden items-center rounded-full border border-[#2b3f60]/45 bg-[linear-gradient(180deg,rgba(18,33,54,0.88)_0%,rgba(14,25,44,0.86)_100%)] p-1 pl-4 shadow-[0_12px_34px_rgba(0,0,0,0.42)] backdrop-blur-xl md:flex">
+          <div className="flex items-center">
+            {navLinks.map((link) => (
+              <a
+                key={link.name}
+                href={link.href}
+                className="px-3 py-1.5 text-[0.82rem] font-medium text-[#d3deee]/78 transition-colors hover:text-white"
+              >
+                {link.name}
+              </a>
+            ))}
+          </div>
 
           <SignedOutContent>
+            <div className="mx-3 h-6 w-px bg-[#4a5c78]/45" />
             <a
               href="/sign-in"
-              className="ml-3 inline-flex items-center rounded-full border border-primary/40 bg-primary/10 px-5 py-2 text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-primary transition-all hover:border-primary/60 hover:bg-primary/20"
+              className="inline-flex items-center gap-2 rounded-full border border-[#f0a96a]/45 bg-[linear-gradient(180deg,#1b2235_0%,#141c2f_100%)] px-5 py-2 text-sm font-semibold text-white shadow-[0_0_0_1px_rgba(83,104,140,0.55),0_0_0_3px_rgba(240,169,106,0.18),0_10px_24px_rgba(0,0,0,0.42)] transition hover:border-[#f4bd88]/55 hover:shadow-[0_0_0_1px_rgba(93,118,161,0.62),0_0_0_4px_rgba(240,169,106,0.22),0_14px_28px_rgba(0,0,0,0.48)]"
             >
               Sign In
+              <ArrowRight className="h-3.5 w-3.5" />
             </a>
           </SignedOutContent>
 
           <SignedInContent>
+            <div className="mx-3 h-6 w-px bg-[#4a5c78]/45" />
             <Link
               href="/dashboard"
-              className="ml-3 inline-flex items-center rounded-full border border-primary/40 bg-primary/10 px-5 py-2 text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-primary transition-all hover:border-primary/60 hover:bg-primary/20"
+              className="inline-flex items-center gap-2 rounded-full border border-[#f0a96a]/45 bg-[linear-gradient(180deg,#1b2235_0%,#141c2f_100%)] px-5 py-2 text-sm font-semibold text-white shadow-[0_0_0_1px_rgba(83,104,140,0.55),0_0_0_3px_rgba(240,169,106,0.18),0_10px_24px_rgba(0,0,0,0.42)] transition hover:border-[#f4bd88]/55 hover:shadow-[0_0_0_1px_rgba(93,118,161,0.62),0_0_0_4px_rgba(240,169,106,0.22),0_14px_28px_rgba(0,0,0,0.48)]"
             >
               Portal
+              <ArrowRight className="h-3.5 w-3.5" />
             </Link>
-            <div className="ml-3">
+            <div className="ml-3 mr-1">
               <UserButton appearance={clerkAuthAppearance} afterSignOutUrl="/" />
             </div>
           </SignedInContent>
         </nav>
 
-        {/* Mobile */}
-        <div className="flex items-center gap-3 md:hidden">
+        <div className="absolute right-0 flex items-center gap-3 md:hidden">
           <SignedInContent>
             <UserButton appearance={clerkAuthAppearance} afterSignOutUrl="/" />
           </SignedInContent>
@@ -92,7 +71,7 @@ export default function Header() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-10 w-10 text-white/70 hover:bg-white/5 hover:text-white"
+                className="h-10 w-10 rounded-full border border-[#2b3f60]/45 bg-[linear-gradient(180deg,rgba(18,33,54,0.88)_0%,rgba(14,25,44,0.86)_100%)] text-white/75 backdrop-blur-xl hover:bg-[#1a2b45] hover:text-white"
               >
                 <Menu className="h-5 w-5" />
                 <span className="sr-only">Open menu</span>
