@@ -15,7 +15,7 @@ export default function LoginPage() {
   if (!isClerkConfigured) {
     return (
       <motion.div
-        className="w-full max-w-sm space-y-4 text-center"
+        className="w-full max-w-sm space-y-4 rounded-3xl border border-white/10 bg-white/[0.04] p-8 text-center shadow-[0_0_60px_rgba(37,99,235,0.22)] backdrop-blur-xl"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
@@ -43,13 +43,15 @@ export default function LoginPage() {
 
   return (
     <motion.div
-      className="w-full max-w-md"
+      className="relative w-full max-w-md"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: 'easeOut' }}
     >
-      <div className="mb-8 flex flex-col items-center text-center">
-        <div className="mb-4 flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl">
+      <div className="pointer-events-none absolute inset-6 -z-10 rounded-[2rem] bg-primary/25 blur-3xl" />
+
+      <div className="mb-5 flex flex-col items-center text-center">
+        <div className="mb-4 flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl border border-white/20 bg-white/5">
           <Image
             src="/images/logo1.png"
             alt="Tareeq Al Haqq"
@@ -58,8 +60,11 @@ export default function LoginPage() {
             className="h-full w-full object-contain"
           />
         </div>
-        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-primary/70">Tareeq Al Haqq</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.35em] text-primary/70">Tareeq Al Haqq</p>
+        <h1 className="mt-3 text-3xl font-headline text-white">Member Access</h1>
+        <p className="mt-2 text-sm text-white/60">Secure sign in for students and team members.</p>
       </div>
+
       <SignIn
         appearance={clerkAuthAppearance}
         path="/login"
