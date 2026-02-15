@@ -7,25 +7,22 @@ import Footer from "@/components/layout/footer";
 /* ── Animation variants ── */
 const projects = [
   {
-    title: "Markaz Al Haqq",
+    title: "Global Coverage",
     description:
-      "A centre dedicated to authentic Islamic education, community building, and the preservation of traditional scholarship. Serving as a hub for structured learning and scholarly guidance.",
-    icon: Landmark,
-    tag: "Community",
+      "Our teams operate across 25+ countries, bringing local expertise to every production with a global perspective.",
+    icon: Globe2,
   },
   {
-    title: "Mutoon AI",
+    title: "Dedicated Teams",
     description:
-      "An AI-powered tool to help learners navigate, search, and cross-reference classical Islamic texts. Study traditional works more efficiently with intelligent assistance.",
-    icon: BrainCircuit,
-    tag: "Technology",
+      "Expert shooters, editors, and directors work in concert to deliver stories that exceed expectations.",
+    icon: Users2,
   },
 ];
 
 export default function Home() {
   return (
-    <div className="relative flex flex-col">
-      {/* Gradient background */}
+    <div className="relative flex min-h-screen flex-col pb-10">
       <div className="gradient-bg" />
 
       {/* ── Hero ── */}
@@ -123,15 +120,14 @@ export default function Home() {
                   whileHover={{ y: -2 }}
                   transition={{ type: "spring", stiffness: 300, damping: 20 }}
                 >
-                  <h3 className="mb-2 text-sm font-semibold uppercase tracking-[0.15em] text-white/80">
-                    {item.label}
-                  </h3>
-                  <p className="text-sm leading-relaxed text-white/40">
-                    {item.text}
-                  </p>
-                </motion.div>
+                  <div className="mb-6 inline-flex h-11 w-11 items-center justify-center rounded-xl border border-white/15 bg-white/5">
+                    <Icon className="h-5 w-5 text-[#8BA9FF]" />
+                  </div>
+                  <h2 className="mb-3 text-2xl font-semibold text-white">{title}</h2>
+                  <p className="text-base leading-relaxed text-white/55">{description}</p>
+                </motion.article>
               ))}
-            </motion.div>
+            </div>
           </div>
         </motion.div>
       </section>
@@ -204,7 +200,19 @@ export default function Home() {
                 working alongside qualified scholars to ensure every learning
                 track stays anchored to authentic sources.
               </p>
-            </motion.div>
+            </article>
+
+            <article className="rounded-3xl border border-white/10 bg-black/30 p-8 backdrop-blur-xl md:p-10">
+              <h2 className="text-3xl font-semibold text-white md:text-4xl">Our Mission</h2>
+              <ul className="mt-6 space-y-4 text-base text-white/65">
+                {visionPoints.map((point) => (
+                  <li key={point} className="flex gap-3">
+                    <span className="mt-2 h-2 w-2 flex-none rounded-full bg-[#4A75FF]" />
+                    <span>{point}</span>
+                  </li>
+                ))}
+              </ul>
+            </article>
           </div>
         </motion.div>
       </section>
@@ -229,9 +237,8 @@ export default function Home() {
             <h2 className="text-3xl tracking-tight text-white md:text-4xl">
               What we are building
             </h2>
-            <p className="mt-4 text-base text-white/40">
-              Tools and spaces that make authentic Islamic knowledge easier to
-              access, study, and apply.
+            <p className="mx-auto max-w-2xl text-xl leading-relaxed text-white/55">
+              We&apos;re always looking for talented creators. Apply to join and work on productions that matter.
             </p>
           </motion.div>
 
@@ -258,8 +265,8 @@ export default function Home() {
               </motion.article>
             ))}
           </div>
-        </motion.div>
-      </section>
+        </section>
+      </main>
 
       <Footer />
     </div>
