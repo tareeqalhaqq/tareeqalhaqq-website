@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useAuth, useUser } from '@clerk/nextjs';
+import { useClerkConfig } from '@/components/providers/clerk-config-provider';
 import { resolveRoleFromMetadata, type Role } from '@/lib/roles';
 
 type User = {
@@ -34,7 +35,7 @@ type AuthState = {
 };
 
 export function useAuthProfile() {
-  const isClerkConfigured = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
+  const { isClerkConfigured } = useClerkConfig();
 
   if (!isClerkConfigured) {
     return {
