@@ -18,7 +18,9 @@ export default function AcademyPortalPage() {
   const isAuthorized = status === 'authenticated' && (role === 'student' || isAdmin);
 
   return (
-    <section className="page-section">
+    <section className="page-section relative min-h-[calc(100vh-5rem)] overflow-hidden">
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-[url('/bg-texture.png')] bg-cover bg-center opacity-35" />
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-black/25 via-background/70 to-background" />
       <div className="page-section__inner space-y-8">
         {status === 'loading' && (
           <div className="glass-panel space-y-3 p-8 text-white">
