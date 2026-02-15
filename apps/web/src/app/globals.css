@@ -145,7 +145,7 @@
   pointer-events: none;
   background-image:
     linear-gradient(180deg, hsl(223 75% 3% / 0.86) 0%, hsl(222 76% 4% / 0.88) 48%, hsl(223 74% 3% / 0.9) 100%),
-    url('/images/logo3.png');
+    url('/bg-texture.png');
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
