@@ -32,7 +32,7 @@ export default function AccountPreferencesPage() {
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.replace('/sign-in');
+      router.replace('/login');
     }
   }, [router, status]);
 

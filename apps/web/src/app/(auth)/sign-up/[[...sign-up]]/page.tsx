@@ -66,7 +66,7 @@ export default function SignUpPage() {
         appearance={clerkAuthAppearance}
         routing="path"
         path="/sign-up"
-        signInUrl="/sign-in"
+        signInUrl="/login"
         afterSignUpUrl="/dashboard"
       />
     </motion.div>

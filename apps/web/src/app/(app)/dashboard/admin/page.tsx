@@ -8,7 +8,7 @@ export default async function AdminDashboardPage() {
   const { userId, isAdmin, profile } = await getServerProfile();
 
   if (!userId) {
-    redirect('/sign-in');
+    redirect('/login');
   }
 
   if (!isAdmin) {

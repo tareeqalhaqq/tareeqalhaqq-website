@@ -6,7 +6,7 @@ export default async function DashboardPage() {
   const { userId, isAdmin } = await getServerProfile();
 
   if (!userId) {
-    redirect('/sign-in');
+    redirect('/login');
   }
 
   if (isAdmin) {

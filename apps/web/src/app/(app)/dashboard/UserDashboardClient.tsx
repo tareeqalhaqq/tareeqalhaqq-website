@@ -37,7 +37,7 @@ export default function UserDashboardClient() {
               Please sign in to access your dashboard tools and account settings.
             </p>
             <Button asChild>
-              <Link href="/sign-in">Go to sign in</Link>
+              <Link href="/login">Go to portal</Link>
             </Button>
           </div>
         )}
