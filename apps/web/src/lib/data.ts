@@ -1,10 +1,7 @@
 export const navLinks = [
-  { name: 'Home', href: '/' },
-  { name: 'About', href: '/about' },
-  { name: 'Academy', href: '/academy' },
-  { name: 'Events', href: '/events' },
-  { name: 'Active Projects', href: '/active-projects' },
-  { name: 'Store', href: 'https://store.tareeqalhaqq.org' },
+  { name: 'About', href: '#about' },
+  { name: 'Vision', href: '#vision' },
+  { name: 'Projects', href: '#projects' },
 ];
 
 export const socialLinks = [
