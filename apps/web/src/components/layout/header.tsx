@@ -1,47 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { ReactNode, useState } from "react";
+import { useState } from "react";
 import { Logo } from "@/components/icons";
 import { navLinks } from "@/lib/data";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Menu, Search, ChevronDown } from "lucide-react";
-import dynamic from "next/dynamic";
+import { Menu } from "lucide-react";
 import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { clerkAuthAppearance } from "@/lib/clerk-appearance";
-
-const SearchDialog = dynamic(
-  () => import("@/components/search-dialog").then((mod) => mod.SearchDialog),
-  { ssr: false }
-);
-
-type HeaderLink = {
-  name: string;
-  href?: string;
-  subLinks?: Array<{ name: string; href: string }>;
-};
-
-const dashboardLinks = [
-  { name: "Dashboard", href: "/dashboard" },
-  { name: "Profile", href: "/account/preferences" },
-];
+import { ReactNode } from "react";
 
 export default function Header() {
-  const pathname = usePathname();
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [isSearchOpen, setSearchOpen] = useState(false);
   const isClerkConfigured = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
-
-  const signedOutLinks: HeaderLink[] = navLinks;
 
   const SignedOutContent = ({ children }: { children: ReactNode }) =>
     isClerkConfigured ? <SignedOut>{children}</SignedOut> : <>{children}</>;
@@ -50,185 +22,99 @@ export default function Header() {
     isClerkConfigured ? <SignedIn>{children}</SignedIn> : null;
 
   return (
-    <>
-      <header className="sticky top-0 z-50 w-full px-3 py-3 sm:px-4">
-        <div className="group relative mx-auto flex w-full max-w-6xl items-center justify-between gap-3 rounded-full border border-white/10 bg-black/60 px-4 py-2.5 shadow-[0_18px_50px_rgba(0,0,0,0.35)] backdrop-blur-2xl transition duration-300 before:absolute before:inset-0 before:-z-10 before:rounded-full before:bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.18),transparent_55%)] before:opacity-70 before:blur-2xl after:absolute after:-inset-px after:-z-10 after:rounded-full after:bg-gradient-to-r after:from-white/15 after:via-transparent after:to-white/15 after:opacity-0 after:transition after:duration-300 group-hover:border-white/20 group-hover:after:opacity-100 sm:px-6 sm:py-3">
-          <Link href="/" className="flex items-center transition-transform hover:scale-[1.01]">
-            <Logo />
-          </Link>
+    <header className="fixed top-0 z-50 w-full">
+      <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-5 sm:px-8">
+        {/* Logo */}
+        <Link href="/" className="flex items-center transition-opacity hover:opacity-80">
+          <Logo />
+        </Link>
 
-          <nav className="hidden items-center space-x-3 text-xs font-semibold uppercase tracking-[0.22em] md:flex lg:space-x-5">
-            <SignedOutContent>
-              {signedOutLinks.map((link) =>
-                link.subLinks ? (
-                  <DropdownMenu key={link.name}>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        className="flex items-center gap-2 rounded-full border border-white/5 bg-white/5 px-4 py-2 text-[0.65rem] font-semibold uppercase tracking-[0.28em] text-foreground/80 transition hover:border-white/10 hover:bg-white/10 hover:text-foreground"
-                      >
-                        {link.name}
-                        <ChevronDown className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="min-w-[200px] overflow-hidden rounded-2xl border border-white/10 bg-secondary/60 backdrop-blur-xl">
-                      {link.subLinks.map((subLink) => (
-                        <DropdownMenuItem key={subLink.name} asChild>
-                          <Link href={subLink.href} className="text-xs uppercase tracking-[0.25em] text-foreground/80 hover:text-primary">
-                            {subLink.name}
-                          </Link>
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                ) : (
-                  <Link
+        {/* Desktop Nav */}
+        <nav className="hidden items-center gap-1 md:flex">
+          {navLinks.map((link) => (
+            <a
+              key={link.name}
+              href={link.href}
+              className="px-4 py-2 text-[0.7rem] font-medium uppercase tracking-[0.2em] text-white/60 transition-colors hover:text-white"
+            >
+              {link.name}
+            </a>
+          ))}
+
+          <SignedOutContent>
+            <a
+              href="/academy/portal"
+              className="ml-3 inline-flex items-center rounded-full border border-primary/40 bg-primary/10 px-5 py-2 text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-primary transition-all hover:border-primary/60 hover:bg-primary/20"
+            >
+              Portal
+            </a>
+          </SignedOutContent>
+
+          <SignedInContent>
+            <Link
+              href="/dashboard"
+              className="ml-3 inline-flex items-center rounded-full border border-primary/40 bg-primary/10 px-5 py-2 text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-primary transition-all hover:border-primary/60 hover:bg-primary/20"
+            >
+              Portal
+            </Link>
+            <div className="ml-3">
+              <UserButton appearance={clerkAuthAppearance} afterSignOutUrl="/" />
+            </div>
+          </SignedInContent>
+        </nav>
+
+        {/* Mobile */}
+        <div className="flex items-center gap-3 md:hidden">
+          <SignedInContent>
+            <UserButton appearance={clerkAuthAppearance} afterSignOutUrl="/" />
+          </SignedInContent>
+          <Sheet open={isMobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+            <SheetTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-10 w-10 text-white/70 hover:bg-white/5 hover:text-white"
+              >
+                <Menu className="h-5 w-5" />
+                <span className="sr-only">Open menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-[280px] border-white/[0.06] bg-[hsl(220,20%,4%)]">
+              <div className="flex flex-col gap-2 px-2 pt-12">
+                {navLinks.map((link) => (
+                  <a
                     key={link.name}
-                    href={link.href!}
-                    className={cn(
-                      "rounded-full border border-transparent px-4 py-2 text-[0.65rem] font-semibold tracking-[0.28em] text-foreground/70 transition-colors hover:border-white/10 hover:text-foreground",
-                      pathname === link.href ? "border-white/10 text-foreground" : "text-foreground/70"
-                    )}
+                    href={link.href}
+                    className="rounded-lg px-4 py-3 text-sm font-medium text-white/60 transition-colors hover:bg-white/5 hover:text-white"
+                    onClick={() => setMobileMenuOpen(false)}
                   >
                     {link.name}
+                  </a>
+                ))}
+                <div className="my-4 h-px bg-white/[0.06]" />
+                <SignedOutContent>
+                  <a
+                    href="/academy/portal"
+                    className="flex items-center justify-center rounded-full border border-primary/40 bg-primary/10 px-5 py-3 text-sm font-semibold uppercase tracking-[0.15em] text-primary transition-all hover:bg-primary/20"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Portal
+                  </a>
+                </SignedOutContent>
+                <SignedInContent>
+                  <Link
+                    href="/dashboard"
+                    className="flex items-center justify-center rounded-full border border-primary/40 bg-primary/10 px-5 py-3 text-sm font-semibold uppercase tracking-[0.15em] text-primary transition-all hover:bg-primary/20"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Portal
                   </Link>
-                )
-              )}
-            </SignedOutContent>
-            <SignedInContent>
-              {dashboardLinks.map((link) => (
-                <Link
-                  key={link.name}
-                  href={link.href}
-                  className={cn(
-                    "rounded-full border border-transparent px-4 py-2 text-[0.65rem] font-semibold tracking-[0.28em] text-foreground/70 transition-colors hover:border-white/10 hover:text-foreground",
-                    pathname === link.href ? "border-white/10 text-foreground" : "text-foreground/70"
-                  )}
-                >
-                  {link.name}
-                </Link>
-              ))}
-            </SignedInContent>
-          </nav>
-
-          <div className="flex items-center gap-2 sm:gap-3">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-9 w-9 rounded-full border border-white/10 bg-white/5 text-foreground/80 transition hover:bg-white/10 hover:text-foreground sm:h-10 sm:w-10"
-              onClick={() => setSearchOpen(true)}
-            >
-              <Search className="h-5 w-5" />
-              <span className="sr-only">Search</span>
-            </Button>
-            <SignedOutContent>
-              <div className="hidden items-center gap-2 md:flex">
-                <Button
-                  asChild
-                  className="rounded-full bg-primary px-6 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-primary-foreground shadow-lg shadow-black/30 transition hover:shadow-xl hover:shadow-black/40"
-                >
-                  <Link href="/sign-in">Sign In</Link>
-                </Button>
+                </SignedInContent>
               </div>
-            </SignedOutContent>
-            <SignedInContent>
-              <UserButton appearance={clerkAuthAppearance} afterSignOutUrl="/" />
-            </SignedInContent>
-            <Sheet open={isMobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-              <SheetTrigger asChild className="md:hidden">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-10 w-10 rounded-full border border-white/10 bg-white/5 text-foreground/80 hover:bg-white/10 hover:text-foreground"
-                >
-                  <Menu className="h-6 w-6" />
-                  <span className="sr-only">Open menu</span>
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="w-[280px] border-white/10 bg-black/80 text-foreground">
-                <div className="p-6">
-                  <Link href="/" className="mb-8 block" onClick={() => setMobileMenuOpen(false)}>
-                    <Logo className="text-left" />
-                  </Link>
-                  <nav className="flex flex-col space-y-4">
-                    <SignedInContent>
-                      <div className="space-y-3">
-                        <p className="text-xs font-semibold uppercase tracking-[0.35em] text-primary/80">
-                          Dashboard
-                        </p>
-                        <div className="ml-2 flex flex-col space-y-2">
-                          {dashboardLinks.map((link) => (
-                            <Link
-                              key={link.name}
-                              href={link.href}
-                              className="rounded-full px-4 py-2 text-sm text-muted-foreground transition hover:bg-white/10 hover:text-foreground"
-                              onClick={() => setMobileMenuOpen(false)}
-                            >
-                              {link.name}
-                            </Link>
-                          ))}
-                        </div>
-                      </div>
-                    </SignedInContent>
-                    <SignedOutContent>
-                      {signedOutLinks.map((link) => (
-                        <div key={link.name}>
-                          {link.subLinks ? (
-                            <div className="space-y-3">
-                              <p className="text-xs font-semibold uppercase tracking-[0.35em] text-primary/80">
-                                {link.name}
-                              </p>
-                              <div className="ml-2 flex flex-col space-y-2">
-                                {link.subLinks.map((subLink) => (
-                                  <Link
-                                    key={subLink.name}
-                                    href={subLink.href}
-                                    className="rounded-full px-4 py-2 text-sm text-muted-foreground transition hover:bg-white/10 hover:text-foreground"
-                                    onClick={() => setMobileMenuOpen(false)}
-                                  >
-                                    {subLink.name}
-                                  </Link>
-                                ))}
-                              </div>
-                            </div>
-                          ) : (
-                            <Link
-                              href={link.href!}
-                              className={cn(
-                                "rounded-full px-4 py-2 text-sm uppercase tracking-[0.3em] text-muted-foreground transition hover:bg-white/10 hover:text-foreground",
-                                pathname === link.href && "bg-white/10 text-foreground"
-                              )}
-                              onClick={() => setMobileMenuOpen(false)}
-                            >
-                              {link.name}
-                            </Link>
-                          )}
-                        </div>
-                      ))}
-                    </SignedOutContent>
-                  </nav>
-                  <div className="mt-8 space-y-3">
-                    <SignedOutContent>
-                      <Button
-                        asChild
-                        className="w-full rounded-full bg-primary px-6 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-primary-foreground shadow-lg shadow-black/30 transition hover:shadow-xl hover:shadow-black/40"
-                      >
-                        <Link href="/sign-in">Sign In</Link>
-                      </Button>
-                    </SignedOutContent>
-                    <SignedInContent>
-                      <div className="flex items-center justify-center">
-                        <UserButton appearance={clerkAuthAppearance} afterSignOutUrl="/" />
-                      </div>
-                    </SignedInContent>
-                  </div>
-                </div>
-              </SheetContent>
-            </Sheet>
-          </div>
+            </SheetContent>
+          </Sheet>
         </div>
-      </header>
-      <SearchDialog open={isSearchOpen} onOpenChange={setSearchOpen} />
-    </>
+      </div>
+    </header>
   );
 }

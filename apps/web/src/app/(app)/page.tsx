@@ -1,204 +1,248 @@
 'use client';
 
 import Image from "next/image";
-import Link from "next/link";
-import { BookOpen, Users, Sparkles } from "lucide-react";
+import { BrainCircuit, Smartphone, ArrowDown } from "lucide-react";
 import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
 import Footer from "@/components/layout/footer";
 
 const fadeUp = {
-  hidden: { opacity: 0, y: 32 },
+  hidden: { opacity: 0, y: 24 },
   visible: { opacity: 1, y: 0 },
 };
 
-const staggerContainer = {
+const stagger = {
   hidden: {},
   visible: {
     transition: {
-      staggerChildren: 0.15,
-      delayChildren: 0.1,
+      staggerChildren: 0.12,
+      delayChildren: 0.05,
     },
   },
 };
 
-const features = [
+const projects = [
   {
-    title: "Verified Resources",
-    description: "Hand-checked books, articles, and athkar with clear sourcing.",
-    icon: BookOpen,
+    title: "Mutoon AI",
+    description:
+      "An AI-powered tool to help learners navigate, search, and cross-reference classical Islamic texts. Study traditional works more efficiently with intelligent assistance.",
+    icon: BrainCircuit,
   },
   {
-    title: "Guided Focus",
-    description: "Study plans and reminders that stay out of your way.",
-    icon: Sparkles,
+    title: "Mobile & Web Apps",
+    description:
+      "Purpose-built applications supporting Islamic learning — from verified athkar and reference tools to structured study platforms. Built with care for accuracy and clarity.",
+    icon: Smartphone,
   },
-  {
-    title: "Supportive Network",
-    description: "Mentors and peers invested in authentic knowledge.",
-    icon: Users,
-  },
-];
-
-const trustPoints = [
-  "Curated classical and contemporary works",
-  "Inline references for quick verification",
-  "Workspace that keeps notes and highlights together",
 ];
 
 export default function Home() {
   return (
-    <div className="flex flex-col min-h-screen">
-      <main className="flex-grow">
-        <motion.section
-          className="relative flex min-h-[calc(100vh-80px)] flex-col items-center justify-center overflow-hidden px-6 py-24 text-center"
-          initial="hidden"
-          animate="visible"
-          variants={staggerContainer}
+    <div className="flex flex-col">
+      {/* ── Hero ── */}
+      <motion.section
+        className="relative flex min-h-screen flex-col items-center justify-center px-6 text-center"
+        initial="hidden"
+        animate="visible"
+        variants={stagger}
+      >
+        <motion.div
+          className="mx-auto flex w-full max-w-3xl flex-col items-center gap-8"
+          variants={stagger}
         >
           <motion.div
-            className="mx-auto flex w-full max-w-4xl flex-col items-center gap-8"
-            variants={staggerContainer}
+            className="relative flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl"
+            variants={fadeUp}
+            transition={{ type: "spring", stiffness: 120, damping: 14 }}
           >
-            <motion.span
-              className="relative flex h-28 w-28 items-center justify-center overflow-hidden rounded-3xl border border-white/10 bg-slate-900/70 shadow-lg"
-              variants={fadeUp}
-              transition={{ type: "spring", stiffness: 120, damping: 14 }}
-              whileHover={{ rotate: 3 }}
-            >
-              <Image
-                src="/images/logo1.png"
-                alt="Tareeq Al Haqq crest"
-                width={120}
-                height={120}
-                className="h-full w-full object-contain"
-                priority
-              />
-              <motion.span
-                className="absolute inset-0 rounded-3xl bg-primary/10"
-                aria-hidden
-                initial={{ opacity: 0 }}
-                animate={{ opacity: [0, 0.4, 0] }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-              />
-            </motion.span>
-            <motion.div className="space-y-5" variants={fadeUp}>
-              <p className="eyebrow text-primary">Tareeq Al Haqq</p>
-              <h1 className="text-4xl font-headline uppercase tracking-[0.12em] text-white md:text-5xl">
-                A Clear Path to
-                <span className="mt-2 block text-accent">Authentic Knowledge</span>
-              </h1>
-              <p className="mx-auto max-w-2xl text-base text-white/80 md:text-lg">
-                Study with assurance. Our platform curates dependable resources, structured learning tracks, and simple tools so you can focus on understanding, not searching.
-              </p>
-            </motion.div>
-            <motion.div
-              className="flex flex-col items-center gap-4 sm:flex-row"
-              variants={fadeUp}
-            >
-              <motion.div whileHover={{ y: -4 }} whileTap={{ scale: 0.97 }}>
-                <Button
-                  asChild
-                  variant="outline"
-                  size="lg"
-                  className="rounded-full border-white/20 bg-white/5 px-8 py-6 text-sm font-semibold uppercase tracking-[0.3em] text-white transition hover:border-white/30 hover:bg-white/10"
-                >
-                  <Link href="/about">Explore Our Mission</Link>
-                </Button>
-              </motion.div>
-            </motion.div>
+            <Image
+              src="/images/logo1.png"
+              alt="Tareeq Al Haqq crest"
+              width={80}
+              height={80}
+              className="h-full w-full object-contain"
+              priority
+            />
           </motion.div>
-        </motion.section>
 
-        <section className="fluent-section">
-          <motion.div
-            className="fluent-section__inner grid gap-12 md:grid-cols-[1.1fr_0.9fr] md:items-center"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.4 }}
-            variants={staggerContainer}
-          >
-            <motion.div className="space-y-6 text-left" variants={fadeUp}>
-              <p className="eyebrow">Why Learners Trust Us</p>
-              <h2 className="text-3xl uppercase tracking-[0.18em] text-white md:text-4xl">Built for focused study</h2>
-              <p className="text-base text-white/75">
-                Every tool is designed to reduce noise. Browse verified references, organise insights, and revisit essential concepts without distraction.
-              </p>
-              <div className="space-y-4">
-                {trustPoints.map((item) => (
-                  <motion.div
-                    key={item}
-                    className="flex items-start gap-3 text-sm text-white/80"
-                    variants={fadeUp}
-                    transition={{ type: "spring", stiffness: 140, damping: 18 }}
-                  >
-                    <span className="mt-1 h-2.5 w-2.5 rounded-full bg-primary" />
-                    <span>{item}</span>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
-            <motion.div
-              className="glass-panel flex flex-col items-center gap-4 text-center"
-              variants={fadeUp}
-              transition={{ type: "spring", stiffness: 120, damping: 14 }}
-              whileHover={{ y: -6 }}
-            >
-              <Image
-                src="/images/logo1.png"
-                alt="Illustration of the Tareeq Al Haqq workspace"
-                width={260}
-                height={260}
-                className="h-48 w-48 object-contain"
-              />
-              <p className="text-sm text-white/70">
-                A single, quiet space for readings, annotations, and reflections.
-              </p>
-            </motion.div>
+          <motion.div className="space-y-6" variants={fadeUp}>
+            <p className="eyebrow">Tareeq Al Haqq</p>
+            <h1 className="text-4xl font-headline tracking-tight text-white md:text-6xl lg:text-7xl">
+              A Clear Path to
+              <span className="block text-primary">Authentic Knowledge</span>
+            </h1>
+            <p className="mx-auto max-w-xl text-base leading-relaxed text-white/50 md:text-lg">
+              Curating dependable resources, structured learning, and simple tools so you can focus on understanding.
+            </p>
           </motion.div>
-        </section>
 
-        <section className="fluent-section">
-          <motion.div
-            className="fluent-section__inner space-y-10 text-center"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.3 }}
-            variants={staggerContainer}
-          >
+          <motion.div variants={fadeUp}>
+            <a
+              href="#about"
+              className="mt-4 flex h-10 w-10 items-center justify-center rounded-full border border-white/10 text-white/30 transition-colors hover:border-white/20 hover:text-white/60"
+            >
+              <ArrowDown className="h-4 w-4" />
+            </a>
+          </motion.div>
+        </motion.div>
+      </motion.section>
+
+      {/* ── About ── */}
+      <section id="about" className="section-wrapper">
+        <motion.div
+          className="section-inner"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.3 }}
+          variants={stagger}
+        >
+          <motion.div className="mb-16 max-w-2xl" variants={fadeUp}>
+            <p className="eyebrow mb-4">About</p>
+            <h2 className="text-3xl tracking-tight text-white md:text-4xl">
+              Built for focused study
+            </h2>
+          </motion.div>
+
+          <div className="grid gap-12 md:grid-cols-2">
+            <motion.div className="space-y-6" variants={fadeUp}>
+              <p className="text-base leading-relaxed text-white/50">
+                Tareeq Al Haqq is a platform dedicated to making authentic Islamic knowledge accessible with clarity, context, and trustworthy sourcing. Founded by Mustafa Asif, the initiative pairs verified scholarship with modern technology.
+              </p>
+              <p className="text-base leading-relaxed text-white/50">
+                We curate dependable references, commentary, and learning tools so anyone can study the faith with confidence. The team combines traditional scholarship with thoughtful software to keep resources organised and accessible.
+              </p>
+            </motion.div>
+
             <motion.div className="space-y-4" variants={fadeUp}>
-              <p className="eyebrow">Key Pillars</p>
-              <h2 className="text-3xl uppercase tracking-[0.18em] text-white md:text-4xl">What We Provide</h2>
-              <p className="mx-auto max-w-2xl text-base text-white/75">
-                Core pillars that keep the experience focused on what matters for your learning journey.
+              {[
+                { label: "Our History", text: "Founded to address scattered and unverified resources, the platform began by curating trusted libraries and structuring teacher-approved study plans." },
+                { label: "Our Mission", text: "We verify sources, design intuitive study tools, and connect learners with specialists so authentic guidance is easy to access and apply." },
+              ].map((item) => (
+                <div
+                  key={item.label}
+                  className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-6"
+                >
+                  <h3 className="mb-2 text-sm font-semibold uppercase tracking-[0.15em] text-white/80">
+                    {item.label}
+                  </h3>
+                  <p className="text-sm leading-relaxed text-white/40">
+                    {item.text}
+                  </p>
+                </div>
+              ))}
+            </motion.div>
+          </div>
+        </motion.div>
+      </section>
+
+      {/* ── Divider ── */}
+      <div className="mx-auto w-full max-w-5xl px-6">
+        <div className="h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+      </div>
+
+      {/* ── Vision ── */}
+      <section id="vision" className="section-wrapper">
+        <motion.div
+          className="section-inner"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.3 }}
+          variants={stagger}
+        >
+          <motion.div className="mb-16 max-w-2xl" variants={fadeUp}>
+            <p className="eyebrow mb-4">Vision</p>
+            <h2 className="text-3xl tracking-tight text-white md:text-4xl">
+              Where we are headed
+            </h2>
+          </motion.div>
+
+          <div className="grid gap-12 md:grid-cols-2">
+            <motion.div className="space-y-6" variants={fadeUp}>
+              <p className="text-base leading-relaxed text-white/50">
+                We are building a global reference point for credible Islamic learning, pairing timeless scholarship with responsible technology.
+              </p>
+              <p className="text-base leading-relaxed text-white/50">
+                The Academy will extend the platform with structured courses, guided readings, and collaborative cohorts built around authenticated sources. Combining live instruction, scholar-vetted materials, and consistent mentorship.
               </p>
             </motion.div>
-            <div className="grid gap-8 md:grid-cols-3">
-              {features.map(({ title, description, icon: Icon }, index) => (
-                <motion.div
-                  key={title}
-                  className="glass-panel h-full space-y-4 text-left"
-                  variants={fadeUp}
-                  transition={{ delay: index * 0.1, type: "spring", stiffness: 120, damping: 16 }}
-                  whileHover={{ y: -8, boxShadow: "0 24px 45px -20px rgba(15, 118, 110, 0.5)" }}
-                >
-                  <motion.div
-                    className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10"
-                    initial={{ scale: 0.8, opacity: 0 }}
-                    whileInView={{ scale: 1, opacity: 1 }}
-                    transition={{ type: "spring", stiffness: 200, damping: 18, delay: 0.15 + index * 0.05 }}
-                    viewport={{ once: true }}
-                  >
-                    <Icon className="h-6 w-6 text-primary" />
-                  </motion.div>
-                  <h3 className="text-xl font-headline uppercase tracking-[0.18em] text-white">{title}</h3>
-                  <p className="text-sm text-white/70">{description}</p>
-                </motion.div>
-              ))}
-            </div>
+
+            <motion.div className="space-y-4" variants={fadeUp}>
+              <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-6">
+                <h3 className="mb-4 text-sm font-semibold uppercase tracking-[0.15em] text-white/80">
+                  Academy — Launching 2026
+                </h3>
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    "Structured study paths",
+                    "Verified reading packs",
+                    "Live seminars",
+                    "Mentor-led circles",
+                    "Interactive assessments",
+                    "Shared annotations",
+                  ].map((item) => (
+                    <div
+                      key={item}
+                      className="rounded-lg border border-white/[0.04] bg-white/[0.02] px-3 py-2 text-xs text-white/40"
+                    >
+                      {item}
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <p className="text-xs leading-relaxed text-white/30">
+                Directed by Mustafa Asif in partnership with Markaz Al Haqq, working alongside qualified scholars to ensure every learning track stays anchored to authentic sources.
+              </p>
+            </motion.div>
+          </div>
+        </motion.div>
+      </section>
+
+      {/* ── Divider ── */}
+      <div className="mx-auto w-full max-w-5xl px-6">
+        <div className="h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+      </div>
+
+      {/* ── Projects ── */}
+      <section id="projects" className="section-wrapper">
+        <motion.div
+          className="section-inner"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.3 }}
+          variants={stagger}
+        >
+          <motion.div className="mb-16 max-w-2xl" variants={fadeUp}>
+            <p className="eyebrow mb-4">Projects</p>
+            <h2 className="text-3xl tracking-tight text-white md:text-4xl">
+              What we are building
+            </h2>
+            <p className="mt-4 text-base text-white/40">
+              Tools that make authentic Islamic knowledge easier to access, study, and apply.
+            </p>
           </motion.div>
-        </section>
-      </main>
+
+          <div className="grid gap-6 md:grid-cols-2">
+            {projects.map(({ title, description, icon: Icon }) => (
+              <motion.article
+                key={title}
+                className="group rounded-xl border border-white/[0.06] bg-white/[0.02] p-8 transition-colors hover:border-white/[0.1] hover:bg-white/[0.04]"
+                variants={fadeUp}
+                transition={{ type: "spring", stiffness: 120, damping: 16 }}
+              >
+                <div className="mb-5 flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                  <Icon className="h-5 w-5 text-primary/70" />
+                </div>
+                <h3 className="mb-3 text-lg font-headline tracking-tight text-white">
+                  {title}
+                </h3>
+                <p className="text-sm leading-relaxed text-white/40">
+                  {description}
+                </p>
+              </motion.article>
+            ))}
+          </div>
+        </motion.div>
+      </section>
+
       <Footer />
     </div>
   );
