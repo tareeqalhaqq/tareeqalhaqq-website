@@ -64,13 +64,16 @@ export default function Home() {
       <motion.section className="relative flex min-h-screen flex-col items-center justify-center px-6 text-center">
         <motion.div className="mx-auto flex w-full max-w-4xl flex-col items-center gap-8" {...fadeUp}>
           <div className="space-y-6">
-            <p className="eyebrow">Who We Are</p>
-            <h1 className="text-4xl font-headline tracking-tight text-white md:text-6xl lg:text-7xl">
-              A Clear Path to
-              <span className="block text-primary">Authentic Knowledge</span>
+            <p className="eyebrow text-primary">Begin Your Journey</p>
+            <h1 className="text-4xl font-headline tracking-tight text-white drop-shadow-[0_6px_32px_rgba(56,189,248,0.25)] md:text-6xl lg:text-7xl">
+              Learn with
+              <span className="block bg-gradient-to-r from-primary via-cyan-200 to-primary bg-clip-text text-transparent">
+                Clarity and Purpose
+              </span>
             </h1>
-            <p className="mx-auto max-w-2xl text-base leading-relaxed text-white/50 md:text-lg">
-              Rooted in the Qur&apos;an, Sunnah, and the understanding of the righteous predecessors.
+            <p className="mx-auto max-w-2xl text-base leading-relaxed text-white/70 md:text-lg">
+              Rooted in the Qur&apos;an and Sunnah, with structured pathways that help you build beneficial knowledge step
+              by step.
             </p>
           </div>
 

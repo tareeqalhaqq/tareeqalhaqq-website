@@ -10,8 +10,9 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="auth-gradient-bg flex min-h-screen w-full flex-col items-center justify-center px-6 py-12">
-      {/* Back to home link */}
+    <div className="auth-gradient-bg relative flex min-h-screen w-full flex-col items-center justify-center px-6 py-12">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(99,102,241,0.18),transparent_45%)]" />
+
       <motion.div
         className="absolute left-6 top-6"
         initial={{ opacity: 0, x: -10 }}
@@ -20,7 +21,7 @@ export default function AuthLayout({
       >
         <Link
           href="/"
-          className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.15em] text-white/40 transition-colors hover:text-white/70"
+          className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.15em] text-white/45 transition-colors hover:text-white/75"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           Home
