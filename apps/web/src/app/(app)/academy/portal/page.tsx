@@ -6,13 +6,14 @@ import { SignIn } from '@clerk/nextjs';
 
 import { Button } from '@/components/ui/button';
 import { useAuthProfile } from '@/hooks/use-auth-profile';
+import { useClerkConfig } from '@/components/providers/clerk-config-provider';
 import { clerkAuthAppearance } from '@/lib/clerk-appearance';
 
 export const dynamic = 'force-dynamic';
 
 export default function AcademyPortalPage() {
   const { status, profile, user, isAdmin, role } = useAuthProfile();
-  const isClerkConfigured = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
+  const { isClerkConfigured } = useClerkConfig();
   const displayName = profile?.full_name ?? user?.email ?? 'Student';
   const isAuthorized = status === 'authenticated' && (role === 'student' || isAdmin);
 
