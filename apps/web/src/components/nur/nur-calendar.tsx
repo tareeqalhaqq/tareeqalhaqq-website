@@ -231,7 +231,7 @@ export function NurCalendar({ items, logs, onToggleComplete, onSelectDate, selec
                       {surah?.name ?? `Surah ${item.surah_number}`}
                     </p>
                     <p className="text-[0.7rem] text-white/40">
-                      Ayah {item.start_ayah}–{item.end_ayah} &middot; {item.task_type}
+                      {item.unit_type === 'ayah' ? 'Ayah' : item.unit_type === 'page' ? 'Page' : item.unit_type} {item.range_start}–{item.range_end} &middot; {item.task_type}
                       {item.carried_over && (
                         <span className="ml-1.5 text-orange-300/60">
                           <ArrowRight className="inline h-3 w-3" /> carried over
@@ -257,11 +257,11 @@ export function NurCalendar({ items, logs, onToggleComplete, onSelectDate, selec
             <p className="text-xs font-medium uppercase tracking-wider text-white/40">Day Summary</p>
             <div className="grid grid-cols-3 gap-2 text-center">
               <div>
-                <p className="text-lg font-semibold text-cyan-300">{selectedDayLog.total_verses_new}</p>
+                <p className="text-lg font-semibold text-cyan-300">{selectedDayLog.total_new}</p>
                 <p className="text-[0.6rem] text-white/40">New</p>
               </div>
               <div>
-                <p className="text-lg font-semibold text-emerald-300">{selectedDayLog.total_verses_revised}</p>
+                <p className="text-lg font-semibold text-emerald-300">{selectedDayLog.total_revised}</p>
                 <p className="text-[0.6rem] text-white/40">Revised</p>
               </div>
               <div>

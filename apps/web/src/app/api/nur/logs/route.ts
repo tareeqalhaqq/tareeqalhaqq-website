@@ -15,7 +15,7 @@ export async function POST(request: Request) {
 
     const { data: profile } = await supabase
       .from('nur_profiles')
-      .select('id')
+      .select('id, preferred_unit')
       .eq('clerk_id', userId)
       .single();
 
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
     }
 
-    // Calculate verse counts from completed items for this date
+    // Calculate counts from completed items for this date
     const { data: completedItems } = await supabase
       .from('nur_schedule_items')
       .select('*')
@@ -31,17 +31,17 @@ export async function POST(request: Request) {
       .eq('date', body.date)
       .eq('completed', true);
 
-    const totalVersesNew = (completedItems ?? [])
+    const totalNew = (completedItems ?? [])
       .filter(i => i.task_type === 'memorization')
-      .reduce((sum: number, i: { end_ayah: number; start_ayah: number }) => sum + (i.end_ayah - i.start_ayah + 1), 0);
+      .reduce((sum: number, i: { range_end: number; range_start: number }) => sum + (i.range_end - i.range_start + 1), 0);
 
-    const totalVersesRevised = (completedItems ?? [])
+    const totalRevised = (completedItems ?? [])
       .filter(i => i.task_type === 'revision')
-      .reduce((sum: number, i: { end_ayah: number; start_ayah: number }) => sum + (i.end_ayah - i.start_ayah + 1), 0);
+      .reduce((sum: number, i: { range_end: number; range_start: number }) => sum + (i.range_end - i.range_start + 1), 0);
 
-    const totalVersesRecited = (completedItems ?? [])
+    const totalRecited = (completedItems ?? [])
       .filter(i => i.task_type === 'recitation')
-      .reduce((sum: number, i: { end_ayah: number; start_ayah: number }) => sum + (i.end_ayah - i.start_ayah + 1), 0);
+      .reduce((sum: number, i: { range_end: number; range_start: number }) => sum + (i.range_end - i.range_start + 1), 0);
 
     // Calculate streak
     let streakCount = 0;
@@ -73,9 +73,10 @@ export async function POST(request: Request) {
         {
           nur_profile_id: profile.id,
           date: body.date,
-          total_verses_new: totalVersesNew,
-          total_verses_revised: totalVersesRevised,
-          total_verses_recited: totalVersesRecited,
+          total_new: totalNew,
+          total_revised: totalRevised,
+          total_recited: totalRecited,
+          unit_type: profile.preferred_unit ?? 'ayah',
           streak_count: streakCount,
           day_rating: body.day_rating ?? null,
           reflection: body.reflection ?? null,

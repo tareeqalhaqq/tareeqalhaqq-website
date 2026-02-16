@@ -5,8 +5,8 @@ import { Settings, Save, Sun, Moon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { surahs } from '@/lib/quran-data';
-import type { NurProfile, TrackType, DayEndSetting } from '@/lib/nur-types';
+import type { NurProfile, TrackType, DayEndSetting, QuranUnit } from '@/lib/nur-types';
+import { TRACK_LABELS, UNIT_LABELS } from '@/lib/nur-types';
 
 type SettingsPanelProps = {
   profile: NurProfile;
@@ -14,23 +14,36 @@ type SettingsPanelProps = {
   isSaving?: boolean;
 };
 
+const allTrackTypes: TrackType[] = ['memorization', 'revision', 'recitation'];
+const allUnits: QuranUnit[] = ['ayah', 'page', 'surah', 'juz', 'hizb', 'ruba'];
+
 export function SettingsPanel({ profile, onSave, isSaving }: SettingsPanelProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [trackType, setTrackType] = useState<TrackType>(profile.track_type);
+  const [trackTypes, setTrackTypes] = useState<TrackType[]>(profile.track_types);
+  const [preferredUnit, setPreferredUnit] = useState<QuranUnit>(profile.preferred_unit);
   const [dayEnd, setDayEnd] = useState<DayEndSetting>(profile.day_end_setting);
   const [fajrTime, setFajrTime] = useState(profile.fajr_time ?? '05:30');
-  const [dailyVerses, setDailyVerses] = useState(profile.daily_new_verses);
-  const [revisionPages, setRevisionPages] = useState(profile.daily_revision_pages);
+  const [dailyNew, setDailyNew] = useState(profile.daily_new_amount);
+  const [dailyRevision, setDailyRevision] = useState(profile.daily_revision_amount);
   const [preferredTime, setPreferredTime] = useState(profile.preferred_time ?? '06:00');
   const [reminderEnabled, setReminderEnabled] = useState(profile.reminder_enabled);
 
+  const toggleTrack = (type: TrackType) => {
+    setTrackTypes(prev => {
+      const has = prev.includes(type);
+      if (has && prev.length === 1) return prev;
+      return has ? prev.filter(t => t !== type) : [...prev, type];
+    });
+  };
+
   const handleSave = () => {
     onSave({
-      track_type: trackType,
+      track_types: trackTypes,
+      preferred_unit: preferredUnit,
       day_end_setting: dayEnd,
       fajr_time: fajrTime,
-      daily_new_verses: dailyVerses,
-      daily_revision_pages: revisionPages,
+      daily_new_amount: dailyNew,
+      daily_revision_amount: dailyRevision,
       preferred_time: preferredTime,
       reminder_enabled: reminderEnabled,
     });
@@ -58,40 +71,70 @@ export function SettingsPanel({ profile, onSave, isSaving }: SettingsPanelProps)
       </div>
 
       <div className="space-y-4">
+        {/* Track types (multi-select) */}
         <div>
-          <Label className="text-white/70 text-sm">Track Type</Label>
+          <Label className="text-white/70 text-sm mb-2 block">Track Types</Label>
+          <div className="flex flex-wrap gap-2">
+            {allTrackTypes.map(type => {
+              const selected = trackTypes.includes(type);
+              return (
+                <button
+                  key={type}
+                  onClick={() => toggleTrack(type)}
+                  className={`rounded-lg border px-3 py-1.5 text-xs transition-all ${
+                    selected
+                      ? 'border-cyan-400/30 bg-cyan-400/[0.08] text-cyan-200'
+                      : 'border-white/[0.06] bg-white/[0.02] text-white/50 hover:border-white/[0.12]'
+                  }`}
+                >
+                  {TRACK_LABELS[type]}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Preferred unit */}
+        <div>
+          <Label className="text-white/70 text-sm">Tracking Unit</Label>
           <select
-            value={trackType}
-            onChange={e => setTrackType(e.target.value as TrackType)}
+            value={preferredUnit}
+            onChange={e => setPreferredUnit(e.target.value as QuranUnit)}
             className="mt-1 w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-sm text-white"
           >
-            <option value="memorization" className="bg-[hsl(220,20%,8%)]">Memorization (Hifz)</option>
-            <option value="revision" className="bg-[hsl(220,20%,8%)]">Revision (Muraja&apos;ah)</option>
-            <option value="recitation" className="bg-[hsl(220,20%,8%)]">Recitation (Tilawah)</option>
+            {allUnits.map(u => (
+              <option key={u} value={u} className="bg-[hsl(220,20%,8%)]">
+                {UNIT_LABELS[u]}
+              </option>
+            ))}
           </select>
         </div>
 
         <div>
-          <Label className="text-white/70 text-sm">Daily new verses</Label>
+          <Label className="text-white/70 text-sm">
+            Daily new {UNIT_LABELS[preferredUnit].toLowerCase()}
+          </Label>
           <Input
             type="number"
             min={1}
-            max={50}
-            value={dailyVerses}
-            onChange={e => setDailyVerses(Number(e.target.value))}
+            max={300}
+            value={dailyNew}
+            onChange={e => setDailyNew(Number(e.target.value))}
             className="mt-1 border-white/[0.08] bg-white/[0.04] text-white"
           />
         </div>
 
-        {trackType === 'memorization' && (
+        {trackTypes.includes('memorization') && (
           <div>
-            <Label className="text-white/70 text-sm">Revision pages per day</Label>
+            <Label className="text-white/70 text-sm">
+              Revision {UNIT_LABELS[preferredUnit].toLowerCase()} per day
+            </Label>
             <Input
               type="number"
               min={0}
-              max={30}
-              value={revisionPages}
-              onChange={e => setRevisionPages(Number(e.target.value))}
+              max={100}
+              value={dailyRevision}
+              onChange={e => setDailyRevision(Number(e.target.value))}
               className="mt-1 border-white/[0.08] bg-white/[0.04] text-white"
             />
           </div>

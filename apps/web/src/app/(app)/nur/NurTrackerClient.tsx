@@ -199,7 +199,7 @@ export default function NurTrackerClient() {
 
   const handleApplySuggestion = async (suggestion: AiSuggestion) => {
     if (suggestion.action?.dailyVerses) {
-      await handleSaveSettings({ daily_new_verses: suggestion.action.dailyVerses });
+      await handleSaveSettings({ daily_new_amount: suggestion.action.dailyVerses });
     }
     if (suggestion.action?.goalTitle && suggestion.action?.goalType) {
       await handleAddGoal({
@@ -277,9 +277,9 @@ export default function NurTrackerClient() {
           <div className="text-white">
             <p className="eyebrow text-cyan-300/60 glow-text">Nur</p>
             <h1 className="text-2xl font-headline font-semibold">
-              {state.profile.track_type === 'memorization'
+              {state.profile.track_types.includes('memorization')
                 ? 'Memorization Tracker'
-                : state.profile.track_type === 'revision'
+                : state.profile.track_types.includes('revision')
                 ? 'Revision Tracker'
                 : 'Recitation Tracker'}
             </h1>

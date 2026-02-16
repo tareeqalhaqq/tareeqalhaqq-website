@@ -1,12 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { BookOpen, Clock, Target, Sparkles, ChevronRight, ChevronLeft, Sun, Moon } from 'lucide-react';
+import { BookOpen, Clock, Target, Sparkles, ChevronRight, ChevronLeft, Sun, Moon, Ruler } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { surahs } from '@/lib/quran-data';
-import type { SetupWizardData, TrackType, DayEndSetting } from '@/lib/nur-types';
+import type { SetupWizardData, TrackType, DayEndSetting, QuranUnit } from '@/lib/nur-types';
+import { TRACK_LABELS, UNIT_LABELS } from '@/lib/nur-types';
 
 type SetupWizardProps = {
   onComplete: (data: SetupWizardData) => void;
@@ -14,22 +15,39 @@ type SetupWizardProps = {
 };
 
 const steps = [
-  { title: 'Your Path', icon: BookOpen, description: 'Choose your Quran journey type' },
+  { title: 'Your Path', icon: BookOpen, description: 'Choose your Quran journey type(s)' },
+  { title: 'Tracking Unit', icon: Ruler, description: 'How do you want to measure progress?' },
   { title: 'Starting Point', icon: Target, description: 'Where will you begin?' },
   { title: 'Daily Goals', icon: Sparkles, description: 'Set your pace' },
   { title: 'Day Settings', icon: Clock, description: 'Customize your schedule' },
 ];
 
+const trackOptions: { type: TrackType; label: string; desc: string }[] = [
+  { type: 'memorization', label: 'Memorization (Hifz)', desc: 'Memorize new portions of the Quran with structured daily assignments and revision cycles.' },
+  { type: 'revision', label: "Revision (Muraja'ah)", desc: 'Strengthen and maintain what you have already memorized through systematic review.' },
+  { type: 'recitation', label: 'Recitation (Tilawah)', desc: 'Read through the Quran at your own pace, tracking progress day by day.' },
+];
+
+const unitOptions: { unit: QuranUnit; label: string; desc: string }[] = [
+  { unit: 'ayah', label: 'Ayahs (Verses)', desc: 'Track individual verses — the most precise way to measure your progress.' },
+  { unit: 'page', label: 'Pages (Mushaf)', desc: 'Track by Mushaf page (1–604). Great for revision and recitation.' },
+  { unit: 'surah', label: 'Surahs', desc: 'Track by complete surah. Best for recitation or surah-by-surah memorization.' },
+  { unit: 'juz', label: 'Juz (30 parts)', desc: "Track by juz — each juz is roughly 20 pages of the Qur'an." },
+  { unit: 'hizb', label: 'Hizb (60 halves)', desc: 'Track by hizb — each juz is split into two ahzab.' },
+  { unit: 'ruba', label: "Rub' al-Hizb (quarters)", desc: "Track by rub' — each hizb is split into four quarters (240 total)." },
+];
+
 export function SetupWizard({ onComplete, isSubmitting }: SetupWizardProps) {
   const [step, setStep] = useState(0);
   const [data, setData] = useState<SetupWizardData>({
-    trackType: 'memorization',
+    trackTypes: ['memorization'],
+    preferredUnit: 'ayah',
     dayEndSetting: 'midnight',
     fajrTime: '05:30',
     startSurah: 1,
     startAyah: 1,
-    dailyNewVerses: 5,
-    dailyRevisionPages: 2,
+    dailyNewAmount: 5,
+    dailyRevisionAmount: 2,
     preferredTime: '06:00',
     reminderEnabled: true,
   });
@@ -38,10 +56,24 @@ export function SetupWizard({ onComplete, isSubmitting }: SetupWizardProps) {
     setData(prev => ({ ...prev, [key]: val }));
   };
 
+  const toggleTrackType = (type: TrackType) => {
+    setData(prev => {
+      const has = prev.trackTypes.includes(type);
+      if (has && prev.trackTypes.length === 1) return prev; // must keep at least one
+      return {
+        ...prev,
+        trackTypes: has
+          ? prev.trackTypes.filter(t => t !== type)
+          : [...prev.trackTypes, type],
+      };
+    });
+  };
+
   const canNext = () => {
-    if (step === 0) return true;
-    if (step === 1) return data.startSurah >= 1 && data.startSurah <= 114;
-    if (step === 2) return data.dailyNewVerses > 0;
+    if (step === 0) return data.trackTypes.length > 0;
+    if (step === 1) return true; // unit always has a default
+    if (step === 2) return data.startSurah >= 1 && data.startSurah <= 114;
+    if (step === 3) return data.dailyNewAmount > 0;
     return true;
   };
 
@@ -49,11 +81,13 @@ export function SetupWizard({ onComplete, isSubmitting }: SetupWizardProps) {
     onComplete(data);
   };
 
-  const trackOptions: { type: TrackType; label: string; desc: string }[] = [
-    { type: 'memorization', label: 'Memorization (Hifz)', desc: 'Memorize new portions of the Quran with structured daily assignments and revision cycles.' },
-    { type: 'revision', label: 'Revision (Muraja\'ah)', desc: 'Strengthen and maintain what you have already memorized through systematic review.' },
-    { type: 'recitation', label: 'Recitation (Tilawah)', desc: 'Read through the Quran at your own pace, tracking progress day by day.' },
-  ];
+  /** Dynamic label for the daily amount field based on selected unit */
+  const amountLabel = () => {
+    const unit = UNIT_LABELS[data.preferredUnit].toLowerCase();
+    if (data.trackTypes.includes('memorization')) return `New ${unit} per day`;
+    if (data.trackTypes.includes('revision')) return `${UNIT_LABELS[data.preferredUnit]} to revise per day`;
+    return `${UNIT_LABELS[data.preferredUnit]} to recite per day`;
+  };
 
   return (
     <div className="mx-auto w-full max-w-2xl">
@@ -97,28 +131,68 @@ export function SetupWizard({ onComplete, isSubmitting }: SetupWizardProps) {
           <h2 className="text-2xl font-headline font-semibold">{steps[step].title}</h2>
         </div>
 
-        {/* Step 0: Track Type */}
+        {/* ── Step 0: Track Types (multi-select) ── */}
         {step === 0 && (
           <div className="space-y-3">
-            {trackOptions.map(opt => (
-              <button
-                key={opt.type}
-                onClick={() => update('trackType', opt.type)}
-                className={`w-full rounded-xl border p-4 text-left transition-all duration-200 ${
-                  data.trackType === opt.type
-                    ? 'border-cyan-400/30 bg-cyan-400/[0.06] shadow-[0_0_20px_rgba(56,189,248,0.08)]'
-                    : 'border-white/[0.06] bg-white/[0.02] hover:border-white/[0.12]'
-                }`}
-              >
-                <p className="font-semibold text-sm">{opt.label}</p>
-                <p className="text-xs text-white/50 mt-1">{opt.desc}</p>
-              </button>
-            ))}
+            <p className="text-xs text-white/40">Select one or more — you can always change this later.</p>
+            {trackOptions.map(opt => {
+              const selected = data.trackTypes.includes(opt.type);
+              return (
+                <button
+                  key={opt.type}
+                  onClick={() => toggleTrackType(opt.type)}
+                  className={`w-full rounded-xl border p-4 text-left transition-all duration-200 ${
+                    selected
+                      ? 'border-cyan-400/30 bg-cyan-400/[0.06] shadow-[0_0_20px_rgba(56,189,248,0.08)]'
+                      : 'border-white/[0.06] bg-white/[0.02] hover:border-white/[0.12]'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <p className="font-semibold text-sm">{opt.label}</p>
+                    <div className={`flex h-5 w-5 items-center justify-center rounded border transition-all ${
+                      selected
+                        ? 'border-cyan-400/50 bg-cyan-400/20 text-cyan-300'
+                        : 'border-white/20 bg-white/5'
+                    }`}>
+                      {selected && (
+                        <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                      )}
+                    </div>
+                  </div>
+                  <p className="text-xs text-white/50 mt-1">{opt.desc}</p>
+                </button>
+              );
+            })}
           </div>
         )}
 
-        {/* Step 1: Starting Point */}
+        {/* ── Step 1: Quran Unit ── */}
         {step === 1 && (
+          <div className="space-y-3">
+            <p className="text-xs text-white/40">How do you want to measure your daily progress?</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {unitOptions.map(opt => (
+                <button
+                  key={opt.unit}
+                  onClick={() => update('preferredUnit', opt.unit)}
+                  className={`rounded-xl border p-4 text-left transition-all duration-200 ${
+                    data.preferredUnit === opt.unit
+                      ? 'border-cyan-400/30 bg-cyan-400/[0.06] shadow-[0_0_20px_rgba(56,189,248,0.08)]'
+                      : 'border-white/[0.06] bg-white/[0.02] hover:border-white/[0.12]'
+                  }`}
+                >
+                  <p className="font-semibold text-sm">{opt.label}</p>
+                  <p className="text-xs text-white/50 mt-1">{opt.desc}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ── Step 2: Starting Point ── */}
+        {step === 2 && (
           <div className="space-y-4">
             <div>
               <Label className="text-white/70 text-sm">Starting Surah</Label>
@@ -147,9 +221,9 @@ export function SetupWizard({ onComplete, isSubmitting }: SetupWizardProps) {
             </div>
             <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-3">
               <p className="text-xs text-white/50">
-                {data.trackType === 'memorization'
+                {data.trackTypes.includes('memorization')
                   ? 'This is where your new memorization will begin. Your daily schedule will generate from this point forward.'
-                  : data.trackType === 'revision'
+                  : data.trackTypes.includes('revision')
                   ? 'This is the starting point for your revision cycle. The schedule will loop through from here.'
                   : 'You will begin your daily recitation from this surah and ayah.'}
               </p>
@@ -157,31 +231,31 @@ export function SetupWizard({ onComplete, isSubmitting }: SetupWizardProps) {
           </div>
         )}
 
-        {/* Step 2: Daily Goals */}
-        {step === 2 && (
+        {/* ── Step 3: Daily Goals ── */}
+        {step === 3 && (
           <div className="space-y-4">
             <div>
-              <Label className="text-white/70 text-sm">
-                {data.trackType === 'memorization' ? 'New verses per day' : data.trackType === 'revision' ? 'Pages to revise per day' : 'Verses to recite per day'}
-              </Label>
+              <Label className="text-white/70 text-sm">{amountLabel()}</Label>
               <Input
                 type="number"
                 min={1}
-                max={data.trackType === 'recitation' ? 300 : 50}
-                value={data.dailyNewVerses}
-                onChange={e => update('dailyNewVerses', Number(e.target.value))}
+                max={300}
+                value={data.dailyNewAmount}
+                onChange={e => update('dailyNewAmount', Number(e.target.value))}
                 className="mt-1.5 border-white/[0.08] bg-white/[0.04] text-white"
               />
             </div>
-            {data.trackType === 'memorization' && (
+            {data.trackTypes.includes('memorization') && (
               <div>
-                <Label className="text-white/70 text-sm">Revision pages per day</Label>
+                <Label className="text-white/70 text-sm">
+                  Revision {UNIT_LABELS[data.preferredUnit].toLowerCase()} per day
+                </Label>
                 <Input
                   type="number"
                   min={0}
-                  max={30}
-                  value={data.dailyRevisionPages}
-                  onChange={e => update('dailyRevisionPages', Number(e.target.value))}
+                  max={100}
+                  value={data.dailyRevisionAmount}
+                  onChange={e => update('dailyRevisionAmount', Number(e.target.value))}
                   className="mt-1.5 border-white/[0.08] bg-white/[0.04] text-white"
                 />
               </div>
@@ -195,20 +269,22 @@ export function SetupWizard({ onComplete, isSubmitting }: SetupWizardProps) {
                 className="mt-1.5 border-white/[0.08] bg-white/[0.04] text-white"
               />
             </div>
-            <div className="rounded-lg border border-cyan-400/10 bg-cyan-400/[0.03] p-3">
-              <p className="text-xs text-cyan-200/60">
-                At this pace, you&apos;ll complete a full cycle in approximately {' '}
-                <strong className="text-cyan-300">
-                  {Math.ceil(6236 / (data.dailyNewVerses || 1))} days
-                </strong>
-                {' '}({Math.ceil(6236 / (data.dailyNewVerses || 1) / 30)} months).
-              </p>
-            </div>
+            {data.preferredUnit === 'ayah' && (
+              <div className="rounded-lg border border-cyan-400/10 bg-cyan-400/[0.03] p-3">
+                <p className="text-xs text-cyan-200/60">
+                  At this pace, you&apos;ll complete a full cycle in approximately{' '}
+                  <strong className="text-cyan-300">
+                    {Math.ceil(6236 / (data.dailyNewAmount || 1))} days
+                  </strong>
+                  {' '}({Math.ceil(6236 / (data.dailyNewAmount || 1) / 30)} months).
+                </p>
+              </div>
+            )}
           </div>
         )}
 
-        {/* Step 3: Day Settings */}
-        {step === 3 && (
+        {/* ── Step 4: Day Settings ── */}
+        {step === 4 && (
           <div className="space-y-4">
             <div>
               <Label className="text-white/70 text-sm mb-3 block">When does your day end?</Label>
@@ -276,6 +352,23 @@ export function SetupWizard({ onComplete, isSubmitting }: SetupWizardProps) {
           </div>
         )}
       </div>
+
+      {/* Summary before finish */}
+      {step === steps.length - 1 && (
+        <div className="mt-4 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 text-white">
+          <p className="text-xs font-semibold text-white/60 uppercase tracking-wider mb-2">Summary</p>
+          <div className="grid grid-cols-2 gap-2 text-xs text-white/50">
+            <span>Track types</span>
+            <span className="text-white/80">{data.trackTypes.map(t => TRACK_LABELS[t]).join(', ')}</span>
+            <span>Measuring in</span>
+            <span className="text-white/80">{UNIT_LABELS[data.preferredUnit]}</span>
+            <span>Daily target</span>
+            <span className="text-white/80">{data.dailyNewAmount} {UNIT_LABELS[data.preferredUnit].toLowerCase()}/day</span>
+            <span>Day boundary</span>
+            <span className="text-white/80 capitalize">{data.dayEndSetting}</span>
+          </div>
+        </div>
+      )}
 
       {/* Navigation */}
       <div className="mt-6 flex items-center justify-between">

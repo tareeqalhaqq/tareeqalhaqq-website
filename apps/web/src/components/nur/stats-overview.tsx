@@ -34,7 +34,7 @@ export function StatsOverview({ profile, items, logs }: StatsOverviewProps) {
 
   // Total completed
   const totalCompleted = items.filter(i => i.completed).length;
-  const totalVerses = items.filter(i => i.completed).reduce((sum, item) => sum + (item.end_ayah - item.start_ayah + 1), 0);
+  const totalVerses = items.filter(i => i.completed).reduce((sum, item) => sum + (item.range_end - item.range_start + 1), 0);
 
   // Today's progress
   const todayItems = items.filter(i => i.date === todayStr);
@@ -43,7 +43,7 @@ export function StatsOverview({ profile, items, logs }: StatsOverviewProps) {
   const todayPercent = todayTotal > 0 ? Math.round((todayCompleted / todayTotal) * 100) : 0;
 
   // Current position
-  const currentSurah = getSurahByNumber(profile.memorization_current_surah ?? profile.memorization_start_surah ?? 1);
+  const currentSurah = getSurahByNumber(profile.memorization_current_surah ?? 1);
 
   const stats = [
     {
