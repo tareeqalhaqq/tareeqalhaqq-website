@@ -2,7 +2,14 @@
 
 import Link from "next/link";
 import { navLinks } from "@/lib/data";
-import { ArrowRight, LayoutDashboard, User, LogOut, ChevronDown, BookOpen } from "lucide-react";
+import {
+  ArrowRight,
+  LayoutDashboard,
+  User,
+  LogOut,
+  ChevronDown,
+  BookOpen,
+} from "lucide-react";
 import { SignedIn, SignedOut, useClerk } from "@clerk/nextjs";
 import { ReactNode } from "react";
 import {
@@ -14,7 +21,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export default function Header() {
-  const isClerkConfigured = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
+  const isClerkConfigured = Boolean(
+    process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
+  );
 
   const SignedOutContent = ({ children }: { children: ReactNode }) =>
     isClerkConfigured ? <SignedOut>{children}</SignedOut> : <>{children}</>;
@@ -27,7 +36,7 @@ export default function Header() {
       <div className="relative mx-auto flex w-full max-w-6xl items-center justify-center">
         {/* Signed-out: desktop nav */}
         <SignedOutContent>
-          <nav className="hidden items-center rounded-full border border-[#2b3f60]/45 bg-[linear-gradient(180deg,rgba(18,33,54,0.88)_0%,rgba(14,25,44,0.86)_100%)] p-1 pl-4 shadow-[0_12px_34px_rgba(0,0,0,0.42),0_0_20px_rgba(56,189,248,0.06)] backdrop-blur-xl md:flex">
+          <nav className="hidden items-center rounded-full border border-[#7da5ca]/30 bg-[linear-gradient(180deg,rgba(43,71,102,0.45)_0%,rgba(23,38,60,0.4)_100%)] p-1 pl-4 shadow-[0_12px_34px_rgba(0,0,0,0.35),0_0_24px_rgba(148,197,255,0.1)] [backdrop-filter:blur(22px)_saturate(170%)] md:flex">
             <div className="flex items-center">
               {navLinks.map((link) => (
                 <a
@@ -88,7 +97,7 @@ function AuthenticatedNav() {
   return (
     <>
       {/* Desktop authenticated nav */}
-      <nav className="hidden items-center rounded-full border border-[#2b3f60]/45 bg-[linear-gradient(180deg,rgba(18,33,54,0.88)_0%,rgba(14,25,44,0.86)_100%)] p-1 pl-4 shadow-[0_12px_34px_rgba(0,0,0,0.42),0_0_20px_rgba(56,189,248,0.06)] backdrop-blur-xl md:flex">
+      <nav className="hidden items-center rounded-full border border-[#7da5ca]/30 bg-[linear-gradient(180deg,rgba(43,71,102,0.45)_0%,rgba(23,38,60,0.4)_100%)] p-1 pl-4 shadow-[0_12px_34px_rgba(0,0,0,0.35),0_0_24px_rgba(148,197,255,0.1)] [backdrop-filter:blur(22px)_saturate(170%)] md:flex">
         <div className="flex items-center">
           <Link
             href="/dashboard"
@@ -128,19 +137,28 @@ function AuthenticatedNav() {
             sideOffset={8}
             className="w-48 rounded-xl border border-white/[0.08] bg-[hsl(220,22%,8%)] text-white shadow-2xl shadow-black/60"
           >
-            <DropdownMenuItem asChild className="cursor-pointer gap-2 rounded-lg text-white/70 focus:bg-white/[0.06] focus:text-white">
+            <DropdownMenuItem
+              asChild
+              className="cursor-pointer gap-2 rounded-lg text-white/70 focus:bg-white/[0.06] focus:text-white"
+            >
               <Link href="/dashboard">
                 <LayoutDashboard className="h-4 w-4" />
                 Dashboard
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem asChild className="cursor-pointer gap-2 rounded-lg text-cyan-300/70 focus:bg-cyan-500/[0.08] focus:text-cyan-200">
+            <DropdownMenuItem
+              asChild
+              className="cursor-pointer gap-2 rounded-lg text-cyan-300/70 focus:bg-cyan-500/[0.08] focus:text-cyan-200"
+            >
               <Link href="/nur">
                 <BookOpen className="h-4 w-4" />
                 Nur
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem asChild className="cursor-pointer gap-2 rounded-lg text-white/70 focus:bg-white/[0.06] focus:text-white">
+            <DropdownMenuItem
+              asChild
+              className="cursor-pointer gap-2 rounded-lg text-white/70 focus:bg-white/[0.06] focus:text-white"
+            >
               <Link href="/profile">
                 <User className="h-4 w-4" />
                 Profile
@@ -162,7 +180,7 @@ function AuthenticatedNav() {
       <div className="mt-2 flex w-full items-center justify-center gap-3 md:hidden">
         <Link
           href="/dashboard"
-          className="inline-flex items-center gap-2 rounded-full border border-[#2b3f60]/45 bg-[linear-gradient(180deg,rgba(18,33,54,0.88)_0%,rgba(14,25,44,0.86)_100%)] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_12px_34px_rgba(0,0,0,0.42)] backdrop-blur-xl transition hover:border-[#4a5c78]/55"
+          className="inline-flex items-center gap-2 rounded-full border border-[#7da5ca]/30 bg-[linear-gradient(180deg,rgba(43,71,102,0.45)_0%,rgba(23,38,60,0.4)_100%)] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_12px_34px_rgba(0,0,0,0.35),0_0_18px_rgba(148,197,255,0.08)] [backdrop-filter:blur(22px)_saturate(170%)] transition hover:border-[#9dc0df]/45"
         >
           <LayoutDashboard className="h-3.5 w-3.5" />
           Dashboard
@@ -170,7 +188,7 @@ function AuthenticatedNav() {
 
         <Link
           href="/nur"
-          className="inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-[linear-gradient(180deg,rgba(18,33,54,0.88)_0%,rgba(14,25,44,0.86)_100%)] px-4 py-2.5 text-sm font-semibold text-cyan-300 shadow-[0_12px_34px_rgba(0,0,0,0.42),0_0_12px_rgba(56,189,248,0.08)] backdrop-blur-xl transition hover:border-cyan-400/35"
+          className="inline-flex items-center gap-2 rounded-full border border-cyan-300/30 bg-[linear-gradient(180deg,rgba(43,71,102,0.45)_0%,rgba(23,38,60,0.4)_100%)] px-4 py-2.5 text-sm font-semibold text-cyan-300 shadow-[0_12px_34px_rgba(0,0,0,0.35),0_0_18px_rgba(56,189,248,0.12)] [backdrop-filter:blur(22px)_saturate(170%)] transition hover:border-cyan-300/45"
           style={{ textShadow: "0 0 12px rgba(56,189,248,0.3)" }}
         >
           <BookOpen className="h-3.5 w-3.5" />
@@ -179,7 +197,7 @@ function AuthenticatedNav() {
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="flex h-10 w-10 items-center justify-center rounded-full border border-[#2b3f60]/45 bg-[linear-gradient(180deg,rgba(18,33,54,0.88)_0%,rgba(14,25,44,0.86)_100%)] text-white/75 shadow-[0_12px_34px_rgba(0,0,0,0.42)] backdrop-blur-xl transition hover:text-white">
+            <button className="flex h-10 w-10 items-center justify-center rounded-full border border-[#7da5ca]/30 bg-[linear-gradient(180deg,rgba(43,71,102,0.45)_0%,rgba(23,38,60,0.4)_100%)] text-white/75 shadow-[0_12px_34px_rgba(0,0,0,0.35)] [backdrop-filter:blur(22px)_saturate(170%)] transition hover:text-white">
               <User className="h-4 w-4" />
               <span className="sr-only">Account menu</span>
             </button>
@@ -189,7 +207,10 @@ function AuthenticatedNav() {
             sideOffset={8}
             className="w-48 rounded-xl border border-white/[0.08] bg-[hsl(220,22%,8%)] text-white shadow-2xl shadow-black/60"
           >
-            <DropdownMenuItem asChild className="cursor-pointer gap-2 rounded-lg text-white/70 focus:bg-white/[0.06] focus:text-white">
+            <DropdownMenuItem
+              asChild
+              className="cursor-pointer gap-2 rounded-lg text-white/70 focus:bg-white/[0.06] focus:text-white"
+            >
               <Link href="/profile">
                 <User className="h-4 w-4" />
                 Profile
