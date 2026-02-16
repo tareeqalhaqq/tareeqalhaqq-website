@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight, Check, ArrowRight, BookOpen } from 'lucide-r
 import { Button } from '@/components/ui/button';
 import { getSurahByNumber } from '@/lib/quran-data';
 import type { NurScheduleItem, NurDailyLog, CalendarDay } from '@/lib/nur-types';
+import { TRACK_LABELS, UNIT_SINGULAR } from '@/lib/nur-types';
 
 type NurCalendarProps = {
   items: NurScheduleItem[];
@@ -206,7 +207,7 @@ export function NurCalendar({ items, logs, onToggleComplete, onSelectDate, selec
         {selectedDayItems.length > 0 ? (
           <div className="space-y-2">
             {selectedDayItems.map(item => {
-              const surah = getSurahByNumber(item.surah_number);
+              const surah = item.surah_number ? getSurahByNumber(item.surah_number) : undefined;
               return (
                 <div
                   key={item.id}
@@ -228,10 +229,10 @@ export function NurCalendar({ items, logs, onToggleComplete, onSelectDate, selec
                   </button>
                   <div className="min-w-0 flex-1">
                     <p className={`text-sm font-medium ${item.completed ? 'text-emerald-300/70 line-through' : 'text-white/90'}`}>
-                      {surah?.name ?? `Surah ${item.surah_number}`}
+                      {item.unit_type === 'ayah' ? surah?.name ?? `Surah ${item.surah_number}` : `${UNIT_SINGULAR[item.unit_type]} assignment`}
                     </p>
                     <p className="text-[0.7rem] text-white/40">
-                      {item.unit_type === 'ayah' ? 'Ayah' : item.unit_type === 'page' ? 'Page' : item.unit_type} {item.range_start}–{item.range_end} &middot; {item.task_type}
+                      {UNIT_SINGULAR[item.unit_type]} {item.range_start}–{item.range_end} &middot; {TRACK_LABELS[item.task_type]}
                       {item.carried_over && (
                         <span className="ml-1.5 text-orange-300/60">
                           <ArrowRight className="inline h-3 w-3" /> carried over

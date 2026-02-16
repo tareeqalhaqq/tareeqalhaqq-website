@@ -92,7 +92,7 @@ export type SetupWizardData = {
   startAyah: number;
   dailyNewAmount: number;
   dailyRevisionAmount: number;
-  preferredTime: string;
+  preferredTime: string | null;
   reminderEnabled: boolean;
 };
 

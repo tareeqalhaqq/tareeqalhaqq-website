@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Settings, Save, Sun, Moon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,8 +26,15 @@ export function SettingsPanel({ profile, onSave, isSaving }: SettingsPanelProps)
   const [dailyNew, setDailyNew] = useState(profile.daily_new_amount);
   const [dailyRevision, setDailyRevision] = useState(profile.daily_revision_amount);
   const [preferredTime, setPreferredTime] = useState(profile.preferred_time ?? '06:00');
+  const [noPreferredTime, setNoPreferredTime] = useState(!profile.preferred_time);
   const [reminderEnabled, setReminderEnabled] = useState(profile.reminder_enabled);
 
+
+  useEffect(() => {
+    if (noPreferredTime) {
+      setPreferredTime('06:00');
+    }
+  }, [noPreferredTime]);
   const toggleTrack = (type: TrackType) => {
     setTrackTypes(prev => {
       const has = prev.includes(type);
@@ -44,7 +51,7 @@ export function SettingsPanel({ profile, onSave, isSaving }: SettingsPanelProps)
       fajr_time: fajrTime,
       daily_new_amount: dailyNew,
       daily_revision_amount: dailyRevision,
-      preferred_time: preferredTime,
+      preferred_time: noPreferredTime ? null : preferredTime,
       reminder_enabled: reminderEnabled,
     });
   };
@@ -140,13 +147,27 @@ export function SettingsPanel({ profile, onSave, isSaving }: SettingsPanelProps)
           </div>
         )}
 
-        <div>
-          <Label className="text-white/70 text-sm">Preferred study time</Label>
+        <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-3">
+          <div className="mb-2 flex items-center justify-between">
+            <Label className="text-white/70 text-sm">Preferred study time</Label>
+            <button
+              type="button"
+              onClick={() => setNoPreferredTime(prev => !prev)}
+              className={`rounded-md border px-2 py-1 text-[0.65rem] transition ${
+                noPreferredTime
+                  ? 'border-cyan-400/30 bg-cyan-400/[0.06] text-cyan-200'
+                  : 'border-white/[0.08] text-white/60 hover:text-white/80'
+              }`}
+            >
+              {noPreferredTime ? 'No preferred time selected' : 'Set no preferred time'}
+            </button>
+          </div>
           <Input
             type="time"
             value={preferredTime}
+            disabled={noPreferredTime}
             onChange={e => setPreferredTime(e.target.value)}
-            className="mt-1 border-white/[0.08] bg-white/[0.04] text-white"
+            className="mt-1 border-white/[0.08] bg-white/[0.04] text-white disabled:opacity-50"
           />
         </div>
 
