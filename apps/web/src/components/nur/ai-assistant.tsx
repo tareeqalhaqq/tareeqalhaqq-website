@@ -41,20 +41,20 @@ function generateSuggestions(profile: NurProfile, items: NurScheduleItem[], goal
     suggestions.push({
       type: 'adjust_pace',
       title: 'Increase your pace',
-      description: `You've completed ${Math.round(completionRate * 100)}% of your tasks recently. You may be ready to increase your daily target from ${profile.daily_new_verses} to ${profile.daily_new_verses + 2} verses.`,
+      description: `You've completed ${Math.round(completionRate * 100)}% of your tasks recently. You may be ready to increase your daily target from ${profile.daily_new_amount} to ${profile.daily_new_amount + 2} verses.`,
       action: {
-        label: `Set to ${profile.daily_new_verses + 2} verses/day`,
-        dailyVerses: profile.daily_new_verses + 2,
+        label: `Set to ${profile.daily_new_amount + 2} verses/day`,
+        dailyVerses: profile.daily_new_amount + 2,
       },
     });
   } else if (completionRate < 0.5 && totalCount >= 5) {
     suggestions.push({
       type: 'adjust_pace',
       title: 'Adjust your pace',
-      description: `Your completion rate has been ${Math.round(completionRate * 100)}% recently. Consider reducing your daily target to ${Math.max(1, profile.daily_new_verses - 2)} verses to build consistency first.`,
+      description: `Your completion rate has been ${Math.round(completionRate * 100)}% recently. Consider reducing your daily target to ${Math.max(1, profile.daily_new_amount - 2)} verses to build consistency first.`,
       action: {
-        label: `Set to ${Math.max(1, profile.daily_new_verses - 2)} verses/day`,
-        dailyVerses: Math.max(1, profile.daily_new_verses - 2),
+        label: `Set to ${Math.max(1, profile.daily_new_amount - 2)} verses/day`,
+        dailyVerses: Math.max(1, profile.daily_new_amount - 2),
       },
     });
   }
@@ -70,7 +70,7 @@ function generateSuggestions(profile: NurProfile, items: NurScheduleItem[], goal
 
   // Goal suggestions
   if (goals.filter(g => !g.completed).length === 0) {
-    const currentSurah = profile.memorization_current_surah ?? profile.memorization_start_surah ?? 1;
+    const currentSurah = profile.memorization_current_surah ?? 1;
     const surahData = surahs.find(s => s.number === currentSurah);
     suggestions.push({
       type: 'add_goal',
@@ -134,10 +134,10 @@ export function AiAssistant({ profile, scheduleItems, goals, onApplySuggestion }
     if (lowerQ.includes('how long') || lowerQ.includes('when will')) {
       const totalVerses = 6236;
       const remaining = totalVerses - ((profile.memorization_current_ayah ?? 1) + ((profile.memorization_current_surah ?? 1) - 1) * 20);
-      const daysLeft = Math.ceil(remaining / profile.daily_new_verses);
-      response = `At your current pace of ${profile.daily_new_verses} new verses per day, you'll complete the Quran in approximately ${daysLeft} days (${Math.ceil(daysLeft / 30)} months). Remember, consistency matters more than speed.`;
+      const daysLeft = Math.ceil(remaining / profile.daily_new_amount);
+      response = `At your current pace of ${profile.daily_new_amount} new verses per day, you'll complete the Quran in approximately ${daysLeft} days (${Math.ceil(daysLeft / 30)} months). Remember, consistency matters more than speed.`;
     } else if (lowerQ.includes('suggest') || lowerQ.includes('recommend') || lowerQ.includes('schedule')) {
-      response = `Based on your ${profile.track_type} track, I recommend:\n\n1. Focus on ${profile.daily_new_verses} new verses in the morning\n2. Revise ${profile.daily_revision_pages} pages of previous material after Dhuhr\n3. Listen to the audio of tomorrow's portion before bed\n\nThis spaced approach helps with long-term retention.`;
+      response = `Based on your ${profile.track_types.join(' & ')} track, I recommend:\n\n1. Focus on ${profile.daily_new_amount} new ${profile.preferred_unit}s in the morning\n2. Revise ${profile.daily_revision_amount} ${profile.preferred_unit}s of previous material after Dhuhr\n3. Listen to the audio of tomorrow's portion before bed\n\nThis spaced approach helps with long-term retention.`;
     } else if (lowerQ.includes('motivat') || lowerQ.includes('struggling') || lowerQ.includes('hard')) {
       response = `The journey of Quran can be challenging, but remember: "Verily, with hardship comes ease" (94:6). The one who struggles with the Quran gets double the reward. Every moment of effort is recorded. Take it one ayah at a time.`;
     } else if (lowerQ.includes('revision') || lowerQ.includes('forget')) {

@@ -79,16 +79,16 @@ export async function POST(request: Request) {
       .select('*')
       .eq('nur_profile_id', profile.id)
       .order('date', { ascending: false })
-      .order('end_ayah', { ascending: false })
+      .order('range_end', { ascending: false })
       .limit(1);
 
     const lastItem = lastItems?.[0];
-    let startSurah = profile.memorization_current_surah ?? profile.memorization_start_surah ?? 1;
-    let startAyah = profile.memorization_current_ayah ?? profile.memorization_start_ayah ?? 1;
+    let startSurah = profile.memorization_current_surah ?? 1;
+    let startAyah = profile.memorization_current_ayah ?? 1;
 
     if (lastItem) {
-      startSurah = lastItem.surah_number;
-      startAyah = lastItem.end_ayah + 1;
+      startSurah = lastItem.surah_number ?? startSurah;
+      startAyah = lastItem.range_end + 1;
       // Check if we need to move to next surah
       const surahVerses: Record<number, number> = {
         1: 7, 2: 286, 3: 200, 4: 176, 5: 120, 6: 165, 7: 206, 8: 75, 9: 129, 10: 109,
@@ -112,13 +112,17 @@ export async function POST(request: Request) {
 
     // Get the last date to schedule from
     const lastDate = lastItem?.date ? new Date(lastItem.date + 'T12:00:00') : new Date();
+    const unitType: string = profile.preferred_unit ?? 'ayah';
+    const primaryTrack: string = (profile.track_types as string[])?.[0] ?? 'memorization';
+
     const items: Array<{
       nur_profile_id: string;
       date: string;
       task_type: string;
-      surah_number: number;
-      start_ayah: number;
-      end_ayah: number;
+      unit_type: string;
+      surah_number: number | null;
+      range_start: number;
+      range_end: number;
       completed: boolean;
       carried_over: boolean;
     }> = [];
@@ -146,24 +150,25 @@ export async function POST(request: Request) {
       date.setDate(date.getDate() + day);
       const dateStr = date.toISOString().split('T')[0];
 
-      let versesLeft = profile.daily_new_verses;
-      while (versesLeft > 0 && curSurah <= 114) {
+      let amountLeft = profile.daily_new_amount;
+      while (amountLeft > 0 && curSurah <= 114) {
         const maxAyah = surahVerses[curSurah] ?? 1;
         const available = maxAyah - curAyah + 1;
-        const toAssign = Math.min(versesLeft, available);
+        const toAssign = Math.min(amountLeft, available);
 
         items.push({
           nur_profile_id: profile.id,
           date: dateStr,
-          task_type: profile.track_type,
-          surah_number: curSurah,
-          start_ayah: curAyah,
-          end_ayah: curAyah + toAssign - 1,
+          task_type: primaryTrack,
+          unit_type: unitType,
+          surah_number: unitType === 'ayah' ? curSurah : null,
+          range_start: curAyah,
+          range_end: curAyah + toAssign - 1,
           completed: false,
           carried_over: false,
         });
 
-        versesLeft -= toAssign;
+        amountLeft -= toAssign;
         curAyah += toAssign;
         if (curAyah > maxAyah) {
           curSurah++;

@@ -72,21 +72,23 @@ export async function POST(request: Request) {
       .eq('clerk_id', userId)
       .single();
 
+    const trackTypes: string[] = body.trackTypes ?? ['memorization'];
+    const preferredUnit: string = body.preferredUnit ?? 'ayah';
+
     // Create Nur profile
     const { data: nurProfile, error: profileError } = await supabase
       .from('nur_profiles')
       .insert({
         clerk_id: userId,
         display_name: userProfile?.full_name ?? null,
-        track_type: body.trackType ?? 'memorization',
+        track_types: trackTypes,
+        preferred_unit: preferredUnit,
         day_end_setting: body.dayEndSetting ?? 'midnight',
         fajr_time: body.fajrTime ?? null,
-        memorization_start_surah: body.startSurah ?? 1,
-        memorization_start_ayah: body.startAyah ?? 1,
         memorization_current_surah: body.startSurah ?? 1,
         memorization_current_ayah: body.startAyah ?? 1,
-        daily_new_verses: body.dailyNewVerses ?? 5,
-        daily_revision_pages: body.dailyRevisionPages ?? 2,
+        daily_new_amount: body.dailyNewAmount ?? 5,
+        daily_revision_amount: body.dailyRevisionAmount ?? 2,
         preferred_time: body.preferredTime ?? null,
         reminder_enabled: body.reminderEnabled ?? true,
         setup_completed: true,
@@ -100,12 +102,15 @@ export async function POST(request: Request) {
     }
 
     // Generate initial schedule (7 days)
+    // For now, schedule generation always works at the ayah level internally
+    const primaryTrack = trackTypes[0] ?? 'memorization';
     const scheduleItems = generateSchedule(
       nurProfile.id,
       body.startSurah ?? 1,
       body.startAyah ?? 1,
-      body.dailyNewVerses ?? 5,
-      body.trackType ?? 'memorization',
+      body.dailyNewAmount ?? 5,
+      primaryTrack,
+      preferredUnit,
       7,
     );
 
@@ -158,8 +163,9 @@ function generateSchedule(
   profileId: string,
   startSurah: number,
   startAyah: number,
-  dailyVerses: number,
+  dailyAmount: number,
   trackType: string,
+  unitType: string,
   days: number,
 ) {
   // Surah verse counts for scheduling
@@ -182,9 +188,10 @@ function generateSchedule(
     nur_profile_id: string;
     date: string;
     task_type: string;
-    surah_number: number;
-    start_ayah: number;
-    end_ayah: number;
+    unit_type: string;
+    surah_number: number | null;
+    range_start: number;
+    range_end: number;
     completed: boolean;
     carried_over: boolean;
   }> = [];
@@ -197,24 +204,25 @@ function generateSchedule(
     date.setDate(date.getDate() + day);
     const dateStr = date.toISOString().split('T')[0];
 
-    let versesLeft = dailyVerses;
-    while (versesLeft > 0 && currentSurah <= 114) {
+    let amountLeft = dailyAmount;
+    while (amountLeft > 0 && currentSurah <= 114) {
       const maxAyah = surahVerses[currentSurah] ?? 1;
       const available = maxAyah - currentAyah + 1;
-      const toAssign = Math.min(versesLeft, available);
+      const toAssign = Math.min(amountLeft, available);
 
       items.push({
         nur_profile_id: profileId,
         date: dateStr,
         task_type: trackType,
-        surah_number: currentSurah,
-        start_ayah: currentAyah,
-        end_ayah: currentAyah + toAssign - 1,
+        unit_type: unitType,
+        surah_number: unitType === 'ayah' ? currentSurah : null,
+        range_start: currentAyah,
+        range_end: currentAyah + toAssign - 1,
         completed: false,
         carried_over: false,
       });
 
-      versesLeft -= toAssign;
+      amountLeft -= toAssign;
       currentAyah += toAssign;
 
       if (currentAyah > maxAyah) {
