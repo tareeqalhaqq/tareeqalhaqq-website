@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Target, Plus, Trophy, Flame, BookOpen, X, Check } from 'lucide-react';
+import { Target, Plus, Trophy, Flame, BookOpen, X, Check, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -37,6 +37,19 @@ export function GoalsPanel({ goals, onAddGoal, onDeleteGoal }: GoalsPanelProps) 
     { type: 'custom', label: 'Custom Goal', icon: Target },
   ];
 
+  const getGoalMushafUrl = (goal: NurGoal): string | null => {
+    if (goal.goal_type === 'complete_surah' && goal.target_surah) {
+      return `https://quran.com/${goal.target_surah}`;
+    }
+    if (goal.goal_type === 'complete_juz' && goal.target_juz) {
+      return `https://quran.com/juz/${goal.target_juz}`;
+    }
+    if (goal.goal_type === 'complete_page_range' && goal.target_page_start) {
+      return `https://quran.com/page/${goal.target_page_start}`;
+    }
+    return null;
+  };
+
   const handleSubmit = () => {
     const goal = {
       title: title || `Complete ${goalType === 'complete_surah' ? surahs.find(s => s.number === targetSurah)?.name : goalType === 'complete_juz' ? `Juz ${targetJuz}` : goalType === 'daily_streak' ? `${targetStreak}-day streak` : 'goal'}`,
@@ -44,6 +57,10 @@ export function GoalsPanel({ goals, onAddGoal, onDeleteGoal }: GoalsPanelProps) 
       goal_type: goalType,
       target_surah: goalType === 'complete_surah' ? targetSurah : null,
       target_juz: goalType === 'complete_juz' ? targetJuz : null,
+      target_hizb: null,
+      target_ruba: null,
+      target_page_start: null,
+      target_page_end: null,
       target_streak_days: goalType === 'daily_streak' ? targetStreak : null,
       target_date: targetDate || null,
     };
@@ -193,6 +210,17 @@ export function GoalsPanel({ goals, onAddGoal, onDeleteGoal }: GoalsPanelProps) 
                 </button>
               </div>
               {goal.description && <p className="text-xs text-white/40">{goal.description}</p>}
+              {getGoalMushafUrl(goal) && (
+                <a
+                  href={getGoalMushafUrl(goal) ?? '#'}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1 rounded-md border border-cyan-400/20 bg-cyan-400/[0.05] px-2 py-1 text-[0.68rem] text-cyan-200 transition hover:bg-cyan-400/[0.1]"
+                >
+                  Open in Mushaf
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              )}
               <div className="space-y-1">
                 <div className="flex items-center justify-between text-xs text-white/50">
                   <span>{goal.progress}%</span>

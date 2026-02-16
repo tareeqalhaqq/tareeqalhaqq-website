@@ -12,6 +12,7 @@ import { AiAssistant } from '@/components/nur/ai-assistant';
 import type { AiSuggestion } from '@/components/nur/ai-assistant';
 import { SettingsPanel } from '@/components/nur/settings-panel';
 import { DailyLog } from '@/components/nur/daily-log';
+import { MushafPanel } from '@/components/nur/mushaf-panel';
 import type { NurProfile, NurScheduleItem, NurGoal, NurDailyLog, SetupWizardData } from '@/lib/nur-types';
 import Link from 'next/link';
 
@@ -208,6 +209,10 @@ export default function NurTrackerClient() {
         goal_type: suggestion.action.goalType,
         target_surah: suggestion.action.targetSurah ?? null,
         target_juz: null,
+        target_hizb: null,
+        target_ruba: null,
+        target_page_start: null,
+        target_page_end: null,
         target_streak_days: null,
         target_date: null,
       });
@@ -276,13 +281,12 @@ export default function NurTrackerClient() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="text-white">
             <p className="eyebrow text-cyan-300/60 glow-text">Nur</p>
-            <h1 className="text-2xl font-headline font-semibold">
-              {state.profile.track_types.includes('memorization')
-                ? 'Memorization Tracker'
-                : state.profile.track_types.includes('revision')
-                ? 'Revision Tracker'
-                : 'Recitation Tracker'}
-            </h1>
+            <h1 className="text-2xl font-headline font-semibold">Your Personal Quran Tracker</h1>
+            <p className="mt-1 text-xs text-white/50">
+              {state.profile.track_types.length > 1
+                ? `Tracking: ${state.profile.track_types.map(track => track.charAt(0).toUpperCase() + track.slice(1)).join(', ')}`
+                : `Tracking: ${state.profile.track_types[0].charAt(0).toUpperCase() + state.profile.track_types[0].slice(1)}`}
+            </p>
           </div>
           <div className="flex items-center gap-3">
             <Button
@@ -331,8 +335,8 @@ export default function NurTrackerClient() {
           isSaving={isSaving}
         />
 
-        {/* Bottom section: Goals + AI */}
-        <div className="grid gap-6 lg:grid-cols-2">
+        {/* Bottom section: Goals + AI + Mushaf */}
+        <div className="grid gap-6 lg:grid-cols-3">
           <GoalsPanel
             goals={state.goals}
             onAddGoal={handleAddGoal}
@@ -344,6 +348,7 @@ export default function NurTrackerClient() {
             goals={state.goals}
             onApplySuggestion={handleApplySuggestion}
           />
+          <MushafPanel />
         </div>
 
         {/* Error display */}
