@@ -10,31 +10,31 @@ export type ProjectRecord = {
 };
 
 export const projectSelectFields =
-  'id, title, description, tag, href, display_order, is_published, created_at';
+  "id, title, description, tag, href, display_order, is_published, created_at";
 
 export const fallbackProjects = [
   {
-    title: 'Mutoon AI',
+    title: "Mutoon AI",
     description:
-      'An AI-assisted study companion designed to help learners navigate foundational texts with context, structure, and clarity.',
-    tag: 'Education',
-    href: '/active-projects',
+      "An AI-assisted study companion designed to help learners navigate foundational texts with context, structure, and clarity.",
+    tag: "Education",
+    href: "/",
     display_order: 0,
   },
   {
-    title: 'Markaz Al-Haqq',
+    title: "Markaz Al-Haqq",
     description:
-      'A knowledge hub connecting students to scholars, curated programs, and trusted resources grounded in authentic methodology.',
-    tag: 'Institution',
-    href: '/active-projects',
+      "A knowledge hub connecting students to scholars, curated programs, and trusted resources grounded in authentic methodology.",
+    tag: "Institution",
+    href: "/",
     display_order: 1,
   },
   {
-    title: 'Nur Recitations',
+    title: "Nur Recitations",
     description:
-      'A focused platform for beautiful and accurate Qur’an recitations, helping hearts connect to revelation with reflection.',
-    tag: 'Media',
-    href: '/active-projects',
+      "A focused platform for beautiful and accurate Qur’an recitations, helping hearts connect to revelation with reflection.",
+    tag: "Media",
+    href: "/",
     display_order: 2,
   },
 ];
