@@ -129,7 +129,45 @@
   }
 
   .glass-panel {
-    @apply rounded-2xl border border-white/[0.06] bg-white/[0.03] p-8 backdrop-blur-sm;
+    @apply rounded-2xl border border-white/[0.08] bg-white/[0.03] p-8 backdrop-blur-sm;
+    box-shadow:
+      0 0 20px rgba(56, 189, 248, 0.04),
+      0 0 60px rgba(56, 189, 248, 0.02),
+      inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  }
+
+  .glass-panel-glow {
+    @apply rounded-2xl border border-cyan-400/[0.10] bg-white/[0.03] p-8 backdrop-blur-sm;
+    box-shadow:
+      0 0 24px rgba(56, 189, 248, 0.07),
+      0 0 80px rgba(56, 189, 248, 0.03),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  }
+
+  .glow-text {
+    text-shadow: 0 0 30px rgba(56, 189, 248, 0.3), 0 0 60px rgba(56, 189, 248, 0.1);
+  }
+
+  .glow-border {
+    box-shadow:
+      0 0 15px rgba(56, 189, 248, 0.08),
+      0 0 45px rgba(56, 189, 248, 0.04);
+  }
+
+  .glow-icon {
+    filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.4));
+  }
+
+  .glow-card {
+    @apply rounded-xl border border-white/[0.08] bg-white/[0.02] transition-all duration-300;
+    box-shadow: 0 0 20px rgba(56, 189, 248, 0.03);
+  }
+
+  .glow-card:hover {
+    @apply border-cyan-400/[0.15] bg-white/[0.05];
+    box-shadow:
+      0 0 30px rgba(56, 189, 248, 0.08),
+      0 0 80px rgba(56, 189, 248, 0.03);
   }
 
   .eyebrow {

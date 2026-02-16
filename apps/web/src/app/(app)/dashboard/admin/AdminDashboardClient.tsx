@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { ProjectsManager } from '@/components/admin/projects-manager';
+import Link from 'next/link';
 
 type AdminProfile = {
   full_name?: string | null;
@@ -17,7 +17,7 @@ export function AdminDashboardClient({ profile }: AdminDashboardClientProps) {
       <div className="page-section__inner space-y-6">
         <div className="glass-panel space-y-3 p-8 text-white">
           <p className="eyebrow">Dashboard</p>
-          <h1 className="text-3xl font-semibold">Admin overview</h1>
+          <h1 className="text-3xl font-semibold glow-text">Admin overview</h1>
           <p className="text-sm text-white/70">
             Welcome back{profile?.full_name ? `, ${profile.full_name}` : ''}. Manage the academy experience and keep
             everything running smoothly.
@@ -27,7 +27,7 @@ export function AdminDashboardClient({ profile }: AdminDashboardClientProps) {
               <a href="https://markazalhaqq.org">View academy site</a>
             </Button>
             <Button asChild variant="secondary">
-              <a href="/mobile">Open mobile app</a>
+              <Link href="/nur">Open Nur Tracker</Link>
             </Button>
             <Button asChild variant="outline">
               <a href="/logout">Sign out</a>
@@ -54,7 +54,16 @@ export function AdminDashboardClient({ profile }: AdminDashboardClientProps) {
             </div>
           </div>
 
-          <ProjectsManager adminName={profile?.full_name ?? undefined} />
+          <div className="glass-panel-glow space-y-3 p-6 text-white">
+            <p className="text-sm uppercase tracking-[0.18em] text-cyan-300/60">Nur</p>
+            <p className="text-lg font-semibold">Quran Tracker</p>
+            <p className="text-sm text-white/70">
+              Manage your memorization, revision, and recitation schedule with the Nur tracker.
+            </p>
+            <Button asChild className="w-full sm:w-auto">
+              <Link href="/nur">Open Nur Tracker</Link>
+            </Button>
+          </div>
         </div>
       </div>
     </section>

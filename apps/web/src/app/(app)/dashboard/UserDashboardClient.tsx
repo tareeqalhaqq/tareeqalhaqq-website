@@ -45,13 +45,16 @@ export default function UserDashboardClient() {
           <>
             <div className="glass-panel space-y-3 p-8 text-white">
               <p className="eyebrow">Dashboard</p>
-              <h1 className="text-3xl font-semibold">Assalamu Alaikum, {displayName}!</h1>
+              <h1 className="text-3xl font-semibold glow-text">Assalamu Alaikum, {displayName}!</h1>
               <p className="text-sm text-white/70">
                 You&apos;re signed in to your Tareeq Al Haqq account. We&apos;ve tailored this space using the profile details
                 stored in your account so your experience feels personal and intentional.
               </p>
               <div className="flex flex-wrap gap-3 pt-2">
                 <Button asChild>
+                  <Link href="/nur">Nur - Quran Tracker</Link>
+                </Button>
+                <Button asChild variant="outline">
                   <Link href="/profile">Profile</Link>
                 </Button>
                 <Button asChild variant="outline">
@@ -75,12 +78,12 @@ export default function UserDashboardClient() {
                   <p className="text-lg font-semibold">Your account overview</p>
                   <p className="text-sm text-white/70">Review your profile details and account settings.</p>
                 </div>
-                <div className="glass-panel space-y-3 p-6 text-white">
-                  <p className="text-sm uppercase tracking-[0.18em] text-white/60">App</p>
-                  <p className="text-lg font-semibold">Continue learning</p>
-                  <p className="text-sm text-white/70">Launch the learning experience and pick up where you left off.</p>
+                <div className="glass-panel-glow space-y-3 p-6 text-white">
+                  <p className="text-sm uppercase tracking-[0.18em] text-cyan-300/60">Nur</p>
+                  <p className="text-lg font-semibold">Quran Tracker</p>
+                  <p className="text-sm text-white/70">Track your memorization, revision, and daily recitation schedule.</p>
                   <Button asChild className="w-full">
-                    <Link href="/mobile">Open the app</Link>
+                    <Link href="/nur">Open Nur</Link>
                   </Button>
                 </div>
               </div>
