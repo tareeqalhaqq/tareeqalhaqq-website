@@ -1,6 +1,8 @@
+import type { PlaybackMode, QuranReciter } from '@/lib/quran-audio';
+
 export type MushafViewMode = 'page' | 'ayah';
 
-export type MushafPlaybackMode = 'single_ayah' | 'ayah_range' | 'full_surah' | 'full_page';
+export type MushafPlaybackMode = PlaybackMode;
 
 export type MushafPosition = {
   surah: number;
@@ -8,8 +10,4 @@ export type MushafPosition = {
   page: number;
 };
 
-export type Reciter = {
-  id: string;
-  name: string;
-  baseUrl: string;
-};
+export type Reciter = QuranReciter;

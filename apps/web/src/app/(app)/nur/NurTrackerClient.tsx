@@ -348,7 +348,10 @@ export default function NurTrackerClient() {
             goals={state.goals}
             onApplySuggestion={handleApplySuggestion}
           />
-          <NativeMushafPanel />
+          <NativeMushafPanel
+            profile={state.profile}
+            onSaveSettings={handleSaveSettings}
+          />
         </div>
 
         {/* Error display */}

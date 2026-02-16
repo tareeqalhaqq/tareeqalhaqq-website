@@ -1,6 +1,8 @@
 'use client';
 
-import { ExternalLink, Play } from 'lucide-react';
+import { Pause, Play, Repeat, SkipForward } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { buildAudioQueue, createQuranAudioPlayer } from '@/lib/quran-audio';
 import type { MushafPlaybackMode, MushafPosition, Reciter } from './types';
 
 type PlaybackControlsProps = {
@@ -13,19 +15,86 @@ type PlaybackControlsProps = {
 const playbackModes: { value: MushafPlaybackMode; label: string }[] = [
   { value: 'single_ayah', label: 'Single Ayah' },
   { value: 'ayah_range', label: 'Ayah Range' },
-  { value: 'full_surah', label: 'Full Surah' },
-  { value: 'full_page', label: 'Full Page' },
+  { value: 'surah', label: 'Surah' },
+  { value: 'page', label: 'Page' },
 ];
 
-function formatEveryAyahTrack(surah: number, ayah: number) {
-  return `${String(surah).padStart(3, '0')}${String(ayah).padStart(3, '0')}.mp3`;
-}
-
 export function PlaybackControls({ playbackMode, position, selectedReciter, onPlaybackModeChange }: PlaybackControlsProps) {
-  const sampleTrackUrl = `${selectedReciter.baseUrl}${formatEveryAyahTrack(position.surah, position.ayah)}`;
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isRepeatEnabled, setIsRepeatEnabled] = useState(false);
+
+  const player = useMemo(() => {
+    if (!audioRef.current) {
+      return null;
+    }
+
+    return createQuranAudioPlayer(audioRef.current);
+  }, []);
+
+  useEffect(() => {
+    if (!audioRef.current) {
+      return;
+    }
+
+    const audio = audioRef.current;
+    const handleStateChange = () => setIsPlaying(!audio.paused);
+
+    audio.addEventListener('play', handleStateChange);
+    audio.addEventListener('pause', handleStateChange);
+
+    return () => {
+      audio.removeEventListener('play', handleStateChange);
+      audio.removeEventListener('pause', handleStateChange);
+    };
+  }, []);
+
+  const playQueue = async () => {
+    if (!player) {
+      return;
+    }
+
+    const queue = buildAudioQueue(playbackMode, selectedReciter.id, position);
+    await player.playQueue(queue);
+  };
+
+  const togglePlayPause = async () => {
+    if (!player) {
+      return;
+    }
+
+    if (player.isPaused()) {
+      if (audioRef.current?.src) {
+        await player.play();
+      } else {
+        await playQueue();
+      }
+      return;
+    }
+
+    player.pause();
+  };
+
+  const handleNext = async () => {
+    if (!player) {
+      return;
+    }
+
+    await player.next();
+  };
+
+  const handleRepeat = () => {
+    if (!player) {
+      return;
+    }
+
+    const next = !isRepeatEnabled;
+    setIsRepeatEnabled(next);
+    player.setRepeat(next);
+  };
 
   return (
-    <div className="space-y-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
+    <div className="space-y-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
       <p className="text-xs uppercase tracking-[0.16em] text-white/40">Playback</p>
       <div className="grid grid-cols-2 gap-2">
         {playbackModes.map(mode => (
@@ -43,16 +112,39 @@ export function PlaybackControls({ playbackMode, position, selectedReciter, onPl
           </button>
         ))}
       </div>
-      <a
-        href={sampleTrackUrl}
-        target="_blank"
-        rel="noreferrer"
-        className="inline-flex items-center gap-1.5 text-xs text-cyan-200/80 transition hover:text-cyan-100"
-      >
-        <Play className="h-3.5 w-3.5" />
-        Preview selected ayah audio
-        <ExternalLink className="h-3.5 w-3.5" />
-      </a>
+
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={togglePlayPause}
+          className="inline-flex items-center gap-1.5 rounded-lg border border-cyan-300/40 bg-cyan-400/10 px-3 py-2 text-xs text-cyan-100"
+        >
+          {isPlaying ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
+          {isPlaying ? 'Pause' : 'Play'}
+        </button>
+        <button
+          type="button"
+          onClick={handleNext}
+          className="inline-flex items-center gap-1.5 rounded-lg border border-white/[0.1] bg-black/10 px-3 py-2 text-xs text-white/80"
+        >
+          <SkipForward className="h-3.5 w-3.5" />
+          Next
+        </button>
+        <button
+          type="button"
+          onClick={handleRepeat}
+          className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs ${
+            isRepeatEnabled
+              ? 'border-cyan-300/40 bg-cyan-400/10 text-cyan-100'
+              : 'border-white/[0.1] bg-black/10 text-white/80'
+          }`}
+        >
+          <Repeat className="h-3.5 w-3.5" />
+          Repeat
+        </button>
+      </div>
+
+      <audio ref={audioRef} preload="none" className="hidden" />
     </div>
   );
 }
