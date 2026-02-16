@@ -28,6 +28,9 @@ export type NurProfile = {
   preferred_time: string | null; // HH:MM format
   reminder_enabled: boolean;
   selected_reciter_id: string | null;
+  mushaf_view_mode: 'page' | 'ayah';
+  mushaf_tajweed_enabled: boolean;
+  mushaf_mutashabihat_enabled: boolean;
   setup_completed: boolean;
   created_at: string;
   updated_at: string;

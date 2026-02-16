@@ -1,106 +1,199 @@
 'use client';
 
-import { BookMarked, ExternalLink } from 'lucide-react';
-
-import type { MushafPosition, MushafViewMode } from './types';
-
+import { BookOpenText, ChevronLeft, ChevronRight, Play, TimerReset } from 'lucide-react';
+import {
+  clampAyahToSurah,
+  findMostRelevantPageForSurah,
+  getAvailablePages,
+  getAvailableSurahs,
+  getAyahsForPage,
+  getAyahsForSurah,
+  getDataCoverageMessage,
+  getMutashabihStats,
+  getSurahLabel,
+  type TajweedRule,
+} from '@/lib/quran-text';
+import type { AyahRange, MushafPosition, MushafReaderOptions, MushafReaderSelection, MushafViewMode } from './types';
 
 type MushafReaderProps = {
   viewMode: MushafViewMode;
   position: MushafPosition;
+  options: MushafReaderOptions;
   onPositionChange: (position: MushafPosition) => void;
+  onPlayAyah: (surah: number, ayah: number) => void;
+  onRangeChange: (range: AyahRange | null) => void;
+  onSelectionChange: (selection: MushafReaderSelection) => void;
 };
 
-function clamp(value: number, min: number, max: number) {
-  return Math.min(max, Math.max(min, value));
+const tajweedClassMap: Record<TajweedRule, string> = {
+  normal: 'text-white/95',
+  madd: 'text-sky-300',
+  ghunnah: 'text-emerald-300',
+  qalqalah: 'text-amber-300',
+  ikhfa: 'text-fuchsia-300',
+  idgham: 'text-violet-300',
+};
+
+const availableSurahs = getAvailableSurahs();
+const availablePages = getAvailablePages();
+
+function getPrevious<T extends number>(collection: T[], value: T, fallback: T): T {
+  const idx = collection.indexOf(value);
+  return idx <= 0 ? fallback : collection[idx - 1];
 }
 
-export function MushafReader({ viewMode, position, onPositionChange }: MushafReaderProps) {
-  const quranUrl =
-    viewMode === 'page'
-      ? `https://quran.com/page/${position.page}`
-      : `https://quran.com/${position.surah}/${position.ayah}`;
+function getNext<T extends number>(collection: T[], value: T, fallback: T): T {
+  const idx = collection.indexOf(value);
+  return idx === -1 || idx >= collection.length - 1 ? fallback : collection[idx + 1];
+}
+
+function AyahText({
+  text,
+  tokens,
+  options,
+  mutashabihStats,
+}: {
+  text: string;
+  tokens: Array<{ text: string; tajweed: TajweedRule; mutashabihKey?: string }>;
+  options: MushafReaderOptions;
+  mutashabihStats: Map<string, number>;
+}) {
+  if (!tokens.length) {
+    return <p className="text-right font-[\'Amiri\',serif] text-3xl leading-relaxed text-white/95">{text}</p>;
+  }
 
   return (
-    <div className="space-y-3 rounded-xl border border-cyan-400/20 bg-cyan-400/[0.04] p-4">
-      <div className="flex items-center justify-between">
-        <p className="text-sm font-semibold text-white">Mushaf Reader</p>
-        <a
-          href={quranUrl}
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex items-center gap-1.5 text-xs text-cyan-200/80 transition hover:text-cyan-100"
-        >
-          Open on Quran.com
-          <ExternalLink className="h-3.5 w-3.5" />
-        </a>
+    <p dir="rtl" className="text-right font-['Amiri',serif] text-3xl leading-relaxed">
+      {tokens.map((token, idx) => {
+        const tajweedClass = options.tajweedEnabled ? tajweedClassMap[token.tajweed] : 'text-white/95';
+        const isMutashabih = options.mutashabihatEnabled && token.mutashabihKey && (mutashabihStats.get(token.mutashabihKey) ?? 0) > 1;
+
+        return (
+          <span
+            key={`${token.text}-${idx}`}
+            className={`inline-block px-0.5 ${tajweedClass} ${isMutashabih ? 'rounded bg-yellow-300/20 ring-1 ring-yellow-200/40' : ''}`}
+          >
+            {token.text}{' '}
+          </span>
+        );
+      })}
+    </p>
+  );
+}
+
+export function MushafReader({
+  viewMode,
+  position,
+  options,
+  onPositionChange,
+  onPlayAyah,
+  onRangeChange,
+  onSelectionChange,
+}: MushafReaderProps) {
+  const pageAyahs = getAyahsForPage(position.page);
+  const surahAyahs = getAyahsForSurah(position.surah);
+  const activeAyahs = viewMode === 'page' ? pageAyahs : surahAyahs;
+  const mutashabihStats = getMutashabihStats(activeAyahs);
+  const coverageMessage = getDataCoverageMessage();
+
+  const applySurah = (surah: number) => {
+    const clampedAyah = clampAyahToSurah(surah, 1);
+    onPositionChange({
+      ...position,
+      surah,
+      ayah: clampedAyah,
+      page: findMostRelevantPageForSurah(surah),
+    });
+    onRangeChange(null);
+  };
+
+  const handleAyahSelection = (ayah: number) => {
+    onPositionChange({ ...position, ayah });
+    const activeAyah = activeAyahs.find(item => item.ayah === ayah) ?? null;
+    onSelectionChange({ activeAyah, range: null });
+    onRangeChange(null);
+  };
+
+  const toggleRangeAtAyah = (ayah: number) => {
+    const start = Math.min(position.ayah, ayah);
+    const end = Math.max(position.ayah, ayah);
+    const range: AyahRange = { startAyah: start, endAyah: end };
+    onRangeChange(range);
+    const activeAyah = activeAyahs.find(item => item.ayah === ayah) ?? null;
+    onSelectionChange({ activeAyah, range });
+  };
+
+  return (
+    <div className="space-y-4 rounded-xl border border-cyan-400/20 bg-cyan-400/[0.04] p-4">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="text-sm font-semibold text-white">Native Mushaf Reader</p>
+          <p className="text-xs text-cyan-100/70">{coverageMessage}</p>
+        </div>
+        <div className="flex items-center gap-1.5 text-[11px] text-white/60">
+          <BookOpenText className="h-3.5 w-3.5" />
+          {viewMode === 'page' ? `Page ${position.page}` : getSurahLabel(position.surah)}
+        </div>
       </div>
 
       {viewMode === 'page' ? (
-        <div className="space-y-1">
-          <label htmlFor="mushaf-page" className="text-xs uppercase tracking-[0.16em] text-white/40">
-            Page
-          </label>
-          <div className="flex items-center gap-2">
-            <BookMarked className="h-4 w-4 text-cyan-300/80" />
-            <input
-              id="mushaf-page"
-              type="number"
-              min={1}
-              max={604}
-              value={position.page}
-              onChange={event =>
-                onPositionChange({
-                  ...position,
-                  page: clamp(Number(event.target.value) || 1, 1, 604),
-                })
-              }
-              className="w-full rounded-lg border border-white/[0.1] bg-black/20 px-3 py-2 text-sm text-white outline-none transition focus:border-cyan-300/40"
-            />
-          </div>
+        <div className="flex items-center justify-between rounded-lg border border-white/[0.08] bg-black/20 p-2">
+          <button
+            type="button"
+            onClick={() => onPositionChange({ ...position, page: getPrevious(availablePages, position.page, availablePages[0]), surah: 1, ayah: 1 })}
+            className="rounded-md border border-white/10 p-2 text-white/80"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+          <p className="text-sm text-white/80">Page {position.page}</p>
+          <button
+            type="button"
+            onClick={() => onPositionChange({ ...position, page: getNext(availablePages, position.page, availablePages[availablePages.length - 1]), surah: 114, ayah: 1 })}
+            className="rounded-md border border-white/10 p-2 text-white/80"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
         </div>
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div className="space-y-1">
-            <label htmlFor="mushaf-surah" className="text-xs uppercase tracking-[0.16em] text-white/40">
-              Surah
-            </label>
-            <input
-              id="mushaf-surah"
-              type="number"
-              min={1}
-              max={114}
-              value={position.surah}
-              onChange={event =>
-                onPositionChange({
-                  ...position,
-                  surah: clamp(Number(event.target.value) || 1, 1, 114),
-                })
-              }
-              className="w-full rounded-lg border border-white/[0.1] bg-black/20 px-3 py-2 text-sm text-white outline-none transition focus:border-cyan-300/40"
-            />
-          </div>
-          <div className="space-y-1">
-            <label htmlFor="mushaf-ayah" className="text-xs uppercase tracking-[0.16em] text-white/40">
-              Ayah
-            </label>
-            <input
-              id="mushaf-ayah"
-              type="number"
-              min={1}
-              max={286}
-              value={position.ayah}
-              onChange={event =>
-                onPositionChange({
-                  ...position,
-                  ayah: clamp(Number(event.target.value) || 1, 1, 286),
-                })
-              }
-              className="w-full rounded-lg border border-white/[0.1] bg-black/20 px-3 py-2 text-sm text-white outline-none transition focus:border-cyan-300/40"
-            />
-          </div>
+        <div className="flex items-center justify-between gap-2 rounded-lg border border-white/[0.08] bg-black/20 p-2">
+          <button type="button" onClick={() => applySurah(getPrevious(availableSurahs, position.surah, availableSurahs[0]))} className="rounded-md border border-white/10 p-2 text-white/80">
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+          <p className="text-center text-sm text-white/80">{getSurahLabel(position.surah)}</p>
+          <button type="button" onClick={() => applySurah(getNext(availableSurahs, position.surah, availableSurahs[availableSurahs.length - 1]))} className="rounded-md border border-white/10 p-2 text-white/80">
+            <ChevronRight className="h-4 w-4" />
+          </button>
         </div>
       )}
+
+      <div className="max-h-[24rem] space-y-3 overflow-y-auto pr-1">
+        {activeAyahs.map(ayah => {
+          const isActive = position.surah === ayah.surah && position.ayah === ayah.ayah;
+          return (
+            <article
+              key={ayah.key}
+              className={`rounded-xl border p-3 ${isActive ? 'border-cyan-300/40 bg-cyan-400/10' : 'border-white/[0.08] bg-black/20'}`}
+            >
+              <div className="mb-2 flex items-center justify-between">
+                <p className="text-xs text-cyan-100/70">{ayah.surah}:{ayah.ayah}</p>
+                <div className="flex items-center gap-2">
+                  <button type="button" onClick={() => onPlayAyah(ayah.surah, ayah.ayah)} className="inline-flex items-center gap-1 rounded-md border border-cyan-300/40 px-2 py-1 text-[11px] text-cyan-100">
+                    <Play className="h-3 w-3" />
+                    Play
+                  </button>
+                  <button type="button" onClick={() => toggleRangeAtAyah(ayah.ayah)} className="inline-flex items-center gap-1 rounded-md border border-white/15 px-2 py-1 text-[11px] text-white/80">
+                    <TimerReset className="h-3 w-3" />
+                    Range
+                  </button>
+                </div>
+              </div>
+              <button type="button" onClick={() => handleAyahSelection(ayah.ayah)} className="w-full text-left">
+                <AyahText text={ayah.text} tokens={ayah.tokens} options={options} mutashabihStats={mutashabihStats} />
+              </button>
+            </article>
+          );
+        })}
+      </div>
     </div>
   );
 }

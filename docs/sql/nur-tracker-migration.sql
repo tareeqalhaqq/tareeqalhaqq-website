@@ -494,3 +494,9 @@ ON CONFLICT (number) DO NOTHING;
 -- Your app uses the supabase-js client with the service_role key
 -- in API routes for writes, and the anon key on the client for reads.
 -- ─────────────────────────────────────────────────────────────────────
+
+
+-- Optional native mushaf reader preferences
+ALTER TABLE nur_profiles ADD COLUMN IF NOT EXISTS mushaf_view_mode TEXT NOT NULL DEFAULT 'page' CHECK (mushaf_view_mode IN ('page','ayah'));
+ALTER TABLE nur_profiles ADD COLUMN IF NOT EXISTS mushaf_tajweed_enabled BOOLEAN NOT NULL DEFAULT true;
+ALTER TABLE nur_profiles ADD COLUMN IF NOT EXISTS mushaf_mutashabihat_enabled BOOLEAN NOT NULL DEFAULT false;
