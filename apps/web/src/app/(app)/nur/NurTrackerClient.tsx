@@ -12,7 +12,7 @@ import { AiAssistant } from '@/components/nur/ai-assistant';
 import type { AiSuggestion } from '@/components/nur/ai-assistant';
 import { SettingsPanel } from '@/components/nur/settings-panel';
 import { DailyLog } from '@/components/nur/daily-log';
-import { MushafPanel } from '@/components/nur/mushaf-panel';
+import { MushafPanel as NativeMushafPanel } from '@/components/nur/mushaf-panel';
 import type { NurProfile, NurScheduleItem, NurGoal, NurDailyLog, SetupWizardData } from '@/lib/nur-types';
 import Link from 'next/link';
 
@@ -348,7 +348,7 @@ export default function NurTrackerClient() {
             goals={state.goals}
             onApplySuggestion={handleApplySuggestion}
           />
-          <MushafPanel />
+          <NativeMushafPanel />
         </div>
 
         {/* Error display */}
