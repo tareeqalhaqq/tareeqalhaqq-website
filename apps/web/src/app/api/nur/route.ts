@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { createSupabaseServiceClient } from '@/lib/supabase';
 import { buildScheduleItems } from '@/lib/nur-schedule';
+import { DEFAULT_RECITER_ID } from '@/lib/quran-audio';
 import type { QuranUnit, TrackType } from '@/lib/nur-types';
 
 export async function GET() {
@@ -75,6 +76,7 @@ export async function POST(request: Request) {
         daily_revision_amount: body.dailyRevisionAmount ?? 2,
         preferred_time: body.preferredTime ?? null,
         reminder_enabled: body.reminderEnabled ?? true,
+        selected_reciter_id: DEFAULT_RECITER_ID,
         setup_completed: true,
       })
       .select()

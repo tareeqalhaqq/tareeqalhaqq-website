@@ -4,7 +4,7 @@ import { Headphones } from 'lucide-react';
 import type { Reciter } from './types';
 
 type ReciterSelectorProps = {
-  reciters: Reciter[];
+  reciters: readonly Reciter[];
   selectedReciterId: string;
   onReciterChange: (reciterId: string) => void;
 };
@@ -22,7 +22,7 @@ export function ReciterSelector({ reciters, selectedReciterId, onReciterChange }
         >
           {reciters.map(reciter => (
             <option key={reciter.id} value={reciter.id} className="bg-slate-900 text-white">
-              {reciter.name}
+              {reciter.displayName} ({reciter.bitrateKbps}kbps)
             </option>
           ))}
         </select>

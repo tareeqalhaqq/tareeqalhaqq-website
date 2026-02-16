@@ -1,36 +1,50 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import {
+  DEFAULT_RECITER_ID,
+  QURAN_RECITER_CATALOG,
+  getReciterById,
+  type ReciterId,
+} from '@/lib/quran-audio';
+import type { NurProfile } from '@/lib/nur-types';
 import { MushafReader } from './mushaf/MushafReader';
 import { MushafToolbar } from './mushaf/MushafToolbar';
 import { PlaybackControls } from './mushaf/PlaybackControls';
 import { ReciterSelector } from './mushaf/ReciterSelector';
-import type { MushafPlaybackMode, MushafPosition, MushafViewMode, Reciter } from './mushaf/types';
-
-const reciters: Reciter[] = [
-  { id: 'husary', name: 'Sheikh Al Hussary', baseUrl: 'https://everyayah.com/data/Husary_64kbps/' },
-  { id: 'minshawi', name: 'Sheikh Al Minshawi', baseUrl: 'https://everyayah.com/data/Minshawy_Murattal_128kbps/' },
-  { id: 'abdul-basit', name: 'Sheikh Abdul Basit', baseUrl: 'https://everyayah.com/data/Abdul_Basit_Murattal_64kbps/' },
-  { id: 'ahmed-neana', name: 'Sheikh Ahmed Al Nufais', baseUrl: 'https://everyayah.com/data/Ahmed_Neana_32kbps/' },
-];
+import type { MushafPlaybackMode, MushafPosition, MushafViewMode } from './mushaf/types';
 
 const initialPosition: MushafPosition = { surah: 1, ayah: 1, page: 1 };
 
-export function MushafPanel() {
+type MushafPanelProps = {
+  profile: NurProfile;
+  onSaveSettings: (updates: Partial<NurProfile>) => Promise<void>;
+};
+
+export function MushafPanel({ profile, onSaveSettings }: MushafPanelProps) {
   const [viewMode, setViewMode] = useState<MushafViewMode>('page');
   const [position, setPosition] = useState<MushafPosition>(initialPosition);
-  const [selectedReciterId, setSelectedReciterId] = useState(reciters[0].id);
+  const [selectedReciterId, setSelectedReciterId] = useState<ReciterId>(
+    getReciterById(profile.selected_reciter_id).id,
+  );
   const [playbackMode, setPlaybackMode] = useState<MushafPlaybackMode>('single_ayah');
 
-  const selectedReciter = useMemo(
-    () => reciters.find(reciter => reciter.id === selectedReciterId) ?? reciters[0],
-    [selectedReciterId],
-  );
+  useEffect(() => {
+    setSelectedReciterId(getReciterById(profile.selected_reciter_id).id);
+  }, [profile.selected_reciter_id]);
+
+  const selectedReciter = useMemo(() => getReciterById(selectedReciterId), [selectedReciterId]);
+
+  const handleReciterChange = async (reciterId: string) => {
+    const nextReciter = getReciterById(reciterId).id;
+    setSelectedReciterId(nextReciter);
+    await onSaveSettings({ selected_reciter_id: nextReciter });
+  };
 
   const handleReset = () => {
     setViewMode('page');
     setPosition(initialPosition);
-    setSelectedReciterId(reciters[0].id);
+    setSelectedReciterId(DEFAULT_RECITER_ID);
     setPlaybackMode('single_ayah');
   };
 
@@ -56,9 +70,9 @@ export function MushafPanel() {
       />
 
       <ReciterSelector
-        reciters={reciters}
+        reciters={QURAN_RECITER_CATALOG}
         selectedReciterId={selectedReciter.id}
-        onReciterChange={setSelectedReciterId}
+        onReciterChange={handleReciterChange}
       />
 
       <PlaybackControls

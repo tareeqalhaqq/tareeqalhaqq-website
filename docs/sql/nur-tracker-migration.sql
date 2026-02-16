@@ -83,6 +83,7 @@ CREATE TABLE IF NOT EXISTS nur_profiles (
     -- Schedule preferences
     preferred_time TIME,
     reminder_enabled BOOLEAN NOT NULL DEFAULT true,
+    selected_reciter_id TEXT NOT NULL DEFAULT 'husary',
     setup_completed BOOLEAN NOT NULL DEFAULT false,
 
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -95,6 +96,9 @@ CREATE TRIGGER update_nur_profiles_updated_at
 
 CREATE INDEX IF NOT EXISTS idx_nur_profiles_clerk_id
     ON nur_profiles(clerk_id);
+
+ALTER TABLE nur_profiles
+    ADD COLUMN IF NOT EXISTS selected_reciter_id TEXT NOT NULL DEFAULT 'husary';
 
 
 -- ── nur_schedule_items ──

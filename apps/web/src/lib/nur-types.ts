@@ -27,6 +27,7 @@ export type NurProfile = {
   daily_revision_amount: number;
   preferred_time: string | null; // HH:MM format
   reminder_enabled: boolean;
+  selected_reciter_id: string | null;
   setup_completed: boolean;
   created_at: string;
   updated_at: string;
