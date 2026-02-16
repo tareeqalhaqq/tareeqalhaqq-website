@@ -1,7 +1,7 @@
 export const navLinks = [
   { name: 'About', href: '#about' },
   { name: 'Vision', href: '#vision' },
-  { name: 'Projects', href: '#projects' },
+  { name: 'Projects', href: '/active-projects' },
 ];
 
 export const socialLinks = [

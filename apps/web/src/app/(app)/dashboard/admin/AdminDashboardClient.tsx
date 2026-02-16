@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { EventsManager } from '@/components/admin/events-manager';
+import { ProjectsManager } from '@/components/admin/projects-manager';
 
 type AdminProfile = {
   full_name?: string | null;
@@ -54,7 +54,7 @@ export function AdminDashboardClient({ profile }: AdminDashboardClientProps) {
             </div>
           </div>
 
-          <EventsManager adminName={profile?.full_name ?? undefined} />
+          <ProjectsManager adminName={profile?.full_name ?? undefined} />
         </div>
       </div>
     </section>
