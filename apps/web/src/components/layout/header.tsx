@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { navLinks } from "@/lib/data";
-import { ArrowRight, LayoutDashboard, User, LogOut, ChevronDown } from "lucide-react";
+import { ArrowRight, LayoutDashboard, User, LogOut, ChevronDown, BookOpen } from "lucide-react";
 import { SignedIn, SignedOut, useClerk } from "@clerk/nextjs";
 import { ReactNode } from "react";
 import {
@@ -25,9 +25,9 @@ export default function Header() {
   return (
     <header className="fixed inset-x-0 top-4 z-50 px-4 sm:px-6">
       <div className="relative mx-auto flex w-full max-w-6xl items-center justify-center">
-        {/* ── Signed-out: desktop nav ── */}
+        {/* Signed-out: desktop nav */}
         <SignedOutContent>
-          <nav className="hidden items-center rounded-full border border-[#2b3f60]/45 bg-[linear-gradient(180deg,rgba(18,33,54,0.88)_0%,rgba(14,25,44,0.86)_100%)] p-1 pl-4 shadow-[0_12px_34px_rgba(0,0,0,0.42)] backdrop-blur-xl md:flex">
+          <nav className="hidden items-center rounded-full border border-[#2b3f60]/45 bg-[linear-gradient(180deg,rgba(18,33,54,0.88)_0%,rgba(14,25,44,0.86)_100%)] p-1 pl-4 shadow-[0_12px_34px_rgba(0,0,0,0.42),0_0_20px_rgba(56,189,248,0.06)] backdrop-blur-xl md:flex">
             <div className="flex items-center">
               {navLinks.map((link) => (
                 <a
@@ -38,6 +38,14 @@ export default function Header() {
                   {link.name}
                 </a>
               ))}
+              <Link
+                href="/nur"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-[0.82rem] font-medium text-cyan-300/80 transition-colors hover:text-cyan-200"
+                style={{ textShadow: "0 0 12px rgba(56,189,248,0.4)" }}
+              >
+                <BookOpen className="h-3.5 w-3.5" />
+                Nur
+              </Link>
             </div>
             <div className="mx-3 h-6 w-px bg-[#4a5c78]/45" />
             <a
@@ -49,7 +57,7 @@ export default function Header() {
             </a>
           </nav>
 
-          {/* ── Signed-out: mobile — just Portal button ── */}
+          {/* Signed-out: mobile — just Portal button */}
           <div className="absolute right-0 md:hidden">
             <a
               href="/login"
@@ -61,7 +69,7 @@ export default function Header() {
           </div>
         </SignedOutContent>
 
-        {/* ── Signed-in: authenticated topbar ── */}
+        {/* Signed-in: authenticated topbar */}
         <SignedInContent>
           <AuthenticatedNav />
         </SignedInContent>
@@ -80,7 +88,7 @@ function AuthenticatedNav() {
   return (
     <>
       {/* Desktop authenticated nav */}
-      <nav className="hidden items-center rounded-full border border-[#2b3f60]/45 bg-[linear-gradient(180deg,rgba(18,33,54,0.88)_0%,rgba(14,25,44,0.86)_100%)] p-1 pl-4 shadow-[0_12px_34px_rgba(0,0,0,0.42)] backdrop-blur-xl md:flex">
+      <nav className="hidden items-center rounded-full border border-[#2b3f60]/45 bg-[linear-gradient(180deg,rgba(18,33,54,0.88)_0%,rgba(14,25,44,0.86)_100%)] p-1 pl-4 shadow-[0_12px_34px_rgba(0,0,0,0.42),0_0_20px_rgba(56,189,248,0.06)] backdrop-blur-xl md:flex">
         <div className="flex items-center">
           <Link
             href="/dashboard"
@@ -88,6 +96,14 @@ function AuthenticatedNav() {
           >
             <LayoutDashboard className="h-3.5 w-3.5" />
             Dashboard
+          </Link>
+          <Link
+            href="/nur"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-[0.82rem] font-medium text-cyan-300/80 transition-colors hover:text-cyan-200"
+            style={{ textShadow: "0 0 12px rgba(56,189,248,0.4)" }}
+          >
+            <BookOpen className="h-3.5 w-3.5" />
+            Nur
           </Link>
           <Link
             href="/profile"
@@ -118,6 +134,12 @@ function AuthenticatedNav() {
                 Dashboard
               </Link>
             </DropdownMenuItem>
+            <DropdownMenuItem asChild className="cursor-pointer gap-2 rounded-lg text-cyan-300/70 focus:bg-cyan-500/[0.08] focus:text-cyan-200">
+              <Link href="/nur">
+                <BookOpen className="h-4 w-4" />
+                Nur
+              </Link>
+            </DropdownMenuItem>
             <DropdownMenuItem asChild className="cursor-pointer gap-2 rounded-lg text-white/70 focus:bg-white/[0.06] focus:text-white">
               <Link href="/profile">
                 <User className="h-4 w-4" />
@@ -136,14 +158,23 @@ function AuthenticatedNav() {
         </DropdownMenu>
       </nav>
 
-      {/* Mobile authenticated nav */}
-      <div className="absolute right-0 flex items-center gap-3 md:hidden">
+      {/* Mobile authenticated nav — centered with slight offset */}
+      <div className="mt-2 flex w-full items-center justify-center gap-3 md:hidden">
         <Link
           href="/dashboard"
           className="inline-flex items-center gap-2 rounded-full border border-[#2b3f60]/45 bg-[linear-gradient(180deg,rgba(18,33,54,0.88)_0%,rgba(14,25,44,0.86)_100%)] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_12px_34px_rgba(0,0,0,0.42)] backdrop-blur-xl transition hover:border-[#4a5c78]/55"
         >
           <LayoutDashboard className="h-3.5 w-3.5" />
           Dashboard
+        </Link>
+
+        <Link
+          href="/nur"
+          className="inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-[linear-gradient(180deg,rgba(18,33,54,0.88)_0%,rgba(14,25,44,0.86)_100%)] px-4 py-2.5 text-sm font-semibold text-cyan-300 shadow-[0_12px_34px_rgba(0,0,0,0.42),0_0_12px_rgba(56,189,248,0.08)] backdrop-blur-xl transition hover:border-cyan-400/35"
+          style={{ textShadow: "0 0 12px rgba(56,189,248,0.3)" }}
+        >
+          <BookOpen className="h-3.5 w-3.5" />
+          Nur
         </Link>
 
         <DropdownMenu>

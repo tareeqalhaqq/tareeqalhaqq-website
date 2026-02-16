@@ -10,7 +10,7 @@ const footerLinks = [
 export default function Footer() {
   return (
     <footer className="px-6 pb-12 pt-24 sm:px-8">
-      <div className="mx-auto w-full max-w-6xl rounded-[28px] border border-white/[0.08] bg-[linear-gradient(180deg,rgba(43,78,98,0.34)_0%,rgba(29,52,67,0.34)_100%)] p-8 shadow-[0_20px_50px_rgba(0,0,0,0.26)] backdrop-blur-sm sm:p-10">
+      <div className="mx-auto w-full max-w-6xl rounded-[28px] border border-white/[0.08] bg-[linear-gradient(180deg,rgba(43,78,98,0.34)_0%,rgba(29,52,67,0.34)_100%)] p-8 shadow-[0_20px_50px_rgba(0,0,0,0.26),0_0_30px_rgba(56,189,248,0.03)] backdrop-blur-sm sm:p-10">
         <div className="flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-4">
             <div className="flex h-16 w-16 items-center justify-center rounded-full border border-white/10 bg-white/[0.03]">

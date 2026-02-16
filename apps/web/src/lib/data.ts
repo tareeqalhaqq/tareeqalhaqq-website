@@ -1,7 +1,6 @@
 export const navLinks = [
   { name: "About", href: "#about" },
   { name: "Vision", href: "#vision" },
-  { name: "Projects", href: "#projects" },
 ];
 
 export const socialLinks = [
@@ -69,17 +68,23 @@ export const baseContent = [
     href: "/academy",
   },
   {
+    type: "Nur",
+    title: "Nur - Quran Tracker",
+    description: "Track your Quran memorization, revision, and daily recitation goals.",
+    href: "/nur",
+  },
+  {
     type: "App Development",
     title: "App Development",
     description: "Purpose-driven mobile and web apps for the Muslim community.",
-    href: "/#projects",
+    href: "/#about",
   },
   {
     type: "App Development",
     title: "Mutoon AI",
     description:
       "AI-powered tool to navigate, search, and cross-reference classical Islamic texts.",
-    href: "/#projects",
+    href: "/#about",
   },
   {
     type: "Store",
