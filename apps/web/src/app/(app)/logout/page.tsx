@@ -22,7 +22,7 @@ export default function LogoutPage() {
 
   useEffect(() => {
     signOut().finally(() => {
-      router.replace('/login');
+      router.replace('/');
     });
   }, [router, signOut]);
 
