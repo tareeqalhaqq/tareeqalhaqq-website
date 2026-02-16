@@ -1,6 +1,7 @@
 'use client';
 
-import { ArrowDown, BookOpen, Compass, Sparkles, Users } from 'lucide-react';
+import Link from 'next/link';
+import { BookOpen, Compass, Sparkles, Users } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Footer from '@/components/layout/footer';
 
@@ -69,19 +70,10 @@ export default function Home() {
               Authentic Knowledge
             </h1>
             <p className="mx-auto max-w-2xl text-base leading-relaxed text-white/70 md:text-lg">
-              Rooted in the Qur&apos;an and Sunnah, with structured pathways that help you build beneficial knowledge step
-              by step.
+              Tareeq Al Haqq is rooted in the Qur&apos;an and Sunnah, with structured pathways that help you build beneficial
+              knowledge step by step.
             </p>
           </div>
-
-          <a
-            href="#about"
-            className="mt-4 flex h-10 w-10 items-center justify-center rounded-full border border-white/10 text-white/30 transition-colors hover:border-primary/40 hover:text-primary/70"
-          >
-            <motion.div animate={{ y: [0, 4, 0] }} transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}>
-              <ArrowDown className="h-4 w-4" />
-            </motion.div>
-          </a>
         </motion.div>
       </motion.section>
 
@@ -115,7 +107,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="vision" className="section-wrapper">
+      <section id="vision" className="section-wrapper pt-32">
         <div className="section-inner grid gap-6 md:grid-cols-2">
           <motion.article
             className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-8"
@@ -159,11 +151,12 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="projects" className="section-wrapper">
+      <section id="projects" className="section-wrapper pt-32">
         <div className="section-inner">
           <motion.div className="mb-12 max-w-2xl" {...fadeUp}>
             <p className="eyebrow mb-4">Projects</p>
             <h2 className="text-3xl tracking-tight text-white md:text-4xl">What we are building</h2>
+            <p className="mt-4 text-sm text-white/60">Visit the full projects page for live updates from the admin dashboard.</p>
           </motion.div>
 
           <div className="grid gap-6 md:grid-cols-3">
@@ -182,6 +175,9 @@ export default function Home() {
                 </div>
                 <h3 className="mb-3 text-xl font-headline tracking-tight text-white">{title}</h3>
                 <p className="text-sm leading-relaxed text-white/40">{description}</p>
+                <Link href="/active-projects" className="mt-4 inline-flex text-sm text-primary transition-colors hover:text-primary/80">
+                  Open projects page
+                </Link>
               </motion.article>
             ))}
           </div>
