@@ -84,7 +84,15 @@ export function buildAyahAudioUrl(reciterId: ReciterId, surah: number, ayah: num
   return reciter.sourceUrlPattern.replace('{track}', track);
 }
 
-export function buildAudioQueue(mode: PlaybackMode, reciterId: ReciterId, position: { surah: number; ayah: number }): string[] {
+export function buildAudioQueue(
+  mode: PlaybackMode,
+  reciterId: ReciterId,
+  position: { surah: number; ayah: number },
+  options?: {
+    range?: { startAyah: number; endAyah: number };
+    pageAyahs?: Array<{ surah: number; ayah: number }>;
+  },
+): string[] {
   if (mode === 'surah') {
     const surah = getSurahByNumber(position.surah);
     const maxAyah = surah?.verses ?? position.ayah;
@@ -94,10 +102,21 @@ export function buildAudioQueue(mode: PlaybackMode, reciterId: ReciterId, positi
   if (mode === 'ayah_range') {
     const surah = getSurahByNumber(position.surah);
     const maxAyah = surah?.verses ?? position.ayah;
-    const rangeEnd = Math.min(position.ayah + 4, maxAyah);
-    return Array.from({ length: rangeEnd - position.ayah + 1 }, (_, index) =>
-      buildAyahAudioUrl(reciterId, position.surah, position.ayah + index),
+    const rangeStart = Math.max(options?.range?.startAyah ?? position.ayah, 1);
+    const rangeEnd = Math.min(options?.range?.endAyah ?? position.ayah + 4, maxAyah);
+
+    return Array.from({ length: Math.max(1, rangeEnd - rangeStart + 1) }, (_, index) =>
+      buildAyahAudioUrl(reciterId, position.surah, rangeStart + index),
     );
+  }
+
+  if (mode === 'page') {
+    const pageAyahs = options?.pageAyahs ?? [];
+    if (!pageAyahs.length) {
+      return [buildAyahAudioUrl(reciterId, position.surah, position.ayah)];
+    }
+
+    return pageAyahs.map(item => buildAyahAudioUrl(reciterId, item.surah, item.ayah));
   }
 
   return [buildAyahAudioUrl(reciterId, position.surah, position.ayah)];

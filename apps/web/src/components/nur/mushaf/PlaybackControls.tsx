@@ -3,12 +3,14 @@
 import { Pause, Play, Repeat, SkipForward } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { buildAudioQueue, createQuranAudioPlayer } from '@/lib/quran-audio';
-import type { MushafPlaybackMode, MushafPosition, Reciter } from './types';
+import type { AyahRange, MushafPlaybackMode, MushafPosition, Reciter } from './types';
 
 type PlaybackControlsProps = {
   playbackMode: MushafPlaybackMode;
   position: MushafPosition;
   selectedReciter: Reciter;
+  range: AyahRange | null;
+  pageAyahs: Array<{ surah: number; ayah: number }>;
   onPlaybackModeChange: (mode: MushafPlaybackMode) => void;
 };
 
@@ -19,7 +21,14 @@ const playbackModes: { value: MushafPlaybackMode; label: string }[] = [
   { value: 'page', label: 'Page' },
 ];
 
-export function PlaybackControls({ playbackMode, position, selectedReciter, onPlaybackModeChange }: PlaybackControlsProps) {
+export function PlaybackControls({
+  playbackMode,
+  position,
+  selectedReciter,
+  range,
+  pageAyahs,
+  onPlaybackModeChange,
+}: PlaybackControlsProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isRepeatEnabled, setIsRepeatEnabled] = useState(false);
@@ -54,7 +63,10 @@ export function PlaybackControls({ playbackMode, position, selectedReciter, onPl
       return;
     }
 
-    const queue = buildAudioQueue(playbackMode, selectedReciter.id, position);
+    const queue = buildAudioQueue(playbackMode, selectedReciter.id, position, {
+      range: range ?? undefined,
+      pageAyahs,
+    });
     await player.playQueue(queue);
   };
 
@@ -96,7 +108,7 @@ export function PlaybackControls({ playbackMode, position, selectedReciter, onPl
   return (
     <div className="space-y-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
       <p className="text-xs uppercase tracking-[0.16em] text-white/40">Playback</p>
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         {playbackModes.map(mode => (
           <button
             key={mode.value}
@@ -113,7 +125,7 @@ export function PlaybackControls({ playbackMode, position, selectedReciter, onPl
         ))}
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
           onClick={togglePlayPause}

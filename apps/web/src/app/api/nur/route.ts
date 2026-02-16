@@ -77,6 +77,9 @@ export async function POST(request: Request) {
         preferred_time: body.preferredTime ?? null,
         reminder_enabled: body.reminderEnabled ?? true,
         selected_reciter_id: DEFAULT_RECITER_ID,
+        mushaf_view_mode: 'page',
+        mushaf_tajweed_enabled: true,
+        mushaf_mutashabihat_enabled: false,
         setup_completed: true,
       })
       .select()
