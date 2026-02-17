@@ -99,10 +99,12 @@ export function MushafPanel({ profile, onSaveSettings, isFullScreen = false, onC
   const [options, setOptions] = useState<MushafReaderOptions>({
     tajweedEnabled: profile.mushaf_tajweed_enabled ?? true,
     followPlayback: profile.mushaf_follow_playback_enabled ?? true,
+    pagePairMode: 'single',
   });
   const [range, setRange] = useState<AyahRange | null>(null);
   const [selection, setSelection] = useState<MushafReaderSelection>({ activeAyah: null, range: null });
   const [activePlaybackAyah, setActivePlaybackAyah] = useState<{ surah: number; ayah: number } | null>(null);
+  const [autoPlayRequest, setAutoPlayRequest] = useState(0);
   const [scrollState, setScrollState] = useState({ page: profile.mushaf_scroll_page ?? 0, ayah: profile.mushaf_scroll_ayah ?? 0 });
   const [dashboard, setDashboard] = useState<MushafDashboardPayload>(emptyDashboard);
   const [offlineQueueCount, setOfflineQueueCount] = useState(0);
@@ -242,6 +244,7 @@ export function MushafPanel({ profile, onSaveSettings, isFullScreen = false, onC
     setOptions({
       tajweedEnabled: profile.mushaf_tajweed_enabled ?? true,
       followPlayback: profile.mushaf_follow_playback_enabled ?? true,
+      pagePairMode: 'single',
     });
     setPlaybackRate(Math.min(Math.max(profile.mushaf_playback_rate ?? 1, 0.75), 1.25));
     setPosition({
@@ -253,11 +256,11 @@ export function MushafPanel({ profile, onSaveSettings, isFullScreen = false, onC
 
   // URL params
   useEffect(() => {
-    const view = searchParams.get('view');
+    const view = searchParams?.get('view');
     if (view === 'page' || view === 'ayah') setViewMode(view);
-    const page = Number(searchParams.get('page'));
-    const surah = Number(searchParams.get('surah'));
-    const ayah = Number(searchParams.get('ayah'));
+    const page = Number(searchParams?.get('page'));
+    const surah = Number(searchParams?.get('surah'));
+    const ayah = Number(searchParams?.get('ayah'));
     setPosition(prev => ({
       page: Number.isFinite(page) && page > 0 ? page : prev.page,
       surah: Number.isFinite(surah) && surah > 0 ? surah : prev.surah,
@@ -267,7 +270,7 @@ export function MushafPanel({ profile, onSaveSettings, isFullScreen = false, onC
 
   useEffect(() => {
     if (!isFullScreen) return;
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams(searchParams?.toString() ?? '');
     params.set('view', viewMode);
     if (viewMode === 'page') {
       params.set('page', String(position.page));
@@ -365,6 +368,7 @@ export function MushafPanel({ profile, onSaveSettings, isFullScreen = false, onC
     setPlaybackMode('single_ayah');
     setRange(null);
     setActivePlaybackAyah({ surah, ayah });
+    setAutoPlayRequest(prev => prev + 1);
   };
 
   const handleLogMistake = async (mistakeType: MistakeType) => {
@@ -473,6 +477,7 @@ export function MushafPanel({ profile, onSaveSettings, isFullScreen = false, onC
         return { ...prev, range: prev.range + 1 };
       });
     },
+    autoPlayRequest,
   };
 
   // ──────────────────────────────────────────────
@@ -548,13 +553,18 @@ export function MushafPanel({ profile, onSaveSettings, isFullScreen = false, onC
                 setViewMode('ayah');
                 setPosition(prev => ({ ...prev, surah: firstSurah.number, ayah: 1, page: findMostRelevantPageForSurah(firstSurah.number) }));
               }}
+              onJumpToSurahAyah={(surah, ayah) => {
+                const matched = getAyah(surah, ayah);
+                setViewMode('ayah');
+                setPosition(prev => ({ ...prev, surah, ayah, page: matched?.page ?? findMostRelevantPageForSurah(surah) }));
+              }}
               onReset={() => {
                 setViewMode('page');
                 setPosition(initialPosition);
                 setSelectedReciterId(DEFAULT_RECITER_ID);
                 setPlaybackMode('single_ayah');
                 setPlaybackRate(1);
-                setOptions({ tajweedEnabled: true, followPlayback: true });
+                setOptions({ tajweedEnabled: true, followPlayback: true, pagePairMode: 'single' });
                 setRange(null);
                 setSelection({ activeAyah: null, range: null });
               }}

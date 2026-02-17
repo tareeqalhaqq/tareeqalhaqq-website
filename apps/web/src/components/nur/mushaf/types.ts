@@ -17,6 +17,7 @@ export type Reciter = QuranReciter;
 export type MushafReaderOptions = {
   tajweedEnabled: boolean;
   followPlayback: boolean;
+  pagePairMode: 'single' | 'spread';
 };
 
 export type AyahRange = {

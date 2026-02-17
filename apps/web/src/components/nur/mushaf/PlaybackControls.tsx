@@ -18,6 +18,7 @@ type PlaybackControlsProps = {
   onActiveAyahChange: (surah: number, ayah: number) => void;
   onPlayStateChange: (isPlaying: boolean) => void;
   onLoopModeChange: (mode: MushafLoopMode) => void;
+  autoPlayRequest?: number;
 };
 
 const playbackModes: { value: MushafPlaybackMode; label: string }[] = [
@@ -74,6 +75,7 @@ export function PlaybackControls({
   onActiveAyahChange,
   onPlayStateChange,
   onLoopModeChange,
+  autoPlayRequest,
 }: PlaybackControlsProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const onActiveAyahChangeRef = useRef(onActiveAyahChange);
@@ -81,6 +83,7 @@ export function PlaybackControls({
   const [player, setPlayer] = useState<ReturnType<typeof createQuranAudioPlayer> | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [loopMode, setLoopMode] = useState<MushafLoopMode>('off');
+  const [playbackError, setPlaybackError] = useState<string | null>(null);
 
   useEffect(() => {
     onActiveAyahChangeRef.current = onActiveAyahChange;
@@ -153,9 +156,21 @@ export function PlaybackControls({
       playlistAyahs,
     });
     await warmAudioCache(queue);
-    await player.playQueue(queue);
+    try {
+      await player.playQueue(queue);
+      setPlaybackError(null);
+    } catch {
+      setPlaybackError('Unable to play audio right now. Try a different reciter or press play again.');
+    }
   };
 
+
+  useEffect(() => {
+    if (!player || !autoPlayRequest) {
+      return;
+    }
+    void playQueue();
+  }, [autoPlayRequest, player]);
   const togglePlayPause = async () => {
     if (!player) {
       return;
@@ -163,7 +178,12 @@ export function PlaybackControls({
 
     if (player.isPaused()) {
       if (audioRef.current?.src) {
-        await player.play();
+        try {
+          await player.play();
+          setPlaybackError(null);
+        } catch {
+          setPlaybackError('Playback was blocked by your browser. Press play again to retry.');
+        }
       } else {
         await playQueue();
       }
@@ -273,6 +293,8 @@ export function PlaybackControls({
           {effectiveLoopLabel}
         </button>
       </div>
+
+      {playbackError && <p className="text-[11px] text-rose-200/80">{playbackError}</p>}
 
       <audio ref={audioRef} preload="none" className="hidden" />
     </div>
