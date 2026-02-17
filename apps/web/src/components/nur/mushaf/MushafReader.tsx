@@ -61,6 +61,7 @@ function MushafPageView({
   onAyahTap,
   selectedAyahKey,
   compact,
+  showTopRules = true,
 }: {
   verses: QuranVerse[];
   page: number;
@@ -69,6 +70,7 @@ function MushafPageView({
   onAyahTap: (verse: QuranVerse) => void;
   selectedAyahKey: string | null;
   compact?: boolean;
+  showTopRules?: boolean;
 }) {
   const lines = buildMushafLayoutLines(page, verses);
   const verseByKey = new Map(verses.map(verse => [verse.verse_key, verse]));
@@ -79,7 +81,14 @@ function MushafPageView({
   return (
     <div className={`mushaf-frame mushaf-book-page mx-auto w-full ${pageWidthClasses} overflow-hidden rounded-lg`}>
       <div className="relative aspect-[3/4] h-full w-full">
-        <div className="flex h-full flex-col px-4 pb-12 pt-6 sm:px-6 sm:pb-14 sm:pt-8 lg:px-7">
+        <div className="flex h-full flex-col px-4 pb-12 pt-5 sm:px-6 sm:pb-14 sm:pt-6 lg:px-7">
+          {showTopRules && (
+            <div className="mushaf-page-top-rules" aria-hidden="true">
+              <span className="mushaf-page-top-rule" />
+              <span className="mushaf-page-top-rule mushaf-page-top-rule-accent" />
+            </div>
+          )}
+
           {/* Surah headers at top of page */}
           {(() => {
             const headers: React.ReactNode[] = [];
@@ -163,7 +172,7 @@ function MushafPageSpreadView({
   selectedAyahKey: string | null;
 }) {
   return (
-    <div className="grid gap-3 rounded-xl border border-[#d7c79f]/35 bg-[#f5e9ca]/90 p-3 shadow-[0_12px_40px_rgba(0,0,0,0.2)] lg:grid-cols-2" dir="rtl">
+    <div className="grid gap-3 rounded-xl border border-white/10 bg-[#0f1116]/45 p-2.5 shadow-[0_8px_24px_rgba(0,0,0,0.22)] lg:grid-cols-2" dir="rtl">
       <MushafPageView
         verses={firstPageVerses}
         page={firstPage}
