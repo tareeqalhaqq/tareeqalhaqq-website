@@ -7,6 +7,7 @@ import {
   BookOpen,
   Flame,
   ListChecks,
+  PanelRight,
   Settings2,
   TrendingUp,
   X,
@@ -110,8 +111,7 @@ export function MushafPanel({ profile, onSaveSettings, isFullScreen = false, onC
   const [dashboard, setDashboard] = useState<MushafDashboardPayload>(emptyDashboard);
   const [offlineQueueCount, setOfflineQueueCount] = useState(0);
   const [loadingDashboard, setLoadingDashboard] = useState(true);
-  const [showSidebar, setShowSidebar] = useState(false);
-  const [showReaderSettings, setShowReaderSettings] = useState(true);
+  const [showSidebar, setShowSidebar] = useState(true);
 
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [sessionStartedAt, setSessionStartedAt] = useState<string | null>(null);
@@ -345,7 +345,7 @@ export function MushafPanel({ profile, onSaveSettings, isFullScreen = false, onC
         event.preventDefault();
         setViewMode(prev => (prev === 'page' ? 'ayah' : 'page'));
       }
-      if (event.key.toLowerCase() === 'j' || event.key === 'ArrowLeft') {
+      if (event.key.toLowerCase() === 'j' || event.key === 'ArrowRight') {
         event.preventDefault();
         if (viewMode === 'page') {
           setPosition(prev => ({ ...prev, page: Math.max(prev.page - 1, 1) }));
@@ -353,7 +353,7 @@ export function MushafPanel({ profile, onSaveSettings, isFullScreen = false, onC
           setPosition(prev => ({ ...prev, surah: Math.max(prev.surah - 1, 1), ayah: 1 }));
         }
       }
-      if (event.key.toLowerCase() === 'k' || event.key === 'ArrowRight') {
+      if (event.key.toLowerCase() === 'k' || event.key === 'ArrowLeft') {
         event.preventDefault();
         if (viewMode === 'page') {
           setPosition(prev => ({ ...prev, page: Math.min(prev.page + 1, 604) }));
@@ -505,14 +505,6 @@ export function MushafPanel({ profile, onSaveSettings, isFullScreen = false, onC
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={() => setShowReaderSettings(prev => !prev)}
-              className="inline-flex items-center gap-1.5 rounded-md border border-white/10 bg-black/20 px-2 py-1.5 text-[11px] text-white/80 transition hover:bg-white/5"
-            >
-              <Settings2 className="h-3.5 w-3.5" />
-              Settings
-            </button>
-            <button
-              type="button"
               onClick={() => setViewMode('page')}
               className={`rounded-md border px-2 py-1.5 text-[11px] transition ${viewMode === 'page' ? 'border-cyan-300/40 bg-cyan-400/10 text-cyan-100' : 'border-white/[0.1] bg-black/10 text-white/70 hover:border-white/[0.2]'}`}
             >
@@ -528,11 +520,24 @@ export function MushafPanel({ profile, onSaveSettings, isFullScreen = false, onC
             <BookOpen className="ml-1 h-5 w-5 text-cyan-300/60" />
             <div>
               <h1 className="text-sm font-headline font-semibold text-white">Mushaf</h1>
-              <p className="text-[11px] text-white/40">Full Quran &middot; Uthmani Script</p>
+              <p className="text-[11px] text-white/40">Full Quran &middot; Uthmani Script &middot; {selectedReciter.displayName}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <p className="text-xs text-white/50">{options.pagePairMode === 'spread' ? 'Double page' : 'Single page'}</p>
+            <p className="hidden text-xs text-white/50 sm:block">{options.pagePairMode === 'spread' ? 'Double page' : 'Single page'}</p>
+            <button
+              type="button"
+              onClick={() => setShowSidebar(prev => !prev)}
+              className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-1.5 text-[11px] transition ${
+                showSidebar
+                  ? 'border-cyan-300/40 bg-cyan-400/10 text-cyan-100'
+                  : 'border-white/10 bg-black/20 text-white/80 hover:bg-white/5'
+              }`}
+            >
+              <Settings2 className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Settings</span>
+              <PanelRight className="h-3.5 w-3.5" />
+            </button>
             <button
               type="button"
               onClick={onClose}
@@ -547,54 +552,12 @@ export function MushafPanel({ profile, onSaveSettings, isFullScreen = false, onC
         <div className="flex flex-1 overflow-hidden">
           {/* Mushaf area */}
           <div className="flex-1 overflow-hidden flex flex-col px-2 py-2 sm:px-4 lg:px-6">
-            {showReaderSettings && (
-            <MushafToolbar
-              viewMode={viewMode}
-              playbackMode={playbackMode}
-              options={options}
-              position={position}
-              onViewModeChange={async nextMode => {
-                setViewMode(nextMode);
-                await onSaveSettings({ mushaf_view_mode: nextMode });
-              }}
-              onOptionsChange={async nextOptions => {
-                setOptions(nextOptions);
-                await onSaveSettings({
-                  mushaf_tajweed_enabled: nextOptions.tajweedEnabled,
-                  mushaf_follow_playback_enabled: nextOptions.followPlayback,
-                });
-              }}
-              onJumpToPage={page => {
-                const targetPage = clamp(page, 1, 604);
-                setViewMode('page');
-                setPosition(prev => ({ ...prev, page: targetPage }));
-              }}
-              onJumpToJuz={juz => {
-                const firstSurah = getSurahsByJuz(clamp(juz, 1, 30))[0];
-                if (!firstSurah) return;
-                setViewMode('ayah');
-                setPosition(prev => ({ ...prev, surah: firstSurah.number, ayah: 1, page: findMostRelevantPageForSurah(firstSurah.number) }));
-              }}
-              onJumpToSurahAyah={(surah, ayah) => {
-                const matched = getAyah(surah, ayah);
-                setViewMode('ayah');
-                setPosition(prev => ({ ...prev, surah, ayah, page: matched?.page ?? findMostRelevantPageForSurah(surah) }));
-              }}
-              showNavigationControls
-              onReset={() => {
-                setViewMode('page');
-                setPosition(initialPosition);
-                setSelectedReciterId(DEFAULT_RECITER_ID);
-                setPlaybackMode('single_ayah');
-                setPlaybackRate(1);
-                setOptions({ tajweedEnabled: true, followPlayback: true, pagePairMode: 'single' });
-                setRange(null);
-                setSelection({ activeAyah: null, range: null });
-              }}
-            />
-            )}
+            <div className="mb-2 flex items-center justify-between rounded-lg border border-white/[0.08] bg-black/20 px-3 py-2 text-xs text-white/60">
+              <p>{viewMode === 'page' ? `Page ${position.page}` : `Surah ${position.surah}, Ayah ${position.ayah}`}</p>
+              <p>{options.pagePairMode === 'spread' ? 'Two-page mushaf' : 'Single-page mushaf'}</p>
+            </div>
 
-            <div className="flex-1 overflow-hidden mt-3">
+            <div className="flex-1 overflow-hidden">
               <MushafReader
                 viewMode={viewMode}
                 position={position}
@@ -613,8 +576,53 @@ export function MushafPanel({ profile, onSaveSettings, isFullScreen = false, onC
 
           {/* Sidebar panel */}
           {showSidebar && (
-            <aside className="w-80 border-l border-white/[0.08] bg-black/20 overflow-y-auto p-4 space-y-4 hidden lg:block">
+            <aside className="w-[20rem] border-l border-white/[0.08] bg-black/20 overflow-y-auto p-4 space-y-4">
               <ReciterSelector reciters={QURAN_RECITER_CATALOG} selectedReciterId={selectedReciter.id} onReciterChange={handleReciterChange} />
+
+              <MushafToolbar
+                viewMode={viewMode}
+                playbackMode={playbackMode}
+                options={options}
+                position={position}
+                onViewModeChange={async nextMode => {
+                  setViewMode(nextMode);
+                  await onSaveSettings({ mushaf_view_mode: nextMode });
+                }}
+                onOptionsChange={async nextOptions => {
+                  setOptions(nextOptions);
+                  await onSaveSettings({
+                    mushaf_tajweed_enabled: nextOptions.tajweedEnabled,
+                    mushaf_follow_playback_enabled: nextOptions.followPlayback,
+                  });
+                }}
+                onJumpToPage={page => {
+                  const targetPage = clamp(page, 1, 604);
+                  setViewMode('page');
+                  setPosition(prev => ({ ...prev, page: targetPage }));
+                }}
+                onJumpToJuz={juz => {
+                  const firstSurah = getSurahsByJuz(clamp(juz, 1, 30))[0];
+                  if (!firstSurah) return;
+                  setViewMode('ayah');
+                  setPosition(prev => ({ ...prev, surah: firstSurah.number, ayah: 1, page: findMostRelevantPageForSurah(firstSurah.number) }));
+                }}
+                onJumpToSurahAyah={(surah, ayah) => {
+                  const matched = getAyah(surah, ayah);
+                  setViewMode('ayah');
+                  setPosition(prev => ({ ...prev, surah, ayah, page: matched?.page ?? findMostRelevantPageForSurah(surah) }));
+                }}
+                showNavigationControls
+                onReset={() => {
+                  setViewMode('page');
+                  setPosition(initialPosition);
+                  setSelectedReciterId(DEFAULT_RECITER_ID);
+                  setPlaybackMode('single_ayah');
+                  setPlaybackRate(1);
+                  setOptions({ tajweedEnabled: true, followPlayback: true, pagePairMode: 'single' });
+                  setRange(null);
+                  setSelection({ activeAyah: null, range: null });
+                }}
+              />
 
               <div className="space-y-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
                 <p className="text-xs uppercase tracking-[0.16em] text-white/40">Reader Tools</p>

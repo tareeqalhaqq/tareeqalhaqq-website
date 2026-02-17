@@ -158,7 +158,7 @@ function MushafPageSpreadView({
   selectedAyahKey: string | null;
 }) {
   return (
-    <div className="grid gap-3 lg:grid-cols-2" dir="rtl">
+    <div className="grid gap-3 rounded-xl border border-[#d7c79f]/35 bg-[#f5e9ca]/90 p-3 shadow-[0_12px_40px_rgba(0,0,0,0.2)] lg:grid-cols-2" dir="rtl">
       <MushafPageView
         verses={firstPageVerses}
         page={firstPage}
@@ -451,9 +451,10 @@ export function MushafReader({
         <div className="flex items-center justify-between rounded-xl border border-white/[0.08] bg-black/20 p-2">
           <button
             type="button"
-            onClick={() => handlePageNav(-1)}
-            disabled={position.page <= 1}
+            onClick={() => handlePageNav(1)}
+            disabled={position.page >= (options.pagePairMode === 'spread' ? 603 : 604)}
             className="rounded-lg border border-white/10 p-2.5 text-white/80 transition hover:bg-white/5 disabled:opacity-30"
+            aria-label="Next page"
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
@@ -467,9 +468,10 @@ export function MushafReader({
           </div>
           <button
             type="button"
-            onClick={() => handlePageNav(1)}
-            disabled={position.page >= (options.pagePairMode === 'spread' ? 603 : 604)}
+            onClick={() => handlePageNav(-1)}
+            disabled={position.page <= 1}
             className="rounded-lg border border-white/10 p-2.5 text-white/80 transition hover:bg-white/5 disabled:opacity-30"
+            aria-label="Previous page"
           >
             <ChevronRight className="h-4 w-4" />
           </button>
@@ -478,9 +480,10 @@ export function MushafReader({
         <div className="flex items-center justify-between gap-2 rounded-xl border border-white/[0.08] bg-black/20 p-2">
           <button
             type="button"
-            onClick={() => handleSurahNav(-1)}
-            disabled={position.surah <= 1}
+            onClick={() => handleSurahNav(1)}
+            disabled={position.surah >= 114}
             className="rounded-lg border border-white/10 p-2.5 text-white/80 transition hover:bg-white/5 disabled:opacity-30"
+            aria-label="Next surah"
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
@@ -507,9 +510,10 @@ export function MushafReader({
           </select>
           <button
             type="button"
-            onClick={() => handleSurahNav(1)}
-            disabled={position.surah >= 114}
+            onClick={() => handleSurahNav(-1)}
+            disabled={position.surah <= 1}
             className="rounded-lg border border-white/10 p-2.5 text-white/80 transition hover:bg-white/5 disabled:opacity-30"
+            aria-label="Previous surah"
           >
             <ChevronRight className="h-4 w-4" />
           </button>
