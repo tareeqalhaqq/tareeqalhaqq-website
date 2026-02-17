@@ -4,6 +4,7 @@
  */
 
 const API_BASE = 'https://api.quran.com/api/v4';
+const INTERNAL_API_BASE = '/api/quran/verses';
 const DB_NAME = 'quran_text_cache';
 const DB_VERSION = 1;
 const STORE_PAGES = 'pages';
@@ -89,10 +90,17 @@ export async function fetchPageVerses(page: number): Promise<QuranVerse[]> {
 
   // 3. API fetch
   try {
-    const url = `${API_BASE}/verses/by_page/${page}?language=en&words=false&fields=text_uthmani,chapter_id,verse_number,page_number,verse_key&per_page=50`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`API ${res.status}`);
-    const data = await res.json();
+    let data: { verses?: Record<string, unknown>[] } = {};
+    const internalRes = await fetch(`${INTERNAL_API_BASE}?page=${page}`, { cache: 'no-store' });
+
+    if (internalRes.ok) {
+      data = await internalRes.json();
+    } else {
+      const fallbackUrl = `${API_BASE}/verses/by_page/${page}?language=en&words=false&fields=text_uthmani,chapter_id,verse_number,page_number,verse_key&per_page=50`;
+      const fallbackRes = await fetch(fallbackUrl);
+      if (!fallbackRes.ok) throw new Error(`API ${fallbackRes.status}`);
+      data = await fallbackRes.json();
+    }
 
     const verses: QuranVerse[] = (data.verses ?? []).map((v: Record<string, unknown>) => ({
       verse_key: v.verse_key as string,
@@ -125,10 +133,17 @@ export async function fetchSurahVerses(surah: number): Promise<QuranVerse[]> {
 
   // 3. API fetch
   try {
-    const url = `${API_BASE}/verses/by_chapter/${surah}?language=en&words=false&fields=text_uthmani,chapter_id,verse_number,page_number,verse_key&per_page=300`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`API ${res.status}`);
-    const data = await res.json();
+    let data: { verses?: Record<string, unknown>[] } = {};
+    const internalRes = await fetch(`${INTERNAL_API_BASE}?surah=${surah}`, { cache: 'no-store' });
+
+    if (internalRes.ok) {
+      data = await internalRes.json();
+    } else {
+      const fallbackUrl = `${API_BASE}/verses/by_chapter/${surah}?language=en&words=false&fields=text_uthmani,chapter_id,verse_number,page_number,verse_key&per_page=300`;
+      const fallbackRes = await fetch(fallbackUrl);
+      if (!fallbackRes.ok) throw new Error(`API ${fallbackRes.status}`);
+      data = await fallbackRes.json();
+    }
 
     const verses: QuranVerse[] = (data.verses ?? []).map((v: Record<string, unknown>) => ({
       verse_key: v.verse_key as string,
