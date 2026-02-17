@@ -56,6 +56,7 @@ function MushafPageView({
   onPlayAyah,
   onAyahTap,
   selectedAyahKey,
+  compact,
 }: {
   verses: QuranVerse[];
   page: number;
@@ -63,37 +64,11 @@ function MushafPageView({
   onPlayAyah: (surah: number, ayah: number) => void;
   onAyahTap: (verse: QuranVerse) => void;
   selectedAyahKey: string | null;
+  compact?: boolean;
 }) {
-  // Group consecutive verses and detect surah boundaries
-  const elements: React.ReactNode[] = [];
-  let lastSurah = 0;
-
-  for (let i = 0; i < verses.length; i++) {
-    const verse = verses[i];
-    const isNewSurah = verse.chapter_id !== lastSurah;
-
-    if (isNewSurah) {
-      // Surah header
-      elements.push(
-        <SurahHeader key={`header-${verse.chapter_id}`} surahNumber={verse.chapter_id} />
-      );
-
-      // Bismillah (skip for Al-Fatihah and At-Tawbah)
-      if (!NO_BISMILLAH.has(verse.chapter_id)) {
-        elements.push(
-          <div key={`bismillah-${verse.chapter_id}`} className="mushaf-bismillah">
-            {BISMILLAH}
-          </div>
-        );
-      }
-
-      lastSurah = verse.chapter_id;
-    }
-  }
-
   // Build the continuous text with inline ayah markers
   const textParts: React.ReactNode[] = [];
-  lastSurah = 0;
+  let lastSurah = 0;
 
   for (let i = 0; i < verses.length; i++) {
     const verse = verses[i];
@@ -134,7 +109,7 @@ function MushafPageView({
 
   return (
     <div className="mushaf-frame rounded-lg overflow-hidden">
-      <div className="px-6 py-5 sm:px-10 sm:py-8 min-h-[520px] flex flex-col">
+      <div className={`px-4 py-4 sm:px-6 sm:py-5 ${compact ? 'min-h-[430px]' : 'min-h-[520px]'} flex flex-col`}>
         {/* Surah headers at top of page */}
         {(() => {
           const headers: React.ReactNode[] = [];
@@ -171,6 +146,49 @@ function MushafPageView({
   );
 }
 
+
+function MushafPageSpreadView({
+  firstPageVerses,
+  secondPageVerses,
+  firstPage,
+  secondPage,
+  activePlaybackAyah,
+  onPlayAyah,
+  onAyahTap,
+  selectedAyahKey,
+}: {
+  firstPageVerses: QuranVerse[];
+  secondPageVerses: QuranVerse[];
+  firstPage: number;
+  secondPage: number;
+  activePlaybackAyah: { surah: number; ayah: number } | null;
+  onPlayAyah: (surah: number, ayah: number) => void;
+  onAyahTap: (verse: QuranVerse) => void;
+  selectedAyahKey: string | null;
+}) {
+  return (
+    <div className="grid gap-2 lg:grid-cols-2" dir="rtl">
+      <MushafPageView
+        verses={firstPageVerses}
+        page={firstPage}
+        activePlaybackAyah={activePlaybackAyah}
+        onPlayAyah={onPlayAyah}
+        onAyahTap={onAyahTap}
+        selectedAyahKey={selectedAyahKey}
+        compact
+      />
+      <MushafPageView
+        verses={secondPageVerses}
+        page={secondPage}
+        activePlaybackAyah={activePlaybackAyah}
+        onPlayAyah={onPlayAyah}
+        onAyahTap={onAyahTap}
+        selectedAyahKey={selectedAyahKey}
+        compact
+      />
+    </div>
+  );
+}
 function MushafAyahView({
   verses,
   surah,
@@ -290,6 +308,7 @@ export function MushafReader({
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const restoredScrollTopRef = useRef(scrollTop);
   const [pageVerses, setPageVerses] = useState<QuranVerse[]>([]);
+  const [spreadPageVerses, setSpreadPageVerses] = useState<QuranVerse[]>([]);
   const [surahVerses, setSurahVerses] = useState<QuranVerse[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedAyahKey, setSelectedAyahKey] = useState<string | null>(null);
@@ -301,16 +320,26 @@ export function MushafReader({
     let cancelled = false;
     setLoading(true);
 
-    fetchPageVerses(position.page).then(verses => {
+    const pageStart = options.pagePairMode === 'spread'
+      ? (position.page % 2 === 0 ? Math.max(position.page - 1, 1) : position.page)
+      : position.page;
+
+    const tasks = [fetchPageVerses(pageStart)];
+    if (options.pagePairMode === 'spread' && pageStart < 604) {
+      tasks.push(fetchPageVerses(pageStart + 1));
+    }
+
+    Promise.all(tasks).then(([first, second]) => {
       if (!cancelled) {
-        setPageVerses(verses);
+        setPageVerses(first ?? []);
+        setSpreadPageVerses(second ?? []);
         setLoading(false);
-        preloadAdjacentPages(position.page);
+        preloadAdjacentPages(pageStart);
       }
     });
 
     return () => { cancelled = true; };
-  }, [viewMode, position.page]);
+  }, [options.pagePairMode, viewMode, position.page]);
 
   // Fetch surah verses
   useEffect(() => {
@@ -348,7 +377,8 @@ export function MushafReader({
   }, [activePlaybackAyah, options.followPlayback]);
 
   const handlePageNav = useCallback((delta: number) => {
-    const nextPage = Math.max(1, Math.min(604, position.page + delta));
+    const step = options.pagePairMode === 'spread' ? 2 : 1;
+    const nextPage = Math.max(1, Math.min(604, position.page + (delta * step)));
     if (nextPage === position.page) return;
     onPositionChange({ ...position, page: nextPage });
     onRangeChange(null);
@@ -367,7 +397,7 @@ export function MushafReader({
     });
     onRangeChange(null);
     setSelectedAyahKey(null);
-  }, [onPositionChange, onRangeChange, position]);
+  }, [onPositionChange, onRangeChange, options.pagePairMode, position]);
 
   const handleAyahTap = useCallback((verse: QuranVerse) => {
     setSelectedAyahKey(verse.verse_key);
@@ -437,13 +467,17 @@ export function MushafReader({
             <ChevronLeft className="h-4 w-4" />
           </button>
           <div className="text-center">
-            <p className="text-sm font-semibold text-white/90">Page {position.page}</p>
+            <p className="text-sm font-semibold text-white/90">
+              {options.pagePairMode === 'spread'
+                ? `Pages ${position.page % 2 === 0 ? position.page - 1 : position.page}–${Math.min((position.page % 2 === 0 ? position.page : position.page + 1), 604)}`
+                : `Page ${position.page}`}
+            </p>
             <p className="text-[11px] text-white/40">of 604</p>
           </div>
           <button
             type="button"
             onClick={() => handlePageNav(1)}
-            disabled={position.page >= 604}
+            disabled={position.page >= (options.pagePairMode === 'spread' ? 603 : 604)}
             className="rounded-lg border border-white/10 p-2.5 text-white/80 transition hover:bg-white/5 disabled:opacity-30"
           >
             <ChevronRight className="h-4 w-4" />
@@ -504,14 +538,27 @@ export function MushafReader({
             <p className="text-sm text-white/40">Loading Quran text...</p>
           </div>
         ) : viewMode === 'page' ? (
-          <MushafPageView
-            verses={pageVerses}
-            page={position.page}
-            activePlaybackAyah={activePlaybackAyah}
-            onPlayAyah={onPlayAyah}
-            onAyahTap={handleAyahTap}
-            selectedAyahKey={selectedAyahKey}
-          />
+          options.pagePairMode === 'spread' ? (
+            <MushafPageSpreadView
+              firstPageVerses={pageVerses}
+              secondPageVerses={spreadPageVerses}
+              firstPage={position.page % 2 === 0 ? position.page - 1 : position.page}
+              secondPage={Math.min((position.page % 2 === 0 ? position.page : position.page + 1), 604)}
+              activePlaybackAyah={activePlaybackAyah}
+              onPlayAyah={onPlayAyah}
+              onAyahTap={handleAyahTap}
+              selectedAyahKey={selectedAyahKey}
+            />
+          ) : (
+            <MushafPageView
+              verses={pageVerses}
+              page={position.page}
+              activePlaybackAyah={activePlaybackAyah}
+              onPlayAyah={onPlayAyah}
+              onAyahTap={handleAyahTap}
+              selectedAyahKey={selectedAyahKey}
+            />
+          )
         ) : (
           <MushafAyahView
             verses={surahVerses}
@@ -530,7 +577,11 @@ export function MushafReader({
       <div className="flex items-center justify-between text-[11px] text-white/40 px-1">
         <div className="flex items-center gap-1.5">
           <BookOpenText className="h-3 w-3" />
-          {viewMode === 'page' ? `Page ${position.page}` : getSurahLabel(position.surah)}
+          {viewMode === 'page'
+            ? options.pagePairMode === 'spread'
+              ? `Pages ${position.page % 2 === 0 ? position.page - 1 : position.page}-${Math.min((position.page % 2 === 0 ? position.page : position.page + 1), 604)}`
+              : `Page ${position.page}`
+            : getSurahLabel(position.surah)}
         </div>
         <span>Tap ayah to select &middot; Double-tap to play</span>
       </div>
