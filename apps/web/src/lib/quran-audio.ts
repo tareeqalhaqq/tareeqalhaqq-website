@@ -6,7 +6,7 @@ export type PlaybackMode = (typeof PLAYBACK_MODES)[number];
 
 export type LoopMode = 'off' | 'track' | 'queue';
 
-export type ReciterId = 'husary' | 'minshawi' | 'abdul-basit' | 'ahmad-al-nufais';
+export type ReciterId = 'husary' | 'minshawi' | 'abdul-basit';
 
 export type QuranReciter = {
   id: ReciterId;
@@ -38,22 +38,30 @@ const RECITER_CATALOG: Record<ReciterId, QuranReciter> = {
     sourceUrlPattern: 'https://everyayah.com/data/Abdul_Basit_Murattal_64kbps/{track}.mp3',
     sourceName: 'Abdul_Basit',
   },
-  'ahmad-al-nufais': {
-    id: 'ahmad-al-nufais',
-    displayName: 'Ahmad Al-Nufais',
-    bitrateKbps: 32,
-    sourceUrlPattern: 'https://everyayah.com/data/Ahmed_Neana_32kbps/{track}.mp3',
-    sourceName: 'Ahmad_Al_Nufais',
-  },
 };
 
 export const QURAN_RECITER_CATALOG = Object.freeze(Object.values(RECITER_CATALOG));
 
 export const DEFAULT_RECITER_ID: ReciterId = 'husary';
 
-const LEGACY_RECITER_ALIASES: Record<string, ReciterId> = {
-  'ahmed-neana': 'ahmad-al-nufais',
-};
+const LEGACY_RECITER_ALIASES: Record<string, ReciterId> = {};
+
+function getNextAyah(surah: number, ayah: number): { surah: number; ayah: number } | null {
+  const currentSurah = getSurahByNumber(surah);
+  if (!currentSurah) {
+    return null;
+  }
+
+  if (ayah < currentSurah.verses) {
+    return { surah, ayah: ayah + 1 };
+  }
+
+  if (surah >= 114) {
+    return null;
+  }
+
+  return { surah: surah + 1, ayah: 1 };
+}
 
 function normalizeName(value: string): string {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, '');
@@ -96,6 +104,7 @@ export type AudioQueueItem = {
   surah: number;
   ayah: number;
   verseKey: string;
+  reciterId: ReciterId;
 };
 
 function toQueueItem(reciterId: ReciterId, surah: number, ayah: number): AudioQueueItem {
@@ -104,6 +113,7 @@ function toQueueItem(reciterId: ReciterId, surah: number, ayah: number): AudioQu
     surah,
     ayah,
     verseKey: `${surah}:${ayah}`,
+    reciterId,
   };
 }
 
@@ -217,6 +227,17 @@ export function createQuranAudioPlayer(audio: HTMLAudioElement, callbacks?: Qura
       index = 0;
       await loadTrack();
       return;
+    }
+
+    const currentItem = queue[index];
+    if (queue.length === 1 && currentItem) {
+      const nextAyah = getNextAyah(currentItem.surah, currentItem.ayah);
+      if (nextAyah) {
+        queue = [toQueueItem(currentItem.reciterId, nextAyah.surah, nextAyah.ayah)];
+        index = 0;
+        await loadTrack();
+        return;
+      }
     }
 
     emitTrackChange();

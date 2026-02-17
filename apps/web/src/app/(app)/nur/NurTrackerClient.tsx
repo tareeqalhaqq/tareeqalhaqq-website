@@ -378,7 +378,7 @@ export default function NurTrackerClient() {
               </div>
               <Maximize2 className="h-5 w-5 text-cyan-300/60" />
             </div>
-            <p className="text-xs text-white/50">Full Quran reader with 4 reciters, Uthmani text, spaced repetition, and session tracking.</p>
+            <p className="text-xs text-white/50">Full Quran reader with 3 reciters, Uthmani text, spaced repetition, and session tracking.</p>
             <NativeMushafPanel
               profile={state.profile}
               onSaveSettings={handleSaveSettings}
