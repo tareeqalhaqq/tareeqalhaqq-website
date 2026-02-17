@@ -1,4 +1,22 @@
-@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300..800&family=Sora:wght@400..800&family=Amiri+Quran&family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300..800&family=Sora:wght@400..800&display=swap");
+
+/* KFGQPC Uthmanic Hafs Script – the official Madinah Mushaf font */
+@font-face {
+  font-family: "KFGQPC Hafs";
+  src: url("/fonts/UthmanicHafs.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* KFGQPC Uthman Taha Naskh – secondary mushaf font */
+@font-face {
+  font-family: "UthmanTN";
+  src: url("/fonts/UthmanTN.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
 
 @tailwind base;
 @tailwind components;
@@ -190,139 +208,153 @@
 }
 
 /* ── Mushaf page styles ── */
+
+/* The main mushaf text container – proper Uthmanic script with justified RTL */
 .mushaf-page {
-  font-family: "Amiri Quran", "Noto Naskh Arabic", "Amiri", serif;
+  font-family: "KFGQPC Hafs", "UthmanTN", serif;
   direction: rtl;
-  text-align: right;
-  line-height: 2.1;
-  font-size: clamp(1.22rem, 2.1vw, 1.46rem);
-  color: #1a1a1a;
+  unicode-bidi: embed;
+  text-align: justify;
+  text-align-last: justify;
+  line-height: 2.2;
+  font-size: clamp(1.15rem, 2.5vw, 1.55rem);
+  color: #1e1712;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  word-spacing: 0.06em;
 }
 
-.mushaf-book-page {
-  aspect-ratio: 3 / 4.2;
-}
-
+/* Each line in the mushaf page – text-based justified layout */
 .mushaf-layout-line {
-  min-height: 1.9em;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 0.14em;
-  white-space: nowrap;
+  display: block;
+  text-align: justify;
+  text-align-last: justify;
+  min-height: 1.8em;
+  line-height: inherit;
   overflow: hidden;
+  white-space: nowrap;
 }
 
-.mushaf-page-dark {
-  color: #e8e0d4;
+/* Last line of a surah should be centered, not justified */
+.mushaf-layout-line--last {
+  text-align: center;
+  text-align-last: center;
 }
 
+/* Mushaf page frame – cream parchment look like a real printed mushaf */
 .mushaf-frame {
-  background: linear-gradient(180deg, #f7f2e6 0%, #f4ede0 100%);
-  border: 1px solid rgba(135, 115, 75, 0.28);
+  background: linear-gradient(175deg, #faf6eb 0%, #f5eed8 40%, #f0e8ce 100%);
+  border: 1.5px solid rgba(160, 130, 70, 0.32);
   box-shadow:
-    0 1px 2px rgba(25, 20, 12, 0.08),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.42);
+    0 2px 8px rgba(25, 20, 12, 0.1),
+    0 8px 32px rgba(25, 20, 12, 0.06),
+    inset 0 0 0 1px rgba(255, 248, 225, 0.6);
   position: relative;
 }
 
-.mushaf-frame-dark {
-  background: linear-gradient(135deg, #1a1915 0%, #1f1d18 50%, #1a1915 100%);
-  border-color: #3d3828;
-  box-shadow:
-    inset 0 0 40px rgba(40, 35, 20, 0.3),
-    0 4px 20px rgba(0, 0, 0, 0.4),
-    0 0 0 1px rgba(60, 50, 30, 0.4);
-}
-
-.mushaf-ayah-marker {
-  display: inline-grid;
-  place-items: center;
-  align-items: center;
-  justify-content: center;
-  width: 1.9em;
-  height: 1.9em;
-  font-size: 0.5em;
-  font-family: "Noto Naskh Arabic", serif;
-  color: #74613a;
-  position: relative;
-  vertical-align: middle;
-  margin: 0 0.15em;
-}
-
-.mushaf-ayah-marker-dark {
-  color: #b8a870;
-}
-
-.mushaf-ayah-marker::before {
-  content: none;
-}
-
-.mushaf-ayah-marker-number {
+/* Inner decorative border */
+.mushaf-frame::before {
+  content: "";
   position: absolute;
-  line-height: 1;
-  font-size: 0.88em;
+  inset: 6px;
+  border: 1px solid rgba(160, 130, 70, 0.18);
+  border-radius: inherit;
+  pointer-events: none;
 }
 
+/* Surah header banner – ornamental like printed mushaf */
 .mushaf-surah-header {
   text-align: center;
-  padding: 0.5rem 1.5rem;
-  margin: 0.2rem 0 0.4rem;
-  border-top: 1px solid rgba(130, 111, 70, 0.18);
-  border-bottom: 1px solid rgba(130, 111, 70, 0.18);
-  background: transparent;
-  font-family: "Amiri Quran", "Noto Naskh Arabic", serif;
-  font-size: 1rem;
-  color: #57472d;
+  padding: 0.5rem 2rem;
+  margin: 0.25rem 0 0.4rem;
+  background: linear-gradient(90deg, transparent 0%, rgba(160, 130, 70, 0.12) 15%, rgba(160, 130, 70, 0.18) 50%, rgba(160, 130, 70, 0.12) 85%, transparent 100%);
+  border-top: 1.5px solid rgba(160, 130, 70, 0.28);
+  border-bottom: 1.5px solid rgba(160, 130, 70, 0.28);
+  font-family: "KFGQPC Hafs", "UthmanTN", serif;
+  font-size: 1.1rem;
+  color: #4a3a20;
+  position: relative;
 }
 
-.mushaf-surah-header-dark {
-  border-color: rgba(80, 70, 50, 0.4);
-  background: linear-gradient(90deg, transparent, rgba(80, 70, 50, 0.15), transparent);
-  color: #b8a870;
+/* Decorative ends for surah header */
+.mushaf-surah-header::before,
+.mushaf-surah-header::after {
+  content: "\2726"; /* ✦ */
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.6rem;
+  color: rgba(160, 130, 70, 0.5);
 }
+.mushaf-surah-header::before { right: 0.5rem; }
+.mushaf-surah-header::after { left: 0.5rem; }
 
+/* Bismillah line */
 .mushaf-bismillah {
   text-align: center;
-  font-family: "Amiri Quran", "Noto Naskh Arabic", serif;
-  font-size: 1.35rem;
-  color: #453921;
-  padding: 0.35rem 0;
-  margin-bottom: 0.1rem;
+  font-family: "KFGQPC Hafs", "UthmanTN", serif;
+  font-size: 1.2rem;
+  color: #3d2e18;
+  padding: 0.3rem 0;
+  margin-bottom: 0.15rem;
+  letter-spacing: 0.02em;
 }
 
+/* Top decorative rules */
 .mushaf-page-top-rules {
   display: flex;
   flex-direction: column;
-  gap: 0.22rem;
-  margin-bottom: 0.55rem;
+  gap: 3px;
+  margin-bottom: 0.5rem;
 }
 
 .mushaf-page-top-rule {
   width: 100%;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(126, 105, 66, 0.2), transparent);
+  background: linear-gradient(90deg, rgba(160, 130, 70, 0.1), rgba(160, 130, 70, 0.35), rgba(160, 130, 70, 0.1));
 }
 
 .mushaf-page-top-rule-accent {
-  background: linear-gradient(90deg, transparent, rgba(126, 105, 66, 0.34), transparent);
+  height: 1.5px;
+  background: linear-gradient(90deg, rgba(160, 130, 70, 0.15), rgba(160, 130, 70, 0.5), rgba(160, 130, 70, 0.15));
 }
 
-.mushaf-bismillah-dark {
-  color: #c8b880;
+/* Ayah end marker – the decorative verse number circle */
+.mushaf-ayah-marker {
+  display: inline-grid;
+  place-items: center;
+  width: 1.6em;
+  height: 1.6em;
+  font-size: 0.55em;
+  font-family: "Plus Jakarta Sans", sans-serif;
+  color: #7a6535;
+  position: relative;
+  vertical-align: middle;
+  margin: 0 0.08em;
 }
 
+.mushaf-ayah-marker-number {
+  position: absolute;
+  line-height: 1;
+  font-size: 0.82em;
+  font-weight: 600;
+}
+
+/* Active playback highlight */
 .mushaf-highlight-active {
-  background: rgba(56, 189, 248, 0.12);
-  border-radius: 4px;
-  padding: 2px 4px;
-  transition: background 0.3s ease;
+  background: rgba(56, 189, 248, 0.15);
+  border-radius: 3px;
+  padding: 1px 3px;
+  transition: background 0.25s ease;
+  box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.1);
 }
 
-.mushaf-highlight-active-dark {
-  background: rgba(56, 189, 248, 0.18);
+/* Bottom border rule on page */
+.mushaf-page-bottom-rule {
+  width: 100%;
+  height: 1.5px;
+  background: linear-gradient(90deg, rgba(160, 130, 70, 0.1), rgba(160, 130, 70, 0.4), rgba(160, 130, 70, 0.1));
+  margin-top: auto;
 }
 
 /* Auth page gradient */

@@ -1,6 +1,6 @@
 'use client';
 
-import { BookOpenText, ChevronLeft, ChevronRight, Loader2, Play } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Loader2, Play } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { fetchPageVerses, fetchSurahVerses, preloadAdjacentPages, type QuranVerse } from '@/lib/quran-api';
 import { getSurahByNumber, surahs } from '@/lib/quran-data';
@@ -8,7 +8,6 @@ import { buildMushafLayoutLines } from '@/lib/mushaf-layout';
 import {
   clampAyahToSurah,
   findMostRelevantPageForSurah,
-  getSurahLabel,
 } from '@/lib/quran-text';
 import type { AyahRange, MushafPosition, MushafReaderOptions, MushafReaderSelection, MushafViewMode } from './types';
 
@@ -47,24 +46,29 @@ const BISMILLAH = '\u0628\u0650\u0633\u0652\u0645\u0650 \u0671\u0644\u0644\u0651
 // Surahs that don't start with Bismillah
 const NO_BISMILLAH = new Set([1, 9]);
 
-function AyahNumberMarker({ number, isDark }: { number: number; isDark?: boolean }) {
+function AyahNumberMarker({ number }: { number: number }) {
   return (
-    <span className={`mushaf-ayah-marker ${isDark ? 'mushaf-ayah-marker-dark' : ''}`} aria-label={`Ayah ${number}`}>
-      <svg viewBox="0 0 100 100" className="h-[1.7em] w-[1.7em]" aria-hidden="true">
-        <polygon points="50,3 65,16 84,16 84,35 97,50 84,65 84,84 65,84 50,97 35,84 16,84 16,65 3,50 16,35 16,16 35,16" fill="none" stroke="currentColor" strokeWidth="4" />
+    <span className="mushaf-ayah-marker" aria-label={`Ayah ${number}`}>
+      <svg viewBox="0 0 100 100" className="h-[1.5em] w-[1.5em]" aria-hidden="true">
+        <polygon
+          points="50,2 62,15 82,15 82,35 98,50 82,65 82,85 62,85 50,98 38,85 18,85 18,65 2,50 18,35 18,15 38,15"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="3.5"
+        />
       </svg>
       <span className="mushaf-ayah-marker-number">{number}</span>
     </span>
   );
 }
 
-function SurahHeader({ surahNumber, isDark }: { surahNumber: number; isDark?: boolean }) {
+function SurahHeader({ surahNumber }: { surahNumber: number }) {
   const surah = getSurahByNumber(surahNumber);
   if (!surah) return null;
 
   return (
-    <div className={`mushaf-surah-header ${isDark ? 'mushaf-surah-header-dark' : ''}`}>
-      <span className="text-lg">{surah.nameArabic}</span>
+    <div className="mushaf-surah-header">
+      <span className="text-base">{surah.nameArabic}</span>
     </div>
   );
 }
@@ -77,7 +81,6 @@ function MushafPageView({
   onAyahTap,
   selectedAyahKey,
   compact,
-  showTopRules = true,
 }: {
   verses: QuranVerse[];
   page: number;
@@ -86,81 +89,81 @@ function MushafPageView({
   onAyahTap: (verse: QuranVerse) => void;
   selectedAyahKey: string | null;
   compact?: boolean;
-  showTopRules?: boolean;
 }) {
   const lines = buildMushafLayoutLines(page, verses);
   const verseByKey = new Map(verses.map(verse => [verse.verse_key, verse]));
-  const pageWidthClasses = compact
-    ? 'max-w-[16rem] sm:max-w-[18rem] lg:max-w-[20rem]'
-    : 'max-w-[20rem] sm:max-w-[24rem] lg:max-w-[29rem]';
 
   return (
-    <div className={`mushaf-frame mushaf-book-page mx-auto w-full ${pageWidthClasses} overflow-hidden rounded-lg`}>
-      <div className="relative aspect-[3/4] h-full w-full">
-        <div className="flex h-full flex-col px-4 pb-12 pt-5 sm:px-6 sm:pb-14 sm:pt-6 lg:px-7">
-          {showTopRules && (
-            <div className="mushaf-page-top-rules" aria-hidden="true">
-              <span className="mushaf-page-top-rule" />
-              <span className="mushaf-page-top-rule mushaf-page-top-rule-accent" />
-            </div>
-          )}
-
-          {/* Surah headers at top of page */}
-          {(() => {
-            const headers: React.ReactNode[] = [];
-            let prevSurah = 0;
-            for (const verse of verses) {
-              if (verse.chapter_id !== prevSurah) {
-                headers.push(
-                  <SurahHeader key={`hdr-${verse.chapter_id}`} surahNumber={verse.chapter_id} />
-                );
-                if (!NO_BISMILLAH.has(verse.chapter_id) && verse.verse_number === 1) {
-                  headers.push(
-                    <div key={`bis-${verse.chapter_id}`} className="mushaf-bismillah">
-                      {BISMILLAH}
-                    </div>
-                  );
-                }
-                prevSurah = verse.chapter_id;
-              }
-            }
-            return headers;
-          })()}
-
-          {/* Fixed layout lines (no browser wrapping) */}
-          <div className="mushaf-page flex-1 overflow-hidden" dir="rtl">
-            {lines.map(line => (
-              <div key={`line-${line.index}`} className="mushaf-layout-line" role="presentation">
-                {line.segments.map((segment, segmentIndex) => {
-                  const isActive = activePlaybackAyah?.surah === segment.surah && activePlaybackAyah?.ayah === segment.ayah;
-                  const isSelected = selectedAyahKey === segment.verseKey;
-                  if (segment.type === 'marker') {
-                    return <AyahNumberMarker key={`m-${segment.verseKey}-${segmentIndex}`} number={segment.ayah} />;
-                  }
-
-                  const verse = verseByKey.get(segment.verseKey);
-                  if (!verse || !segment.text) return null;
-
-                  return (
-                    <span
-                      key={`w-${segment.verseKey}-${segmentIndex}`}
-                      data-verse-key={segment.verseKey}
-                      className={`cursor-pointer transition-colors duration-200 px-[0.05em] ${isActive ? 'mushaf-highlight-active' : ''} ${isSelected ? 'bg-cyan-400/15 rounded' : ''}`}
-                      onClick={() => onAyahTap(verse)}
-                      onDoubleClick={() => onPlayAyah(verse.chapter_id, verse.verse_number)}
-                    >
-                      {segment.text}
-                    </span>
-                  );
-                })}
-              </div>
-            ))}
-          </div>
+    <div className={`mushaf-frame mx-auto w-full rounded-lg overflow-hidden ${compact ? 'max-w-[22rem]' : 'max-w-[32rem]'}`}>
+      <div className="relative flex flex-col px-5 pb-10 pt-4 sm:px-7 sm:pb-12 sm:pt-5" style={{ minHeight: compact ? '28rem' : '36rem' }}>
+        {/* Top decorative rules */}
+        <div className="mushaf-page-top-rules" aria-hidden="true">
+          <span className="mushaf-page-top-rule" />
+          <span className="mushaf-page-top-rule mushaf-page-top-rule-accent" />
         </div>
 
+        {/* Surah headers at top of page */}
+        {(() => {
+          const headers: React.ReactNode[] = [];
+          let prevSurah = 0;
+          for (const verse of verses) {
+            if (verse.chapter_id !== prevSurah) {
+              headers.push(
+                <SurahHeader key={`hdr-${verse.chapter_id}`} surahNumber={verse.chapter_id} />
+              );
+              if (!NO_BISMILLAH.has(verse.chapter_id) && verse.verse_number === 1) {
+                headers.push(
+                  <div key={`bis-${verse.chapter_id}`} className="mushaf-bismillah">
+                    {BISMILLAH}
+                  </div>
+                );
+              }
+              prevSurah = verse.chapter_id;
+            }
+          }
+          return headers;
+        })()}
+
+        {/* Mushaf text lines – justified RTL */}
+        <div className="mushaf-page flex-1" dir="rtl">
+          {lines.map(line => (
+            <div
+              key={`line-${line.index}`}
+              className={`mushaf-layout-line ${line.isLast ? 'mushaf-layout-line--last' : ''}`}
+              role="presentation"
+            >
+              {line.segments.map((segment, segmentIndex) => {
+                const isActive = activePlaybackAyah?.surah === segment.surah && activePlaybackAyah?.ayah === segment.ayah;
+                const isSelected = selectedAyahKey === segment.verseKey;
+                if (segment.type === 'marker') {
+                  return <AyahNumberMarker key={`m-${segment.verseKey}-${segmentIndex}`} number={segment.ayah} />;
+                }
+
+                const verse = verseByKey.get(segment.verseKey);
+                if (!verse || !segment.text) return null;
+
+                return (
+                  <span
+                    key={`w-${segment.verseKey}-${segmentIndex}`}
+                    data-verse-key={segment.verseKey}
+                    className={`cursor-pointer transition-colors duration-150 ${isActive ? 'mushaf-highlight-active' : ''} ${isSelected ? 'bg-cyan-400/10 rounded-sm' : ''}`}
+                    onClick={() => onAyahTap(verse)}
+                    onDoubleClick={() => onPlayAyah(verse.chapter_id, verse.verse_number)}
+                  >
+                    {segment.text}
+                  </span>
+                );
+              })}
+            </div>
+          ))}
+        </div>
+
+        {/* Bottom decorative rule */}
+        <div className="mushaf-page-bottom-rule" aria-hidden="true" />
+
         {/* Page number */}
-        <div className="pointer-events-none absolute bottom-4 left-1/2 -translate-x-1/2 text-center sm:bottom-5">
-          <span className="font-sans text-xs tabular-nums text-[#8a7b55]">{page}</span>
+        <div className="pointer-events-none absolute bottom-2 left-1/2 -translate-x-1/2 text-center sm:bottom-3">
+          <span className="font-sans text-[11px] tabular-nums text-[#8a7b55]">{page}</span>
         </div>
       </div>
     </div>
@@ -189,7 +192,7 @@ function MushafPageSpreadView({
 }) {
   return (
     <div
-      className="relative grid items-stretch gap-3 rounded-xl border border-white/10 bg-[#0f1116]/45 p-2.5 shadow-[0_8px_24px_rgba(0,0,0,0.22)] lg:grid-cols-[minmax(0,1fr)_20px_minmax(0,1fr)] lg:gap-0"
+      className="relative grid items-stretch gap-0 lg:grid-cols-[minmax(0,1fr)_1px_minmax(0,1fr)]"
       dir="rtl"
     >
       <div className="flex h-full items-stretch">
@@ -205,8 +208,7 @@ function MushafPageSpreadView({
       </div>
 
       <div className="relative hidden h-full lg:block" aria-hidden="true">
-        <div className="absolute inset-y-2 left-1/2 w-px -translate-x-1/2 bg-white/15" />
-        <div className="absolute inset-y-0 left-0 w-full bg-gradient-to-r from-black/35 via-black/10 to-black/35" />
+        <div className="absolute inset-y-4 left-0 w-px bg-[#c4b690]/40" />
       </div>
 
       <div className="flex h-full items-stretch">
@@ -223,11 +225,11 @@ function MushafPageSpreadView({
     </div>
   );
 }
+
 function MushafAyahView({
   verses,
   surah,
   activePlaybackAyah,
-  options,
   onPlayAyah,
   onAyahTap,
   selectedAyahKey,
@@ -247,18 +249,16 @@ function MushafAyahView({
   return (
     <div className="space-y-2">
       {/* Surah header */}
-      <div className="text-center py-4 border-b border-white/10">
-        <h2 className="font-['Amiri_Quran','Noto_Naskh_Arabic',serif] text-3xl text-white/90">
-          {surahMeta?.nameArabic}
-        </h2>
-        <p className="text-xs text-white/50 mt-1">
+      <div className="mushaf-surah-header">
+        <p className="font-['KFGQPC_Hafs','UthmanTN',serif] text-2xl">{surahMeta?.nameArabic}</p>
+        <p className="text-[11px] text-[#8a7b55] mt-0.5 font-sans">
           {surahMeta?.name} &middot; {surahMeta?.verses} Ayat &middot; {surahMeta?.revelationType === 'meccan' ? 'Meccan' : 'Medinan'}
         </p>
       </div>
 
       {/* Bismillah */}
       {surahMeta && !NO_BISMILLAH.has(surah) && (
-        <div className="text-center py-3 font-['Amiri_Quran','Noto_Naskh_Arabic',serif] text-2xl text-white/70">
+        <div className="mushaf-bismillah text-xl">
           {BISMILLAH}
         </div>
       )}
@@ -276,7 +276,7 @@ function MushafAyahView({
             key={verse.verse_key}
             data-verse-key={verse.verse_key}
             onClick={() => onAyahTap(verse)}
-            className={`group relative rounded-xl border p-4 cursor-pointer transition-all duration-200 ${
+            className={`group relative rounded-lg border p-3 cursor-pointer transition-all duration-150 ${
               isSelected
                 ? 'border-cyan-300/40 bg-cyan-400/10'
                 : isInRange
@@ -284,13 +284,13 @@ function MushafAyahView({
                   : 'border-white/[0.06] bg-white/[0.02] hover:border-white/[0.12] hover:bg-white/[0.04]'
             } ${isActive ? 'ring-1 ring-emerald-300/40' : ''}`}
           >
-            {/* Ayah number badge + play button */}
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <span className="inline-flex items-center justify-center w-8 h-8 rounded-full border border-white/15 text-xs text-white/60 font-sans tabular-nums">
+            {/* Ayah number + play */}
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-1.5">
+                <span className="inline-flex items-center justify-center w-7 h-7 rounded-full border border-white/15 text-[10px] text-white/60 font-sans tabular-nums">
                   {verse.verse_number}
                 </span>
-                <span className="text-[11px] text-white/40">{verse.verse_key}</span>
+                <span className="text-[10px] text-white/35 font-sans">{verse.verse_key}</span>
               </div>
               <button
                 type="button"
@@ -298,9 +298,9 @@ function MushafAyahView({
                   e.stopPropagation();
                   onPlayAyah(verse.chapter_id, verse.verse_number);
                 }}
-                className="opacity-0 group-hover:opacity-100 transition-opacity inline-flex items-center gap-1 rounded-full border border-cyan-300/30 bg-cyan-400/10 px-3 py-1.5 text-[11px] text-cyan-100"
+                className="opacity-0 group-hover:opacity-100 transition-opacity inline-flex items-center gap-1 rounded-full border border-cyan-300/30 bg-cyan-400/10 px-2 py-1 text-[10px] text-cyan-100"
               >
-                <Play className="h-3 w-3" />
+                <Play className="h-2.5 w-2.5" />
                 Play
               </button>
             </div>
@@ -308,7 +308,7 @@ function MushafAyahView({
             {/* Arabic text */}
             <p
               dir="rtl"
-              className="font-['Amiri_Quran','Noto_Naskh_Arabic',serif] text-[1.75rem] leading-[2.6] text-white/90 text-right"
+              className="font-['KFGQPC_Hafs','UthmanTN',serif] text-[1.6rem] leading-[2.4] text-white/90 text-right"
             >
               {verse.text_uthmani}
             </p>
@@ -318,7 +318,7 @@ function MushafAyahView({
 
       {verses.length === 0 && (
         <div className="text-center py-12">
-          <Loader2 className="h-6 w-6 animate-spin text-cyan-300/40 mx-auto mb-2" />
+          <Loader2 className="h-5 w-5 animate-spin text-cyan-300/40 mx-auto mb-2" />
           <p className="text-xs text-white/40">Loading ayat...</p>
         </div>
       )}
@@ -438,7 +438,7 @@ export function MushafReader({
     });
     onRangeChange(null);
     setSelectedAyahKey(null);
-  }, [onPositionChange, onRangeChange, options.pagePairMode, position]);
+  }, [onPositionChange, onRangeChange, position]);
 
   const handleAyahTap = useCallback((verse: QuranVerse) => {
     setSelectedAyahKey(verse.verse_key);
@@ -495,44 +495,42 @@ export function MushafReader({
   );
 
   return (
-    <div className="space-y-3">
-      {/* Navigation bar */}
+    <div className="flex h-full flex-col">
+      {/* Compact navigation bar */}
       {viewMode === 'page' ? (
-        <div className="flex items-center justify-between rounded-xl border border-white/[0.08] bg-black/20 p-2">
+        <div className="flex items-center justify-between px-2 py-1.5">
           <button
             type="button"
             onClick={() => handlePageNav(1)}
             disabled={options.pagePairMode === 'spread' ? spread.rightPage >= MUSHAF_TOTAL_PAGES - 1 : position.page >= MUSHAF_TOTAL_PAGES}
-            className="rounded-lg border border-white/10 p-2.5 text-white/80 transition hover:bg-white/5 disabled:opacity-30"
+            className="rounded-md p-1.5 text-white/70 transition hover:bg-white/5 disabled:opacity-25"
             aria-label="Next page"
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
-          <div className="text-center">
-            <p className="text-sm font-semibold text-white/90">
-              {options.pagePairMode === 'spread'
-                ? `Pages ${spread.rightPage}–${spread.leftPage}`
-                : `Page ${position.page}`}
-            </p>
-            <p className="text-[11px] text-white/40">of {MUSHAF_TOTAL_PAGES}</p>
-          </div>
+          <p className="text-xs text-white/60 font-sans tabular-nums">
+            {options.pagePairMode === 'spread'
+              ? `${spread.rightPage}–${spread.leftPage}`
+              : `${position.page}`}
+            <span className="text-white/30 ml-1">/ {MUSHAF_TOTAL_PAGES}</span>
+          </p>
           <button
             type="button"
             onClick={() => handlePageNav(-1)}
             disabled={position.page <= 1}
-            className="rounded-lg border border-white/10 p-2.5 text-white/80 transition hover:bg-white/5 disabled:opacity-30"
+            className="rounded-md p-1.5 text-white/70 transition hover:bg-white/5 disabled:opacity-25"
             aria-label="Previous page"
           >
             <ChevronRight className="h-4 w-4" />
           </button>
         </div>
       ) : (
-        <div className="flex items-center justify-between gap-2 rounded-xl border border-white/[0.08] bg-black/20 p-2">
+        <div className="flex items-center justify-between gap-2 px-2 py-1.5">
           <button
             type="button"
             onClick={() => handleSurahNav(1)}
             disabled={position.surah >= 114}
-            className="rounded-lg border border-white/10 p-2.5 text-white/80 transition hover:bg-white/5 disabled:opacity-30"
+            className="rounded-md p-1.5 text-white/70 transition hover:bg-white/5 disabled:opacity-25"
             aria-label="Next surah"
           >
             <ChevronLeft className="h-4 w-4" />
@@ -550,7 +548,7 @@ export function MushafReader({
               onRangeChange(null);
               setSelectedAyahKey(null);
             }}
-            className="flex-1 bg-transparent text-center text-sm text-white/90 outline-none appearance-none cursor-pointer"
+            className="flex-1 bg-transparent text-center text-xs text-white/70 outline-none appearance-none cursor-pointer"
           >
             {surahOptions.map(s => (
               <option key={s.number} value={s.number} className="bg-slate-900 text-white">
@@ -562,7 +560,7 @@ export function MushafReader({
             type="button"
             onClick={() => handleSurahNav(-1)}
             disabled={position.surah <= 1}
-            className="rounded-lg border border-white/10 p-2.5 text-white/80 transition hover:bg-white/5 disabled:opacity-30"
+            className="rounded-md p-1.5 text-white/70 transition hover:bg-white/5 disabled:opacity-25"
             aria-label="Previous surah"
           >
             <ChevronRight className="h-4 w-4" />
@@ -570,17 +568,16 @@ export function MushafReader({
         </div>
       )}
 
-      {/* Main content area */}
+      {/* Main content area – takes all available space */}
       <div
         ref={scrollContainerRef}
         onScroll={e => onScrollPositionChange(e.currentTarget.scrollTop)}
-        className="overflow-y-auto overflow-x-hidden"
-        style={{ maxHeight: 'calc(100vh - 280px)', minHeight: '400px' }}
+        className="flex-1 overflow-y-auto overflow-x-hidden px-1"
       >
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20">
-            <Loader2 className="h-8 w-8 animate-spin text-cyan-300/40 mb-3" />
-            <p className="text-sm text-white/40">Loading Quran text...</p>
+            <Loader2 className="h-6 w-6 animate-spin text-cyan-300/40 mb-2" />
+            <p className="text-xs text-white/40">Loading Quran text...</p>
           </div>
         ) : viewMode === 'page' ? (
           options.pagePairMode === 'spread' ? (
@@ -618,17 +615,9 @@ export function MushafReader({
         )}
       </div>
 
-      {/* Info bar */}
-      <div className="flex items-center justify-between text-[11px] text-white/40 px-1">
-        <div className="flex items-center gap-1.5">
-          <BookOpenText className="h-3 w-3" />
-          {viewMode === 'page'
-            ? options.pagePairMode === 'spread'
-              ? `Pages ${spread.rightPage}-${spread.leftPage}`
-              : `Page ${position.page}`
-            : getSurahLabel(position.surah)}
-        </div>
-        <span>Tap ayah to select &middot; Double-tap to play</span>
+      {/* Minimal info line */}
+      <div className="flex items-center justify-center py-1 text-[10px] text-white/30">
+        <span>Tap to select &middot; Double-tap to play</span>
       </div>
     </div>
   );
