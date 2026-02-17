@@ -7,6 +7,7 @@ import {
   BookOpen,
   Flame,
   ListChecks,
+  Settings2,
   TrendingUp,
   X,
 } from 'lucide-react';
@@ -110,6 +111,7 @@ export function MushafPanel({ profile, onSaveSettings, isFullScreen = false, onC
   const [offlineQueueCount, setOfflineQueueCount] = useState(0);
   const [loadingDashboard, setLoadingDashboard] = useState(true);
   const [showSidebar, setShowSidebar] = useState(false);
+  const [showReaderSettings, setShowReaderSettings] = useState(true);
 
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [sessionStartedAt, setSessionStartedAt] = useState<string | null>(null);
@@ -500,8 +502,30 @@ export function MushafPanel({ profile, onSaveSettings, isFullScreen = false, onC
       <div className="fixed inset-0 z-50 flex flex-col bg-[#0b1018]">
         {/* Top bar */}
         <header className="flex items-center justify-between border-b border-white/[0.08] bg-black/40 px-4 py-2.5 backdrop-blur">
-          <div className="flex items-center gap-3">
-            <BookOpen className="h-5 w-5 text-cyan-300/60" />
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setShowReaderSettings(prev => !prev)}
+              className="inline-flex items-center gap-1.5 rounded-md border border-white/10 bg-black/20 px-2 py-1.5 text-[11px] text-white/80 transition hover:bg-white/5"
+            >
+              <Settings2 className="h-3.5 w-3.5" />
+              Settings
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('page')}
+              className={`rounded-md border px-2 py-1.5 text-[11px] transition ${viewMode === 'page' ? 'border-cyan-300/40 bg-cyan-400/10 text-cyan-100' : 'border-white/[0.1] bg-black/10 text-white/70 hover:border-white/[0.2]'}`}
+            >
+              Mushaf
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('ayah')}
+              className={`rounded-md border px-2 py-1.5 text-[11px] transition ${viewMode === 'ayah' ? 'border-cyan-300/40 bg-cyan-400/10 text-cyan-100' : 'border-white/[0.1] bg-black/10 text-white/70 hover:border-white/[0.2]'}`}
+            >
+              Ayah by Ayah
+            </button>
+            <BookOpen className="ml-1 h-5 w-5 text-cyan-300/60" />
             <div>
               <h1 className="text-sm font-headline font-semibold text-white">Mushaf</h1>
               <p className="text-[11px] text-white/40">Full Quran &middot; Uthmani Script</p>
@@ -523,6 +547,7 @@ export function MushafPanel({ profile, onSaveSettings, isFullScreen = false, onC
         <div className="flex flex-1 overflow-hidden">
           {/* Mushaf area */}
           <div className="flex-1 overflow-hidden flex flex-col px-2 py-2 sm:px-4 lg:px-6">
+            {showReaderSettings && (
             <MushafToolbar
               viewMode={viewMode}
               playbackMode={playbackMode}
@@ -555,7 +580,7 @@ export function MushafPanel({ profile, onSaveSettings, isFullScreen = false, onC
                 setViewMode('ayah');
                 setPosition(prev => ({ ...prev, surah, ayah, page: matched?.page ?? findMostRelevantPageForSurah(surah) }));
               }}
-              showNavigationControls={!isFullScreen}
+              showNavigationControls
               onReset={() => {
                 setViewMode('page');
                 setPosition(initialPosition);
@@ -567,6 +592,7 @@ export function MushafPanel({ profile, onSaveSettings, isFullScreen = false, onC
                 setSelection({ activeAyah: null, range: null });
               }}
             />
+            )}
 
             <div className="flex-1 overflow-hidden mt-3">
               <MushafReader

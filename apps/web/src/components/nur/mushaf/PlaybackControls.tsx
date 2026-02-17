@@ -145,6 +145,11 @@ export function PlaybackControls({
     onLoopModeChange(loopMode);
   }, [loopMode, onLoopModeChange, player]);
 
+
+  useEffect(() => {
+    setPlaybackError(null);
+  }, [playbackMode, selectedReciter.id, position.surah, position.ayah, range?.startAyah, range?.endAyah, pageAyahs.length, playlistAyahs.length]);
+
   const playQueue = async () => {
     if (!player) {
       return;
@@ -155,6 +160,10 @@ export function PlaybackControls({
       pageAyahs,
       playlistAyahs,
     });
+    if (!queue.length) {
+      setPlaybackError('No ayat are available for this playback mode yet.');
+      return;
+    }
     await warmAudioCache(queue);
     try {
       await player.playQueue(queue);

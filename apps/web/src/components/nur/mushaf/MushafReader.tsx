@@ -4,6 +4,7 @@ import { BookOpenText, ChevronLeft, ChevronRight, Loader2, Play } from 'lucide-r
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { fetchPageVerses, fetchSurahVerses, preloadAdjacentPages, type QuranVerse } from '@/lib/quran-api';
 import { getSurahByNumber, surahs } from '@/lib/quran-data';
+import { buildMushafLayoutLines } from '@/lib/mushaf-layout';
 import {
   clampAyahToSurah,
   findMostRelevantPageForSurah,
@@ -32,8 +33,11 @@ const NO_BISMILLAH = new Set([1, 9]);
 
 function AyahNumberMarker({ number, isDark }: { number: number; isDark?: boolean }) {
   return (
-    <span className={`mushaf-ayah-marker ${isDark ? 'mushaf-ayah-marker-dark' : ''}`}>
-      {number}
+    <span className={`mushaf-ayah-marker ${isDark ? 'mushaf-ayah-marker-dark' : ''}`} aria-label={`Ayah ${number}`}>
+      <svg viewBox="0 0 100 100" className="h-[1.7em] w-[1.7em]" aria-hidden="true">
+        <polygon points="50,3 65,16 84,16 84,35 97,50 84,65 84,84 65,84 50,97 35,84 16,84 16,65 3,50 16,35 16,16 35,16" fill="none" stroke="currentColor" strokeWidth="4" />
+      </svg>
+      <span className="mushaf-ayah-marker-number">{number}</span>
     </span>
   );
 }
@@ -66,49 +70,11 @@ function MushafPageView({
   selectedAyahKey: string | null;
   compact?: boolean;
 }) {
-  // Build the continuous text with inline ayah markers
-  const textParts: React.ReactNode[] = [];
-  let lastSurah = 0;
-
-  for (let i = 0; i < verses.length; i++) {
-    const verse = verses[i];
-    const isNewSurah = verse.chapter_id !== lastSurah;
-    const isActive = activePlaybackAyah?.surah === verse.chapter_id && activePlaybackAyah?.ayah === verse.verse_number;
-    const isSelected = selectedAyahKey === verse.verse_key;
-
-    if (isNewSurah && lastSurah !== 0) {
-      // Line break before new surah inline
-      textParts.push(<br key={`br-${verse.chapter_id}`} />);
-    }
-
-    lastSurah = verse.chapter_id;
-
-    textParts.push(
-      <span
-        key={verse.verse_key}
-        data-verse-key={verse.verse_key}
-        className={`cursor-pointer transition-colors duration-200 ${
-          isActive ? 'mushaf-highlight-active' : ''
-        } ${isSelected ? 'bg-cyan-400/15 rounded px-1' : ''}`}
-        onClick={() => onAyahTap(verse)}
-        onDoubleClick={() => onPlayAyah(verse.chapter_id, verse.verse_number)}
-      >
-        {verse.text_uthmani}
-      </span>
-    );
-
-    textParts.push(
-      <AyahNumberMarker key={`marker-${verse.verse_key}`} number={verse.verse_number} />
-    );
-
-    // Add space between ayahs
-    if (i < verses.length - 1) {
-      textParts.push(<span key={`space-${i}`}> </span>);
-    }
-  }
+  const lines = buildMushafLayoutLines(page, verses);
+  const verseByKey = new Map(verses.map(verse => [verse.verse_key, verse]));
 
   return (
-    <div className="mushaf-frame rounded-lg overflow-hidden">
+    <div className="mushaf-frame mushaf-book-page rounded-lg overflow-hidden">
       <div className={`px-4 py-4 sm:px-6 sm:py-5 ${compact ? 'min-h-[430px]' : 'min-h-[520px]'} flex flex-col`}>
         {/* Surah headers at top of page */}
         {(() => {
@@ -132,9 +98,34 @@ function MushafPageView({
           return headers;
         })()}
 
-        {/* Continuous ayah text */}
+        {/* Fixed layout lines (no browser wrapping) */}
         <div className="mushaf-page flex-1" dir="rtl">
-          {textParts}
+          {lines.map(line => (
+            <div key={`line-${line.index}`} className="mushaf-layout-line" role="presentation">
+              {line.segments.map((segment, segmentIndex) => {
+                const isActive = activePlaybackAyah?.surah === segment.surah && activePlaybackAyah?.ayah === segment.ayah;
+                const isSelected = selectedAyahKey === segment.verseKey;
+                if (segment.type === 'marker') {
+                  return <AyahNumberMarker key={`m-${segment.verseKey}-${segmentIndex}`} number={segment.ayah} />;
+                }
+
+                const verse = verseByKey.get(segment.verseKey);
+                if (!verse || !segment.text) return null;
+
+                return (
+                  <span
+                    key={`w-${segment.verseKey}-${segmentIndex}`}
+                    data-verse-key={segment.verseKey}
+                    className={`cursor-pointer transition-colors duration-200 px-[0.05em] ${isActive ? 'mushaf-highlight-active' : ''} ${isSelected ? 'bg-cyan-400/15 rounded' : ''}`}
+                    onClick={() => onAyahTap(verse)}
+                    onDoubleClick={() => onPlayAyah(verse.chapter_id, verse.verse_number)}
+                  >
+                    {segment.text}
+                  </span>
+                );
+              })}
+            </div>
+          ))}
         </div>
 
         {/* Page number */}
@@ -167,7 +158,7 @@ function MushafPageSpreadView({
   selectedAyahKey: string | null;
 }) {
   return (
-    <div className="grid gap-2 lg:grid-cols-2" dir="rtl">
+    <div className="grid gap-3 lg:grid-cols-2" dir="rtl">
       <MushafPageView
         verses={firstPageVerses}
         page={firstPage}
