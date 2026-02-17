@@ -26,6 +26,22 @@ type MushafReaderProps = {
   onScrollPositionChange: (scrollTop: number) => void;
 };
 
+const MUSHAF_TOTAL_PAGES = 604;
+
+function getSpreadPages(page: number) {
+  const safePage = Math.max(1, Math.min(MUSHAF_TOTAL_PAGES, page));
+  if (safePage <= 1) {
+    return { rightPage: 1, leftPage: 2 };
+  }
+  if (safePage >= MUSHAF_TOTAL_PAGES) {
+    return { rightPage: MUSHAF_TOTAL_PAGES - 1, leftPage: MUSHAF_TOTAL_PAGES };
+  }
+
+  return safePage % 2 === 1
+    ? { rightPage: safePage, leftPage: safePage + 1 }
+    : { rightPage: safePage - 1, leftPage: safePage };
+}
+
 const BISMILLAH = '\u0628\u0650\u0633\u0652\u0645\u0650 \u0671\u0644\u0644\u0651\u064e\u0647\u0650 \u0671\u0644\u0631\u0651\u064e\u062d\u0652\u0645\u064e\u0670\u0646\u0650 \u0671\u0644\u0631\u0651\u064e\u062d\u0650\u064a\u0645\u0650';
 
 // Surahs that don't start with Bismillah
@@ -153,44 +169,57 @@ function MushafPageView({
 
 
 function MushafPageSpreadView({
-  firstPageVerses,
-  secondPageVerses,
-  firstPage,
-  secondPage,
+  rightPageVerses,
+  leftPageVerses,
+  rightPage,
+  leftPage,
   activePlaybackAyah,
   onPlayAyah,
   onAyahTap,
   selectedAyahKey,
 }: {
-  firstPageVerses: QuranVerse[];
-  secondPageVerses: QuranVerse[];
-  firstPage: number;
-  secondPage: number;
+  rightPageVerses: QuranVerse[];
+  leftPageVerses: QuranVerse[];
+  rightPage: number;
+  leftPage: number;
   activePlaybackAyah: { surah: number; ayah: number } | null;
   onPlayAyah: (surah: number, ayah: number) => void;
   onAyahTap: (verse: QuranVerse) => void;
   selectedAyahKey: string | null;
 }) {
   return (
-    <div className="grid gap-3 rounded-xl border border-white/10 bg-[#0f1116]/45 p-2.5 shadow-[0_8px_24px_rgba(0,0,0,0.22)] lg:grid-cols-2" dir="rtl">
-      <MushafPageView
-        verses={firstPageVerses}
-        page={firstPage}
-        activePlaybackAyah={activePlaybackAyah}
-        onPlayAyah={onPlayAyah}
-        onAyahTap={onAyahTap}
-        selectedAyahKey={selectedAyahKey}
-        compact
-      />
-      <MushafPageView
-        verses={secondPageVerses}
-        page={secondPage}
-        activePlaybackAyah={activePlaybackAyah}
-        onPlayAyah={onPlayAyah}
-        onAyahTap={onAyahTap}
-        selectedAyahKey={selectedAyahKey}
-        compact
-      />
+    <div
+      className="relative grid items-stretch gap-3 rounded-xl border border-white/10 bg-[#0f1116]/45 p-2.5 shadow-[0_8px_24px_rgba(0,0,0,0.22)] lg:grid-cols-[minmax(0,1fr)_20px_minmax(0,1fr)] lg:gap-0"
+      dir="rtl"
+    >
+      <div className="flex h-full items-stretch">
+        <MushafPageView
+          verses={rightPageVerses}
+          page={rightPage}
+          activePlaybackAyah={activePlaybackAyah}
+          onPlayAyah={onPlayAyah}
+          onAyahTap={onAyahTap}
+          selectedAyahKey={selectedAyahKey}
+          compact
+        />
+      </div>
+
+      <div className="relative hidden h-full lg:block" aria-hidden="true">
+        <div className="absolute inset-y-2 left-1/2 w-px -translate-x-1/2 bg-white/15" />
+        <div className="absolute inset-y-0 left-0 w-full bg-gradient-to-r from-black/35 via-black/10 to-black/35" />
+      </div>
+
+      <div className="flex h-full items-stretch">
+        <MushafPageView
+          verses={leftPageVerses}
+          page={leftPage}
+          activePlaybackAyah={activePlaybackAyah}
+          onPlayAyah={onPlayAyah}
+          onAyahTap={onAyahTap}
+          selectedAyahKey={selectedAyahKey}
+          compact
+        />
+      </div>
     </div>
   );
 }
@@ -318,6 +347,7 @@ export function MushafReader({
   const [loading, setLoading] = useState(false);
   const [selectedAyahKey, setSelectedAyahKey] = useState<string | null>(null);
   const [rangeStart, setRangeStart] = useState<number | null>(null);
+  const spread = getSpreadPages(position.page);
 
   // Fetch page verses
   useEffect(() => {
@@ -325,13 +355,11 @@ export function MushafReader({
     let cancelled = false;
     setLoading(true);
 
-    const pageStart = options.pagePairMode === 'spread'
-      ? (position.page % 2 === 0 ? Math.max(position.page - 1, 1) : position.page)
-      : position.page;
+    const pageStart = options.pagePairMode === 'spread' ? spread.rightPage : position.page;
 
     const tasks = [fetchPageVerses(pageStart)];
-    if (options.pagePairMode === 'spread' && pageStart < 604) {
-      tasks.push(fetchPageVerses(pageStart + 1));
+    if (options.pagePairMode === 'spread') {
+      tasks.push(fetchPageVerses(spread.leftPage));
     }
 
     Promise.all(tasks).then(([first, second]) => {
@@ -344,7 +372,7 @@ export function MushafReader({
     });
 
     return () => { cancelled = true; };
-  }, [options.pagePairMode, viewMode, position.page]);
+  }, [options.pagePairMode, spread.leftPage, spread.rightPage, viewMode, position.page]);
 
   // Fetch surah verses
   useEffect(() => {
@@ -382,13 +410,21 @@ export function MushafReader({
   }, [activePlaybackAyah, options.followPlayback]);
 
   const handlePageNav = useCallback((delta: number) => {
-    const step = options.pagePairMode === 'spread' ? 2 : 1;
-    const nextPage = Math.max(1, Math.min(604, position.page + (delta * step)));
+    if (options.pagePairMode === 'spread') {
+      const nextLeadPage = Math.max(1, Math.min(MUSHAF_TOTAL_PAGES - 1, spread.rightPage + (delta * 2)));
+      if (nextLeadPage === spread.rightPage) return;
+      onPositionChange({ ...position, page: nextLeadPage });
+      onRangeChange(null);
+      setSelectedAyahKey(null);
+      return;
+    }
+
+    const nextPage = Math.max(1, Math.min(MUSHAF_TOTAL_PAGES, position.page + delta));
     if (nextPage === position.page) return;
     onPositionChange({ ...position, page: nextPage });
     onRangeChange(null);
     setSelectedAyahKey(null);
-  }, [onPositionChange, onRangeChange, position]);
+  }, [onPositionChange, onRangeChange, options.pagePairMode, position, spread.rightPage]);
 
   const handleSurahNav = useCallback((delta: number) => {
     const nextSurah = Math.max(1, Math.min(114, position.surah + delta));
@@ -466,7 +502,7 @@ export function MushafReader({
           <button
             type="button"
             onClick={() => handlePageNav(1)}
-            disabled={position.page >= (options.pagePairMode === 'spread' ? 603 : 604)}
+            disabled={options.pagePairMode === 'spread' ? spread.rightPage >= MUSHAF_TOTAL_PAGES - 1 : position.page >= MUSHAF_TOTAL_PAGES}
             className="rounded-lg border border-white/10 p-2.5 text-white/80 transition hover:bg-white/5 disabled:opacity-30"
             aria-label="Next page"
           >
@@ -475,10 +511,10 @@ export function MushafReader({
           <div className="text-center">
             <p className="text-sm font-semibold text-white/90">
               {options.pagePairMode === 'spread'
-                ? `Pages ${position.page % 2 === 0 ? position.page - 1 : position.page}–${Math.min((position.page % 2 === 0 ? position.page : position.page + 1), 604)}`
+                ? `Pages ${spread.rightPage}–${spread.leftPage}`
                 : `Page ${position.page}`}
             </p>
-            <p className="text-[11px] text-white/40">of 604</p>
+            <p className="text-[11px] text-white/40">of {MUSHAF_TOTAL_PAGES}</p>
           </div>
           <button
             type="button"
@@ -549,10 +585,10 @@ export function MushafReader({
         ) : viewMode === 'page' ? (
           options.pagePairMode === 'spread' ? (
             <MushafPageSpreadView
-              firstPageVerses={pageVerses}
-              secondPageVerses={spreadPageVerses}
-              firstPage={position.page % 2 === 0 ? position.page - 1 : position.page}
-              secondPage={Math.min((position.page % 2 === 0 ? position.page : position.page + 1), 604)}
+              rightPageVerses={pageVerses}
+              leftPageVerses={spreadPageVerses}
+              rightPage={spread.rightPage}
+              leftPage={spread.leftPage}
               activePlaybackAyah={activePlaybackAyah}
               onPlayAyah={onPlayAyah}
               onAyahTap={handleAyahTap}
@@ -588,7 +624,7 @@ export function MushafReader({
           <BookOpenText className="h-3 w-3" />
           {viewMode === 'page'
             ? options.pagePairMode === 'spread'
-              ? `Pages ${position.page % 2 === 0 ? position.page - 1 : position.page}-${Math.min((position.page % 2 === 0 ? position.page : position.page + 1), 604)}`
+              ? `Pages ${spread.rightPage}-${spread.leftPage}`
               : `Page ${position.page}`
             : getSurahLabel(position.surah)}
         </div>
