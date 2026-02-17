@@ -1,0 +1,173 @@
+/**
+ * Quran.com API client with IndexedDB caching for offline-first experience.
+ * Fetches Uthmani text for any surah/page on demand and caches permanently.
+ */
+
+const API_BASE = 'https://api.quran.com/api/v4';
+const DB_NAME = 'quran_text_cache';
+const DB_VERSION = 1;
+const STORE_PAGES = 'pages';
+const STORE_SURAHS = 'surahs';
+
+export type QuranVerse = {
+  verse_key: string;
+  text_uthmani: string;
+  chapter_id: number;
+  verse_number: number;
+  page_number: number;
+};
+
+// In-memory caches for instant access after first load
+const memoryPageCache = new Map<number, QuranVerse[]>();
+const memorySurahCache = new Map<number, QuranVerse[]>();
+
+// --------------- IndexedDB helpers ---------------
+
+function openDB(): Promise<IDBDatabase> {
+  return new Promise((resolve, reject) => {
+    if (typeof indexedDB === 'undefined') {
+      reject(new Error('IndexedDB not available'));
+      return;
+    }
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains(STORE_PAGES)) {
+        db.createObjectStore(STORE_PAGES);
+      }
+      if (!db.objectStoreNames.contains(STORE_SURAHS)) {
+        db.createObjectStore(STORE_SURAHS);
+      }
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+async function dbGet<T>(store: string, key: IDBValidKey): Promise<T | undefined> {
+  try {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(store, 'readonly');
+      const req = tx.objectStore(store).get(key);
+      req.onsuccess = () => resolve(req.result as T | undefined);
+      req.onerror = () => reject(req.error);
+    });
+  } catch {
+    return undefined;
+  }
+}
+
+async function dbPut(store: string, key: IDBValidKey, value: unknown): Promise<void> {
+  try {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(store, 'readwrite');
+      tx.objectStore(store).put(value, key);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  } catch {
+    // Silently fail cache writes
+  }
+}
+
+// --------------- API fetchers ---------------
+
+export async function fetchPageVerses(page: number): Promise<QuranVerse[]> {
+  // 1. Memory cache
+  if (memoryPageCache.has(page)) {
+    return memoryPageCache.get(page)!;
+  }
+
+  // 2. IndexedDB cache
+  const cached = await dbGet<QuranVerse[]>(STORE_PAGES, page);
+  if (cached?.length) {
+    memoryPageCache.set(page, cached);
+    return cached;
+  }
+
+  // 3. API fetch
+  try {
+    const url = `${API_BASE}/verses/by_page/${page}?language=en&words=false&fields=text_uthmani,chapter_id,verse_number,page_number,verse_key&per_page=50`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`API ${res.status}`);
+    const data = await res.json();
+
+    const verses: QuranVerse[] = (data.verses ?? []).map((v: Record<string, unknown>) => ({
+      verse_key: v.verse_key as string,
+      text_uthmani: v.text_uthmani as string,
+      chapter_id: v.chapter_id as number,
+      verse_number: v.verse_number as number,
+      page_number: v.page_number as number,
+    }));
+
+    memoryPageCache.set(page, verses);
+    void dbPut(STORE_PAGES, page, verses);
+    return verses;
+  } catch {
+    return [];
+  }
+}
+
+export async function fetchSurahVerses(surah: number): Promise<QuranVerse[]> {
+  // 1. Memory cache
+  if (memorySurahCache.has(surah)) {
+    return memorySurahCache.get(surah)!;
+  }
+
+  // 2. IndexedDB cache
+  const cached = await dbGet<QuranVerse[]>(STORE_SURAHS, surah);
+  if (cached?.length) {
+    memorySurahCache.set(surah, cached);
+    return cached;
+  }
+
+  // 3. API fetch
+  try {
+    const url = `${API_BASE}/verses/by_chapter/${surah}?language=en&words=false&fields=text_uthmani,chapter_id,verse_number,page_number,verse_key&per_page=300`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`API ${res.status}`);
+    const data = await res.json();
+
+    const verses: QuranVerse[] = (data.verses ?? []).map((v: Record<string, unknown>) => ({
+      verse_key: v.verse_key as string,
+      text_uthmani: v.text_uthmani as string,
+      chapter_id: v.chapter_id as number,
+      verse_number: v.verse_number as number,
+      page_number: v.page_number as number,
+    }));
+
+    memorySurahCache.set(surah, verses);
+    void dbPut(STORE_SURAHS, surah, verses);
+    return verses;
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Preload adjacent pages for smooth navigation.
+ */
+export function preloadAdjacentPages(currentPage: number): void {
+  const pagesToPreload = [currentPage - 1, currentPage + 1, currentPage + 2];
+  for (const p of pagesToPreload) {
+    if (p >= 1 && p <= 604 && !memoryPageCache.has(p)) {
+      void fetchPageVerses(p);
+    }
+  }
+}
+
+/**
+ * Check if a page is already cached (memory or IDB).
+ */
+export function isPageCached(page: number): boolean {
+  return memoryPageCache.has(page);
+}
+
+/**
+ * Get the number of pages currently in memory cache.
+ */
+export function getCachedPageCount(): number {
+  return memoryPageCache.size;
+}

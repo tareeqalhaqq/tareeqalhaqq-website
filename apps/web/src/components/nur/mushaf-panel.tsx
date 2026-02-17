@@ -2,7 +2,14 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { AlertCircle, Flame, ListChecks, TrendingUp } from 'lucide-react';
+import {
+  AlertCircle,
+  BookOpen,
+  Flame,
+  ListChecks,
+  TrendingUp,
+  X,
+} from 'lucide-react';
 import { DEFAULT_RECITER_ID, QURAN_RECITER_CATALOG, getReciterById, type ReciterId } from '@/lib/quran-audio';
 import { getSurahsByJuz } from '@/lib/quran-data';
 import { findMostRelevantPageForSurah, getAyah, getAyahsForPage, getAyahsForSurah } from '@/lib/quran-text';
@@ -60,6 +67,8 @@ type OfflineAction = {
 type MushafPanelProps = {
   profile: NurProfile;
   onSaveSettings: (updates: Partial<NurProfile>) => Promise<void>;
+  isFullScreen?: boolean;
+  onClose?: () => void;
 };
 
 function clamp(value: number, min: number, max: number) {
@@ -69,15 +78,13 @@ function clamp(value: number, min: number, max: number) {
 function uniqueByVerse(items: Array<{ surah: number; ayah: number; verseKey: string }>) {
   const seen = new Set<string>();
   return items.filter(item => {
-    if (seen.has(item.verseKey)) {
-      return false;
-    }
+    if (seen.has(item.verseKey)) return false;
     seen.add(item.verseKey);
     return true;
   });
 }
 
-export function MushafPanel({ profile, onSaveSettings }: MushafPanelProps) {
+export function MushafPanel({ profile, onSaveSettings, isFullScreen = false, onClose }: MushafPanelProps) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
@@ -91,7 +98,6 @@ export function MushafPanel({ profile, onSaveSettings }: MushafPanelProps) {
   const [playbackRate, setPlaybackRate] = useState(Math.min(Math.max(profile.mushaf_playback_rate ?? 1, 0.75), 1.25));
   const [options, setOptions] = useState<MushafReaderOptions>({
     tajweedEnabled: profile.mushaf_tajweed_enabled ?? true,
-    mutashabihatEnabled: profile.mushaf_mutashabihat_enabled ?? false,
     followPlayback: profile.mushaf_follow_playback_enabled ?? true,
   });
   const [range, setRange] = useState<AyahRange | null>(null);
@@ -101,6 +107,7 @@ export function MushafPanel({ profile, onSaveSettings }: MushafPanelProps) {
   const [dashboard, setDashboard] = useState<MushafDashboardPayload>(emptyDashboard);
   const [offlineQueueCount, setOfflineQueueCount] = useState(0);
   const [loadingDashboard, setLoadingDashboard] = useState(true);
+  const [showSidebar, setShowSidebar] = useState(false);
 
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [sessionStartedAt, setSessionStartedAt] = useState<string | null>(null);
@@ -118,9 +125,7 @@ export function MushafPanel({ profile, onSaveSettings }: MushafPanelProps) {
   const activeSurahAyahs = useMemo(() => getAyahsForSurah(position.surah), [position.surah]);
 
   const readQueue = useCallback((): OfflineAction[] => {
-    if (typeof window === 'undefined') {
-      return [];
-    }
+    if (typeof window === 'undefined') return [];
     try {
       const raw = window.localStorage.getItem(OFFLINE_QUEUE_KEY);
       return raw ? (JSON.parse(raw) as OfflineAction[]) : [];
@@ -130,9 +135,7 @@ export function MushafPanel({ profile, onSaveSettings }: MushafPanelProps) {
   }, []);
 
   const writeQueue = useCallback((queue: OfflineAction[]) => {
-    if (typeof window === 'undefined') {
-      return;
-    }
+    if (typeof window === 'undefined') return;
     try {
       window.localStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(queue.slice(-100)));
     } catch {
@@ -148,9 +151,7 @@ export function MushafPanel({ profile, onSaveSettings }: MushafPanelProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action, payload }),
       });
-      if (!res.ok) {
-        throw new Error('request failed');
-      }
+      if (!res.ok) throw new Error('request failed');
       return await res.json();
     } catch {
       if (queueOnFail) {
@@ -166,9 +167,7 @@ export function MushafPanel({ profile, onSaveSettings }: MushafPanelProps) {
     try {
       setLoadingDashboard(true);
       const res = await fetch('/api/nur/mushaf', { cache: 'no-store' });
-      if (!res.ok) {
-        return;
-      }
+      if (!res.ok) return;
       const data = await res.json();
       setDashboard({
         weakAyat: data.weakAyat ?? [],
@@ -182,9 +181,7 @@ export function MushafPanel({ profile, onSaveSettings }: MushafPanelProps) {
   }, []);
 
   const flushQueue = useCallback(async () => {
-    if (typeof window === 'undefined' || !navigator.onLine) {
-      return;
-    }
+    if (typeof window === 'undefined' || !navigator.onLine) return;
     const queue = readQueue();
     if (!queue.length) {
       setOfflineQueueCount(0);
@@ -193,17 +190,13 @@ export function MushafPanel({ profile, onSaveSettings }: MushafPanelProps) {
     const remaining: OfflineAction[] = [];
     for (const item of queue) {
       const ok = await postAction(item.action, item.payload, false);
-      if (!ok) {
-        remaining.push(item);
-      }
+      if (!ok) remaining.push(item);
     }
     writeQueue(remaining);
   }, [postAction, readQueue, writeQueue]);
 
   const endSession = useCallback(async () => {
-    if (!activeSessionId || !sessionStartedAt) {
-      return;
-    }
+    if (!activeSessionId || !sessionStartedAt) return;
     const duration = Math.max(0, Math.round((Date.now() - new Date(sessionStartedAt).getTime()) / 1000));
     await postAction('end_session', {
       session_id: activeSessionId,
@@ -224,9 +217,7 @@ export function MushafPanel({ profile, onSaveSettings }: MushafPanelProps) {
   }, [activeSessionId, fetchDashboard, position.ayah, position.surah, postAction, sessionConfidence, sessionLoopCounts.ayah, sessionLoopCounts.range, sessionLoopCounts.surah, sessionMistakeCount, sessionStartedAt]);
 
   const startSession = useCallback(async () => {
-    if (activeSessionId) {
-      return;
-    }
+    if (activeSessionId) return;
     const result = await postAction('start_session', {
       surah: position.surah,
       ayah: position.ayah,
@@ -242,16 +233,14 @@ export function MushafPanel({ profile, onSaveSettings }: MushafPanelProps) {
     }
   }, [activeSessionId, playbackMode, playbackRate, position.ayah, position.surah, postAction, selectedReciterId]);
 
+  // Hydrate from profile
   useEffect(() => {
-    if (hydratedRef.current) {
-      return;
-    }
+    if (hydratedRef.current) return;
     hydratedRef.current = true;
     setViewMode(profile.mushaf_view_mode ?? 'page');
     setSelectedReciterId(getReciterById(profile.selected_reciter_id).id);
     setOptions({
       tajweedEnabled: profile.mushaf_tajweed_enabled ?? true,
-      mutashabihatEnabled: profile.mushaf_mutashabihat_enabled ?? false,
       followPlayback: profile.mushaf_follow_playback_enabled ?? true,
     });
     setPlaybackRate(Math.min(Math.max(profile.mushaf_playback_rate ?? 1, 0.75), 1.25));
@@ -262,11 +251,10 @@ export function MushafPanel({ profile, onSaveSettings }: MushafPanelProps) {
     });
   }, [profile]);
 
+  // URL params
   useEffect(() => {
     const view = searchParams.get('view');
-    if (view === 'page' || view === 'ayah') {
-      setViewMode(view);
-    }
+    if (view === 'page' || view === 'ayah') setViewMode(view);
     const page = Number(searchParams.get('page'));
     const surah = Number(searchParams.get('surah'));
     const ayah = Number(searchParams.get('ayah'));
@@ -278,6 +266,7 @@ export function MushafPanel({ profile, onSaveSettings }: MushafPanelProps) {
   }, [searchParams]);
 
   useEffect(() => {
+    if (!isFullScreen) return;
     const params = new URLSearchParams(searchParams.toString());
     params.set('view', viewMode);
     if (viewMode === 'page') {
@@ -290,35 +279,28 @@ export function MushafPanel({ profile, onSaveSettings }: MushafPanelProps) {
       params.delete('page');
     }
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
-  }, [pathname, position.ayah, position.page, position.surah, router, searchParams, viewMode]);
+  }, [isFullScreen, pathname, position.ayah, position.page, position.surah, router, searchParams, viewMode]);
 
   useEffect(() => {
     void fetchDashboard();
     void flushQueue();
-    const onlineHandler = () => {
-      void flushQueue();
-    };
+    const onlineHandler = () => void flushQueue();
     window.addEventListener('online', onlineHandler);
     return () => window.removeEventListener('online', onlineHandler);
   }, [fetchDashboard, flushQueue]);
 
   useEffect(() => {
-    return () => {
-      void endSession();
-    };
+    return () => { void endSession(); };
   }, [endSession]);
 
   useEffect(() => {
     setOfflineQueueCount(readQueue().length);
   }, [readQueue]);
 
+  // Debounced state save
   useEffect(() => {
-    if (!hydratedRef.current) {
-      return;
-    }
-    if (stateTimerRef.current) {
-      window.clearTimeout(stateTimerRef.current);
-    }
+    if (!hydratedRef.current) return;
+    if (stateTimerRef.current) window.clearTimeout(stateTimerRef.current);
     stateTimerRef.current = window.setTimeout(() => {
       void postAction('reader_state', {
         view_mode: viewMode,
@@ -332,29 +314,21 @@ export function MushafPanel({ profile, onSaveSettings }: MushafPanelProps) {
       });
     }, 600);
     return () => {
-      if (stateTimerRef.current) {
-        window.clearTimeout(stateTimerRef.current);
-      }
+      if (stateTimerRef.current) window.clearTimeout(stateTimerRef.current);
     };
   }, [options.followPlayback, playbackRate, position.ayah, position.page, position.surah, postAction, scrollState.ayah, scrollState.page, viewMode]);
 
+  // Keyboard shortcuts
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (window.innerWidth < 1024) {
-        return;
-      }
-
       const target = event.target as HTMLElement | null;
-      if (target?.closest('input,textarea,select,[contenteditable="true"]')) {
-        return;
-      }
+      if (target?.closest('input,textarea,select,[contenteditable="true"]')) return;
 
       if (event.key.toLowerCase() === 'm') {
         event.preventDefault();
         setViewMode(prev => (prev === 'page' ? 'ayah' : 'page'));
       }
-
-      if (event.key.toLowerCase() === 'j') {
+      if (event.key.toLowerCase() === 'j' || event.key === 'ArrowLeft') {
         event.preventDefault();
         if (viewMode === 'page') {
           setPosition(prev => ({ ...prev, page: Math.max(prev.page - 1, 1) }));
@@ -362,8 +336,7 @@ export function MushafPanel({ profile, onSaveSettings }: MushafPanelProps) {
           setPosition(prev => ({ ...prev, surah: Math.max(prev.surah - 1, 1), ayah: 1 }));
         }
       }
-
-      if (event.key.toLowerCase() === 'k') {
+      if (event.key.toLowerCase() === 'k' || event.key === 'ArrowRight') {
         event.preventDefault();
         if (viewMode === 'page') {
           setPosition(prev => ({ ...prev, page: Math.min(prev.page + 1, 604) }));
@@ -371,11 +344,14 @@ export function MushafPanel({ profile, onSaveSettings }: MushafPanelProps) {
           setPosition(prev => ({ ...prev, surah: Math.min(prev.surah + 1, 114), ayah: 1 }));
         }
       }
+      if (event.key === 'Escape' && isFullScreen && onClose) {
+        event.preventDefault();
+        onClose();
+      }
     };
-
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [viewMode]);
+  }, [isFullScreen, onClose, viewMode]);
 
   const handleReciterChange = async (reciterId: string) => {
     const nextReciter = getReciterById(reciterId).id;
@@ -392,9 +368,7 @@ export function MushafPanel({ profile, onSaveSettings }: MushafPanelProps) {
   };
 
   const handleLogMistake = async (mistakeType: MistakeType) => {
-    if (!selection.activeAyah) {
-      return;
-    }
+    if (!selection.activeAyah) return;
     await postAction('log_mistake', {
       session_id: activeSessionId,
       verse_key: selection.activeAyah.key,
@@ -410,9 +384,7 @@ export function MushafPanel({ profile, onSaveSettings }: MushafPanelProps) {
   };
 
   const handleEnqueueReview = async () => {
-    if (!selection.activeAyah) {
-      return;
-    }
+    if (!selection.activeAyah) return;
     const startAyah = selection.range?.startAyah ?? selection.activeAyah.ayah;
     const endAyah = selection.range?.endAyah ?? selection.activeAyah.ayah;
     await postAction('enqueue_review', {
@@ -467,334 +439,267 @@ export function MushafPanel({ profile, onSaveSettings }: MushafPanelProps) {
   const loadPlaylist = () => {
     const queue = generatedPlaylist.map(item => ({ surah: item.surah, ayah: item.ayah }));
     setPlaylistAyahs(queue);
-    if (!queue.length) {
-      return;
-    }
+    if (!queue.length) return;
     const first = queue[0];
     const matched = getAyah(first.surah, first.ayah);
     setPosition(prev => ({ ...prev, surah: first.surah, ayah: first.ayah, page: matched?.page ?? findMostRelevantPageForSurah(first.surah) }));
     setPlaybackMode('playlist');
   };
 
+  const playbackControlsProps = {
+    playbackMode,
+    position,
+    selectedReciter,
+    range,
+    pageAyahs: viewMode === 'page' ? pageAyahs : activeSurahAyahs.map(item => ({ surah: item.surah, ayah: item.ayah })),
+    playlistAyahs,
+    playbackRate,
+    onPlaybackModeChange: setPlaybackMode,
+    onPlaybackRateChange: setPlaybackRate,
+    onActiveAyahChange: (surah: number, ayah: number) => {
+      const matched = getAyah(surah, ayah);
+      setActivePlaybackAyah({ surah, ayah });
+      setPosition(prev => ({ ...prev, surah, ayah, page: matched?.page ?? prev.page }));
+    },
+    onPlayStateChange: (isPlaying: boolean) => {
+      if (isPlaying) void startSession();
+      else void endSession();
+    },
+    onLoopModeChange: (mode: MushafLoopMode) => {
+      if (mode === 'off') return;
+      setSessionLoopCounts(prev => {
+        if (mode === 'track') return { ...prev, ayah: prev.ayah + 1 };
+        if (playbackMode === 'surah') return { ...prev, surah: prev.surah + 1 };
+        return { ...prev, range: prev.range + 1 };
+      });
+    },
+  };
+
+  // ──────────────────────────────────────────────
+  // Full-screen layout
+  // ──────────────────────────────────────────────
+  if (isFullScreen) {
+    return (
+      <div className="fixed inset-0 z-50 flex flex-col bg-[hsl(220,20%,4%)]">
+        {/* Top bar */}
+        <header className="flex items-center justify-between border-b border-white/[0.08] bg-black/40 px-4 py-2.5 backdrop-blur">
+          <div className="flex items-center gap-3">
+            <BookOpen className="h-5 w-5 text-cyan-300/60" />
+            <div>
+              <h1 className="text-sm font-headline font-semibold text-white">Mushaf</h1>
+              <p className="text-[11px] text-white/40">Full Quran &middot; Uthmani Script</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 text-[11px] text-white/50">
+              <ListChecks className="h-3.5 w-3.5 text-cyan-200/60" />
+              Due: {dashboard.dueReviews.length}
+            </div>
+            {offlineQueueCount > 0 && (
+              <span className="inline-flex items-center gap-1 rounded-md border border-amber-300/30 bg-amber-400/10 px-2 py-0.5 text-[11px] text-amber-100">
+                <AlertCircle className="h-3 w-3" />Offline: {offlineQueueCount}
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={() => setShowSidebar(prev => !prev)}
+              className="rounded-lg border border-white/10 px-3 py-1.5 text-xs text-white/70 transition hover:bg-white/5"
+            >
+              {showSidebar ? 'Hide Panel' : 'Tools'}
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-lg border border-white/10 p-2 text-white/70 transition hover:bg-white/5"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        </header>
+
+        {/* Main content */}
+        <div className="flex flex-1 overflow-hidden">
+          {/* Mushaf area */}
+          <div className="flex-1 overflow-hidden flex flex-col px-4 py-3 lg:px-8">
+            <MushafToolbar
+              viewMode={viewMode}
+              playbackMode={playbackMode}
+              options={options}
+              position={position}
+              onViewModeChange={async nextMode => {
+                setViewMode(nextMode);
+                await onSaveSettings({ mushaf_view_mode: nextMode });
+              }}
+              onOptionsChange={async nextOptions => {
+                setOptions(nextOptions);
+                await onSaveSettings({
+                  mushaf_tajweed_enabled: nextOptions.tajweedEnabled,
+                  mushaf_follow_playback_enabled: nextOptions.followPlayback,
+                });
+              }}
+              onJumpToPage={page => {
+                const targetPage = clamp(page, 1, 604);
+                setViewMode('page');
+                setPosition(prev => ({ ...prev, page: targetPage }));
+              }}
+              onJumpToJuz={juz => {
+                const firstSurah = getSurahsByJuz(clamp(juz, 1, 30))[0];
+                if (!firstSurah) return;
+                setViewMode('ayah');
+                setPosition(prev => ({ ...prev, surah: firstSurah.number, ayah: 1, page: findMostRelevantPageForSurah(firstSurah.number) }));
+              }}
+              onReset={() => {
+                setViewMode('page');
+                setPosition(initialPosition);
+                setSelectedReciterId(DEFAULT_RECITER_ID);
+                setPlaybackMode('single_ayah');
+                setPlaybackRate(1);
+                setOptions({ tajweedEnabled: true, followPlayback: true });
+                setRange(null);
+                setSelection({ activeAyah: null, range: null });
+              }}
+            />
+
+            <div className="flex-1 overflow-hidden mt-3">
+              <MushafReader
+                viewMode={viewMode}
+                position={position}
+                options={options}
+                activePlaybackAyah={activePlaybackAyah}
+                scrollTop={viewMode === 'page' ? scrollState.page : scrollState.ayah}
+                scrollRestoreKey={viewMode}
+                onPositionChange={setPosition}
+                onPlayAyah={handlePlayAyah}
+                onRangeChange={setRange}
+                onSelectionChange={setSelection}
+                onScrollPositionChange={next => setScrollState(prev => viewMode === 'page' ? { ...prev, page: next } : { ...prev, ayah: next })}
+              />
+            </div>
+          </div>
+
+          {/* Sidebar panel */}
+          {showSidebar && (
+            <aside className="w-80 border-l border-white/[0.08] bg-black/20 overflow-y-auto p-4 space-y-4 hidden lg:block">
+              <ReciterSelector reciters={QURAN_RECITER_CATALOG} selectedReciterId={selectedReciter.id} onReciterChange={handleReciterChange} />
+
+              {/* Quick actions */}
+              <div className="space-y-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
+                <p className="text-xs uppercase tracking-[0.16em] text-white/40">Quick Actions</p>
+                <p className="text-xs text-white/55">{selection.activeAyah ? `${selection.activeAyah.surah}:${selection.activeAyah.ayah}` : 'Select an ayah'}</p>
+                {selection.activeAyah ? (
+                  <>
+                    <button type="button" onClick={handleEnqueueReview} className="w-full rounded-lg border border-cyan-300/40 bg-cyan-400/10 px-3 py-1.5 text-xs text-cyan-100">
+                      Add to Due Reviews
+                    </button>
+                    <div className="flex flex-wrap gap-1.5">
+                      {MISTAKE_TYPES.map(type => (
+                        <button key={type} type="button" onClick={() => handleLogMistake(type)} className="rounded-md border border-white/15 px-2 py-1 text-[11px] text-white/80 transition hover:border-amber-300/40 hover:text-amber-100">
+                          {MISTAKE_LABELS[type]}
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <p className="text-[11px] text-white/40">Tap an ayah to log mistakes or add reviews.</p>
+                )}
+              </div>
+
+              {/* Weak ayat */}
+              <div className="space-y-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
+                <p className="inline-flex items-center gap-1 text-xs uppercase tracking-[0.16em] text-white/40">
+                  <Flame className="h-3.5 w-3.5 text-amber-300/80" />Weak Ayat
+                </p>
+                {!dashboard.weakAyat.length && !loadingDashboard && <p className="text-[11px] text-white/40">No weak ayat yet.</p>}
+                {dashboard.weakAyat.length > 0 && (
+                  <div className="space-y-2">
+                    <div className="rounded-md border border-white/10 bg-black/15 p-2">
+                      <p className="text-[10px] uppercase tracking-[0.12em] text-white/45">Today</p>
+                      {weakToday.length ? weakToday.map(item => <p key={`t-${item.verse_key}`} className="text-xs text-white/80">{item.verse_key}</p>) : <p className="text-[11px] text-white/40">None today.</p>}
+                    </div>
+                    <div className="rounded-md border border-white/10 bg-black/15 p-2">
+                      <p className="text-[10px] uppercase tracking-[0.12em] text-white/45">Most Confused</p>
+                      {weakMostConfused.length ? weakMostConfused.map(item => <p key={`c-${item.verse_key}`} className="text-xs text-white/80">{item.verse_key}</p>) : <p className="text-[11px] text-white/40">No data.</p>}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Due reviews */}
+              <div className="space-y-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
+                <p className="inline-flex items-center gap-1 text-xs uppercase tracking-[0.16em] text-white/40">
+                  <TrendingUp className="h-3.5 w-3.5 text-cyan-300/90" />Due Reviews
+                </p>
+                {dashboard.dueReviews.slice(0, 4).map(card => (
+                  <div key={card.id} className="rounded-md border border-white/10 bg-black/15 p-2">
+                    <p className="text-xs text-white/80">{card.surah_number}:{card.start_ayah}-{card.end_ayah}</p>
+                    <div className="mt-1 flex gap-1">
+                      {[0, 1, 2, 3, 4, 5].map(grade => (
+                        <button key={`${card.id}-${grade}`} type="button" onClick={() => handleGradeReview(card.id, grade)} className="rounded border border-white/15 px-1.5 py-0.5 text-[10px] text-white/75 hover:border-cyan-300/45 hover:text-cyan-100">
+                          {grade}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+                {!dashboard.dueReviews.length && <p className="text-[11px] text-white/40">Nothing due.</p>}
+              </div>
+
+              {/* Confidence slider */}
+              <div className="space-y-1 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
+                <p className="text-xs uppercase tracking-[0.16em] text-white/40">Session Confidence</p>
+                <div className="flex items-center gap-2">
+                  <input type="range" min={0} max={100} step={5} value={sessionConfidence} onChange={e => setSessionConfidence(Number(e.target.value))} className="w-full accent-cyan-300" />
+                  <p className="w-8 text-right text-xs text-cyan-100">{sessionConfidence}</p>
+                </div>
+              </div>
+            </aside>
+          )}
+        </div>
+
+        {/* Floating playback bar */}
+        <div className="border-t border-white/[0.08] bg-black/60 backdrop-blur px-4 py-2.5">
+          <PlaybackControls {...playbackControlsProps} />
+        </div>
+      </div>
+    );
+  }
+
+  // ──────────────────────────────────────────────
+  // Compact card layout (for Nur dashboard grid)
+  // ──────────────────────────────────────────────
   return (
-    <div className="glass-panel space-y-4 p-4 pb-24 text-white md:p-6 md:pb-6">
-      <div className="flex flex-wrap items-start justify-between gap-3">
+    <div className="glass-panel space-y-4 p-4 text-white md:p-6">
+      <div className="flex items-center justify-between">
         <div>
           <p className="eyebrow text-cyan-300/60">Read & Listen</p>
-          <h3 className="mt-1 text-lg font-headline font-semibold">Native Mushaf & Reciters</h3>
+          <h3 className="mt-1 text-lg font-headline font-semibold">Mushaf & Reciters</h3>
         </div>
         <div className="flex items-center gap-2 text-xs text-white/60">
-          <span className="inline-flex items-center gap-1 rounded-md border border-white/10 bg-black/20 px-2 py-1"><ListChecks className="h-3.5 w-3.5 text-cyan-200/80" />Due: {dashboard.dueReviews.length}</span>
-          {offlineQueueCount > 0 && <span className="inline-flex items-center gap-1 rounded-md border border-amber-300/30 bg-amber-400/10 px-2 py-1 text-amber-100"><AlertCircle className="h-3.5 w-3.5" />Offline: {offlineQueueCount}</span>}
+          <span className="inline-flex items-center gap-1 rounded-md border border-white/10 bg-black/20 px-2 py-1">
+            <ListChecks className="h-3.5 w-3.5 text-cyan-200/80" />Due: {dashboard.dueReviews.length}
+          </span>
         </div>
       </div>
 
-      <MushafToolbar
-        viewMode={viewMode}
-        playbackMode={playbackMode}
-        options={options}
-        position={position}
-        onViewModeChange={async nextMode => {
-          setViewMode(nextMode);
-          await onSaveSettings({ mushaf_view_mode: nextMode });
-        }}
-        onOptionsChange={async nextOptions => {
-          setOptions(nextOptions);
-          await onSaveSettings({
-            mushaf_tajweed_enabled: nextOptions.tajweedEnabled,
-            mushaf_mutashabihat_enabled: nextOptions.mutashabihatEnabled,
-            mushaf_follow_playback_enabled: nextOptions.followPlayback,
-          });
-        }}
-        onJumpToPage={page => {
-          const targetPage = clamp(page, 1, 604);
-          const firstAyah = getAyahsForPage(targetPage)[0];
-          setViewMode('page');
-          setPosition(prev => ({ ...prev, page: targetPage, surah: firstAyah?.surah ?? prev.surah, ayah: firstAyah?.ayah ?? prev.ayah }));
-        }}
-        onJumpToJuz={juz => {
-          const firstSurah = getSurahsByJuz(clamp(juz, 1, 30))[0];
-          if (!firstSurah) return;
-          setViewMode('ayah');
-          setPosition(prev => ({ ...prev, surah: firstSurah.number, ayah: 1, page: findMostRelevantPageForSurah(firstSurah.number) }));
-        }}
-        onReset={() => {
-          setViewMode('page');
-          setPosition(initialPosition);
-          setSelectedReciterId(DEFAULT_RECITER_ID);
-          setPlaybackMode('single_ayah');
-          setPlaybackRate(1);
-          setOptions({ tajweedEnabled: true, mutashabihatEnabled: false, followPlayback: true });
-          setRange(null);
-          setSelection({ activeAyah: null, range: null });
-        }}
-      />
-
-      <MushafReader
-        viewMode={viewMode}
-        position={position}
-        options={options}
-        activePlaybackAyah={activePlaybackAyah}
-        scrollTop={viewMode === 'page' ? scrollState.page : scrollState.ayah}
-        scrollRestoreKey={viewMode}
-        onPositionChange={setPosition}
-        onPlayAyah={handlePlayAyah}
-        onRangeChange={setRange}
-        onSelectionChange={setSelection}
-        onScrollPositionChange={next => setScrollState(prev => viewMode === 'page' ? { ...prev, page: next } : { ...prev, ayah: next })}
-      />
+      <p className="text-xs text-white/50">
+        {viewMode === 'page' ? `Page ${position.page}` : `Surah ${position.surah}`} &middot; {selectedReciter.displayName}
+      </p>
 
       <ReciterSelector reciters={QURAN_RECITER_CATALOG} selectedReciterId={selectedReciter.id} onReciterChange={handleReciterChange} />
 
-      <div className="space-y-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
-        <div className="flex items-center justify-between">
-          <p className="text-xs uppercase tracking-[0.16em] text-white/40">Ayah Quick Actions</p>
-          <p className="text-xs text-white/55">{selection.activeAyah ? `${selection.activeAyah.surah}:${selection.activeAyah.ayah}` : 'Select an ayah'}</p>
+      {/* Stats grid */}
+      <div className="grid grid-cols-2 gap-2">
+        <div className="rounded-md border border-white/10 bg-black/15 p-2">
+          <p className="text-[11px] text-white/45">Weekly</p>
+          <p className="text-sm font-semibold text-white">{dashboard.stats.weekly_sessions} sessions</p>
         </div>
-        {selection.activeAyah ? (
-          <>
-            <button
-              type="button"
-              onClick={handleEnqueueReview}
-              className="rounded-lg border border-cyan-300/40 bg-cyan-400/10 px-3 py-1.5 text-xs text-cyan-100"
-            >
-              Add to Due Reviews
-            </button>
-            <div className="flex flex-wrap gap-2">
-              {MISTAKE_TYPES.map(type => (
-                <button
-                  key={type}
-                  type="button"
-                  onClick={() => handleLogMistake(type)}
-                  className="rounded-md border border-white/15 px-2 py-1 text-[11px] text-white/80 transition hover:border-amber-300/40 hover:text-amber-100"
-                >
-                  {MISTAKE_LABELS[type]}
-                </button>
-              ))}
-            </div>
-          </>
-        ) : (
-          <p className="text-xs text-white/50">Tap an ayah, then log a mistake type or enqueue spaced review.</p>
-        )}
-      </div>
-
-      <div className="grid gap-4 xl:grid-cols-2">
-        <div className="space-y-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
-          <p className="inline-flex items-center gap-1 text-xs uppercase tracking-[0.16em] text-white/40">
-            <Flame className="h-3.5 w-3.5 text-amber-300/80" />
-            Weak Ayat
-          </p>
-          {loadingDashboard && <p className="text-xs text-white/45">Refreshing analytics...</p>}
-          {!dashboard.weakAyat.length && !loadingDashboard && <p className="text-xs text-white/50">No weak ayat yet. Mistake logs will populate this.</p>}
-          {dashboard.weakAyat.length > 0 && (
-            <div className="grid gap-2 sm:grid-cols-2">
-              <div className="rounded-md border border-white/10 bg-black/15 p-2">
-                <p className="text-[11px] uppercase tracking-[0.12em] text-white/45">Today&apos;s Weak Ayat</p>
-                {weakToday.length ? weakToday.map(item => <p key={`today-${item.verse_key}`} className="mt-1 text-xs text-white/80">{item.verse_key}</p>) : <p className="mt-1 text-xs text-white/50">No events today.</p>}
-              </div>
-              <div className="rounded-md border border-white/10 bg-black/15 p-2">
-                <p className="text-[11px] uppercase tracking-[0.12em] text-white/45">Weak Ayat in Juz 30</p>
-                {weakJuz30.length ? weakJuz30.map(item => <p key={`juz30-${item.verse_key}`} className="mt-1 text-xs text-white/80">{item.verse_key}</p>) : <p className="mt-1 text-xs text-white/50">No Juz 30 weak ayat yet.</p>}
-              </div>
-              <div className="rounded-md border border-white/10 bg-black/15 p-2">
-                <p className="text-[11px] uppercase tracking-[0.12em] text-white/45">Most Confused</p>
-                {weakMostConfused.length ? weakMostConfused.map(item => <p key={`confused-${item.verse_key}`} className="mt-1 text-xs text-white/80">{item.verse_key}</p>) : <p className="mt-1 text-xs text-white/50">No confusion data.</p>}
-              </div>
-              <div className="rounded-md border border-white/10 bg-black/15 p-2">
-                <p className="text-[11px] uppercase tracking-[0.12em] text-white/45">Last 7 Days Mistakes</p>
-                {weakLast7.length ? weakLast7.map(item => <p key={`w7-${item.verse_key}`} className="mt-1 text-xs text-white/80">{item.verse_key}</p>) : <p className="mt-1 text-xs text-white/50">No recent mistakes.</p>}
-              </div>
-            </div>
-          )}
-        </div>
-        <div className="space-y-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
-          <p className="inline-flex items-center gap-1 text-xs uppercase tracking-[0.16em] text-white/40">
-            <TrendingUp className="h-3.5 w-3.5 text-cyan-300/90" />
-            Due Reviews & Stats
-          </p>
-          <div className="grid grid-cols-2 gap-2">
-            <div className="rounded-md border border-white/10 bg-black/15 p-2">
-              <p className="text-[11px] text-white/45">Weekly sessions</p>
-              <p className="text-sm font-semibold text-white">{dashboard.stats.weekly_sessions}</p>
-            </div>
-            <div className="rounded-md border border-white/10 bg-black/15 p-2">
-              <p className="text-[11px] text-white/45">Monthly minutes</p>
-              <p className="text-sm font-semibold text-white">{dashboard.stats.monthly_minutes}</p>
-            </div>
-            <div className="rounded-md border border-white/10 bg-black/15 p-2">
-              <p className="text-[11px] text-white/45">Streak</p>
-              <p className="text-sm font-semibold text-white">{dashboard.stats.streak_days}d</p>
-            </div>
-            <div className="rounded-md border border-white/10 bg-black/15 p-2">
-              <p className="text-[11px] text-white/45">Trend</p>
-              <p className={`text-sm font-semibold ${dashboard.stats.improvement_trend >= 0 ? 'text-emerald-300' : 'text-rose-300'}`}>{dashboard.stats.improvement_trend}%</p>
-            </div>
-          </div>
-          <div className="space-y-2">
-            {dashboard.dueReviews.slice(0, 6).map(card => (
-              <div key={card.id} className="rounded-md border border-white/10 bg-black/15 p-2">
-                <p className="text-xs text-white/80">{card.surah_number}:{card.start_ayah}-{card.end_ayah}</p>
-                <div className="mt-1 flex flex-wrap gap-1">
-                  {[0, 1, 2, 3, 4, 5].map(grade => (
-                    <button
-                      key={`${card.id}-${grade}`}
-                      type="button"
-                      onClick={() => handleGradeReview(card.id, grade)}
-                      className="rounded border border-white/15 px-1.5 py-0.5 text-[10px] text-white/75 hover:border-cyan-300/45 hover:text-cyan-100"
-                    >
-                      {grade}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ))}
-            {!dashboard.dueReviews.length && <p className="text-xs text-white/50">Nothing due today.</p>}
-          </div>
+        <div className="rounded-md border border-white/10 bg-black/15 p-2">
+          <p className="text-[11px] text-white/45">Streak</p>
+          <p className="text-sm font-semibold text-white">{dashboard.stats.streak_days}d</p>
         </div>
       </div>
 
-      <div className="space-y-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
-        <p className="text-xs uppercase tracking-[0.16em] text-white/40">Review Playlists</p>
-        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-          <select
-            value={playlistType}
-            onChange={event => setPlaylistType(event.target.value as typeof playlistType)}
-            className="rounded-lg border border-white/[0.1] bg-black/20 px-2 py-2 text-xs text-white outline-none"
-          >
-            <option value="weak_ayat">Weak Ayat Playlist</option>
-            <option value="juz">Juz Playlist</option>
-            <option value="custom_range">Custom Range Playlist</option>
-            <option value="mistake_replay">Mistake Replay Playlist</option>
-            <option value="taraweeh_prep">Taraweeh Prep Mode</option>
-          </select>
-          {playlistType === 'juz' ? (
-            <input
-              type="number"
-              min={1}
-              max={30}
-              value={playlistJuz}
-              onChange={event => setPlaylistJuz(clamp(Number(event.target.value), 1, 30))}
-              className="rounded-lg border border-white/[0.1] bg-black/20 px-2 py-2 text-xs text-white outline-none"
-            />
-          ) : (
-            <div className="rounded-lg border border-white/[0.1] bg-black/10 px-2 py-2 text-xs text-white/45">No Juz filter</div>
-          )}
-          {playlistType === 'custom_range' ? (
-            <div className="flex gap-1">
-              <input
-                type="number"
-                min={1}
-                max={114}
-                value={customRange.surah}
-                onChange={event => setCustomRange(prev => ({ ...prev, surah: clamp(Number(event.target.value), 1, 114) }))}
-                className="w-1/3 rounded-lg border border-white/[0.1] bg-black/20 px-2 py-2 text-xs text-white outline-none"
-              />
-              <input
-                type="number"
-                min={1}
-                value={customRange.startAyah}
-                onChange={event => setCustomRange(prev => ({ ...prev, startAyah: Math.max(Number(event.target.value), 1) }))}
-                className="w-1/3 rounded-lg border border-white/[0.1] bg-black/20 px-2 py-2 text-xs text-white outline-none"
-              />
-              <input
-                type="number"
-                min={1}
-                value={customRange.endAyah}
-                onChange={event => setCustomRange(prev => ({ ...prev, endAyah: Math.max(Number(event.target.value), prev.startAyah) }))}
-                className="w-1/3 rounded-lg border border-white/[0.1] bg-black/20 px-2 py-2 text-xs text-white outline-none"
-              />
-            </div>
-          ) : (
-            <div className="rounded-lg border border-white/[0.1] bg-black/10 px-2 py-2 text-xs text-white/45">No custom range</div>
-          )}
-          <button
-            type="button"
-            onClick={loadPlaylist}
-            disabled={!generatedPlaylist.length}
-            className={`rounded-lg border px-3 py-2 text-xs ${generatedPlaylist.length ? 'border-cyan-300/40 bg-cyan-400/10 text-cyan-100' : 'border-white/[0.1] bg-black/10 text-white/45'}`}
-          >
-            Load ({generatedPlaylist.length})
-          </button>
-        </div>
-      </div>
-
-      <div className="space-y-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
-        <p className="text-xs uppercase tracking-[0.16em] text-white/40">Session Confidence</p>
-        <div className="flex items-center gap-2">
-          <input
-            type="range"
-            min={0}
-            max={100}
-            step={5}
-            value={sessionConfidence}
-            onChange={event => setSessionConfidence(Number(event.target.value))}
-            className="w-full accent-cyan-300"
-          />
-          <p className="w-10 text-right text-xs text-cyan-100">{sessionConfidence}</p>
-        </div>
-      </div>
-
-      <div className="md:hidden fixed bottom-3 left-3 right-3 z-20 rounded-xl border border-cyan-400/20 bg-slate-950/95 p-3 backdrop-blur">
-        <PlaybackControls
-          playbackMode={playbackMode}
-          position={position}
-          selectedReciter={selectedReciter}
-          range={range}
-          pageAyahs={pageAyahs}
-          playlistAyahs={playlistAyahs}
-          playbackRate={playbackRate}
-          onPlaybackModeChange={setPlaybackMode}
-          onPlaybackRateChange={setPlaybackRate}
-          onActiveAyahChange={(surah, ayah) => {
-            const matched = getAyah(surah, ayah);
-            setActivePlaybackAyah({ surah, ayah });
-            setPosition(prev => ({ ...prev, surah, ayah, page: matched?.page ?? prev.page }));
-          }}
-          onPlayStateChange={isPlaying => {
-            if (isPlaying) void startSession();
-            else void endSession();
-          }}
-          onLoopModeChange={(mode: MushafLoopMode) => {
-            if (mode === 'off') return;
-            setSessionLoopCounts(prev => {
-              if (mode === 'track') return { ...prev, ayah: prev.ayah + 1 };
-              if (playbackMode === 'surah') return { ...prev, surah: prev.surah + 1 };
-              return { ...prev, range: prev.range + 1 };
-            });
-          }}
-        />
-      </div>
-
-      <div className="hidden md:block">
-        <PlaybackControls
-          playbackMode={playbackMode}
-          position={position}
-          selectedReciter={selectedReciter}
-          range={range}
-          pageAyahs={viewMode === 'page' ? pageAyahs : activeSurahAyahs.map(item => ({ surah: item.surah, ayah: item.ayah }))}
-          playlistAyahs={playlistAyahs}
-          playbackRate={playbackRate}
-          onPlaybackModeChange={setPlaybackMode}
-          onPlaybackRateChange={setPlaybackRate}
-          onActiveAyahChange={(surah, ayah) => {
-            const matched = getAyah(surah, ayah);
-            setActivePlaybackAyah({ surah, ayah });
-            setPosition(prev => ({ ...prev, surah, ayah, page: matched?.page ?? prev.page }));
-          }}
-          onPlayStateChange={isPlaying => {
-            if (isPlaying) void startSession();
-            else void endSession();
-          }}
-          onLoopModeChange={(mode: MushafLoopMode) => {
-            if (mode === 'off') return;
-            setSessionLoopCounts(prev => {
-              if (mode === 'track') return { ...prev, ayah: prev.ayah + 1 };
-              if (playbackMode === 'surah') return { ...prev, surah: prev.surah + 1 };
-              return { ...prev, range: prev.range + 1 };
-            });
-          }}
-        />
-      </div>
+      <PlaybackControls {...playbackControlsProps} />
     </div>
   );
 }

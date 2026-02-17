@@ -16,7 +16,6 @@ export type Reciter = QuranReciter;
 
 export type MushafReaderOptions = {
   tajweedEnabled: boolean;
-  mutashabihatEnabled: boolean;
   followPlayback: boolean;
 };
 

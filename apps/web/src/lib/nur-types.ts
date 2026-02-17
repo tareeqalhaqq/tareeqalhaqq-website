@@ -30,7 +30,6 @@ export type NurProfile = {
   selected_reciter_id: string | null;
   mushaf_view_mode: 'page' | 'ayah';
   mushaf_tajweed_enabled: boolean;
-  mushaf_mutashabihat_enabled: boolean;
   mushaf_follow_playback_enabled?: boolean;
   mushaf_playback_rate?: number;
   mushaf_last_surah?: number | null;
