@@ -46,23 +46,6 @@ export const DEFAULT_RECITER_ID: ReciterId = 'husary';
 
 const LEGACY_RECITER_ALIASES: Record<string, ReciterId> = {};
 
-function getNextAyah(surah: number, ayah: number): { surah: number; ayah: number } | null {
-  const currentSurah = getSurahByNumber(surah);
-  if (!currentSurah) {
-    return null;
-  }
-
-  if (ayah < currentSurah.verses) {
-    return { surah, ayah: ayah + 1 };
-  }
-
-  if (surah >= 114) {
-    return null;
-  }
-
-  return { surah: surah + 1, ayah: 1 };
-}
-
 function normalizeName(value: string): string {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, '');
 }
@@ -153,7 +136,12 @@ export function buildAudioQueue(
       return [toQueueItem(reciterId, position.surah, position.ayah)];
     }
 
-    return pageAyahs.map(item => toQueueItem(reciterId, item.surah, item.ayah));
+    // Start from the current position within the page and play through the rest
+    const startIndex = pageAyahs.findIndex(
+      item => item.surah === position.surah && item.ayah === position.ayah,
+    );
+    const sliced = startIndex > 0 ? pageAyahs.slice(startIndex) : pageAyahs;
+    return sliced.map(item => toQueueItem(reciterId, item.surah, item.ayah));
   }
 
   if (mode === 'playlist') {
@@ -229,17 +217,7 @@ export function createQuranAudioPlayer(audio: HTMLAudioElement, callbacks?: Qura
       return;
     }
 
-    const currentItem = queue[index];
-    if (queue.length === 1 && currentItem) {
-      const nextAyah = getNextAyah(currentItem.surah, currentItem.ayah);
-      if (nextAyah) {
-        queue = [toQueueItem(currentItem.reciterId, nextAyah.surah, nextAyah.ayah)];
-        index = 0;
-        await loadTrack();
-        return;
-      }
-    }
-
+    // Queue finished – stop playback. Don't auto-advance beyond the queue.
     emitTrackChange();
   };
 

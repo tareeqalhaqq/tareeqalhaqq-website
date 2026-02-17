@@ -1,6 +1,6 @@
 'use client';
 
-import { Gauge, Pause, Play, Repeat, SkipForward } from 'lucide-react';
+import { Pause, Play, Repeat, SkipForward } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { buildAudioQueue, createQuranAudioPlayer } from '@/lib/quran-audio';
 import type { AyahRange, MushafLoopMode, MushafPlaybackMode, MushafPosition, Reciter } from './types';
@@ -21,13 +21,17 @@ type PlaybackControlsProps = {
   autoPlayRequest?: number;
 };
 
-const playbackModes: { value: MushafPlaybackMode; label: string }[] = [
-  { value: 'single_ayah', label: 'Single Ayah' },
-  { value: 'ayah_range', label: 'Ayah Range' },
-  { value: 'surah', label: 'Surah' },
-  { value: 'page', label: 'Page' },
-  { value: 'playlist', label: 'Playlist' },
-];
+const PLAYBACK_MODE_LABELS: Record<MushafPlaybackMode, string> = {
+  single_ayah: 'Ayah',
+  ayah_range: 'Range',
+  surah: 'Surah',
+  page: 'Page',
+  playlist: 'Playlist',
+};
+
+const PLAYBACK_MODE_ORDER: MushafPlaybackMode[] = ['single_ayah', 'page', 'surah', 'ayah_range', 'playlist'];
+
+const SPEED_STEPS = [0.75, 0.85, 1.0, 1.15, 1.25];
 
 function clampRate(value: number) {
   return Number(Math.min(Math.max(value, 0.75), 1.25).toFixed(2));
@@ -161,7 +165,7 @@ export function PlaybackControls({
       playlistAyahs,
     });
     if (!queue.length) {
-      setPlaybackError('No ayat are available for this playback mode yet.');
+      setPlaybackError('No ayat available for this mode.');
       return;
     }
     await warmAudioCache(queue);
@@ -169,7 +173,7 @@ export function PlaybackControls({
       await player.playQueue(queue);
       setPlaybackError(null);
     } catch {
-      setPlaybackError('Unable to play audio right now. Try a different reciter or press play again.');
+      setPlaybackError('Unable to play audio. Try again.');
     }
   };
 
@@ -180,6 +184,7 @@ export function PlaybackControls({
     }
     void playQueue();
   }, [autoPlayRequest, player]);
+
   const togglePlayPause = async () => {
     if (!player) {
       return;
@@ -191,7 +196,7 @@ export function PlaybackControls({
           await player.play();
           setPlaybackError(null);
         } catch {
-          setPlaybackError('Playback was blocked by your browser. Press play again to retry.');
+          setPlaybackError('Playback blocked. Press play again.');
         }
       } else {
         await playQueue();
@@ -215,95 +220,94 @@ export function PlaybackControls({
     setLoopMode(current => (current === 'off' ? queueLoop : 'off'));
   };
 
-  const effectiveLoopLabel = loopMode === 'off'
-    ? 'Loop Off'
-    : loopMode === 'track'
-      ? 'Loop Ayah'
-      : playbackMode === 'surah'
-        ? 'Loop Surah'
-        : playbackMode === 'ayah_range'
-          ? 'Loop Range'
-          : 'Loop Queue';
-
-  const handleSpeedChange = (nextRate: number) => {
-    const clamped = clampRate(nextRate);
-    onPlaybackRateChange(clamped);
-    player?.setPlaybackRate(clamped);
+  const cycleSpeed = () => {
+    const currentIndex = SPEED_STEPS.findIndex(s => Math.abs(s - playbackRate) < 0.01);
+    const nextIndex = (currentIndex + 1) % SPEED_STEPS.length;
+    const nextRate = clampRate(SPEED_STEPS[nextIndex]);
+    onPlaybackRateChange(nextRate);
+    player?.setPlaybackRate(nextRate);
   };
 
+  const cyclePlaybackMode = () => {
+    const currentIndex = PLAYBACK_MODE_ORDER.indexOf(playbackMode);
+    const nextIndex = (currentIndex + 1) % PLAYBACK_MODE_ORDER.length;
+    const nextMode = PLAYBACK_MODE_ORDER[nextIndex];
+    // Skip playlist if empty
+    if (nextMode === 'playlist' && playlistAyahs.length === 0) {
+      onPlaybackModeChange(PLAYBACK_MODE_ORDER[0]);
+      return;
+    }
+    onPlaybackModeChange(nextMode);
+  };
+
+  const trackLabel = `${position.surah}:${position.ayah}`;
+
   return (
-    <div className="space-y-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
-      <p className="text-xs uppercase tracking-[0.16em] text-white/40">Playback</p>
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-        {playbackModes.map(mode => (
-          <button
-            key={mode.value}
-            type="button"
-            onClick={() => onPlaybackModeChange(mode.value)}
-            disabled={mode.value === 'playlist' && playlistAyahs.length === 0}
-            className={`rounded-lg border px-2 py-2 text-xs transition ${
-              playbackMode === mode.value
-                ? 'border-cyan-300/40 bg-cyan-400/10 text-cyan-100'
-                : 'border-white/[0.1] bg-black/10 text-white/70 hover:border-white/[0.2]'
-            } ${mode.value === 'playlist' && playlistAyahs.length === 0 ? 'cursor-not-allowed opacity-40' : ''}`}
-            title={mode.value === 'playlist' && playlistAyahs.length === 0 ? 'Load a playlist first' : undefined}
-          >
-            {mode.label}
-          </button>
-        ))}
+    <div className="flex items-center gap-1.5 px-2 py-1.5">
+      {/* Play / Pause */}
+      <button
+        type="button"
+        onClick={togglePlayPause}
+        className="inline-flex items-center justify-center rounded-full border border-cyan-300/40 bg-cyan-400/10 p-2 text-cyan-100 transition hover:bg-cyan-400/20"
+        aria-label={isPlaying ? 'Pause' : 'Play'}
+      >
+        {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+      </button>
+
+      {/* Track info */}
+      <div className="flex-1 min-w-0 px-1.5">
+        <p className="text-[11px] text-white/80 truncate font-sans">
+          <span className="text-white/50">{PLAYBACK_MODE_LABELS[playbackMode]}</span>
+          {' '}&middot;{' '}
+          <span className="tabular-nums">{trackLabel}</span>
+        </p>
+        {playbackError && <p className="text-[10px] text-rose-300/80 truncate">{playbackError}</p>}
       </div>
 
-      <div className="space-y-1 rounded-lg border border-white/[0.08] bg-black/15 px-3 py-2">
-        <div className="flex items-center justify-between">
-          <p className="inline-flex items-center gap-1 text-[11px] uppercase tracking-[0.16em] text-white/45">
-            <Gauge className="h-3.5 w-3.5" />
-            Speed
-          </p>
-          <p className="text-xs text-cyan-100">{playbackRate.toFixed(2)}x</p>
-        </div>
-        <input
-          type="range"
-          min={0.75}
-          max={1.25}
-          step={0.05}
-          value={playbackRate}
-          onChange={event => handleSpeedChange(Number(event.target.value))}
-          className="w-full accent-cyan-300"
-        />
-      </div>
+      {/* Mode cycle button */}
+      <button
+        type="button"
+        onClick={cyclePlaybackMode}
+        className="rounded-md border border-white/10 px-2 py-1 text-[10px] text-white/60 transition hover:border-white/20 hover:text-white/80"
+        title={`Mode: ${PLAYBACK_MODE_LABELS[playbackMode]}`}
+      >
+        {PLAYBACK_MODE_LABELS[playbackMode]}
+      </button>
 
-      <div className="flex flex-wrap items-center gap-2">
-        <button
-          type="button"
-          onClick={togglePlayPause}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-cyan-300/40 bg-cyan-400/10 px-3 py-2 text-xs text-cyan-100"
-        >
-          {isPlaying ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
-          {isPlaying ? 'Pause' : 'Play'}
-        </button>
-        <button
-          type="button"
-          onClick={handleNext}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-white/[0.1] bg-black/10 px-3 py-2 text-xs text-white/80"
-        >
-          <SkipForward className="h-3.5 w-3.5" />
-          Next
-        </button>
-        <button
-          type="button"
-          onClick={handleRepeat}
-          className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs ${
-            loopMode !== 'off'
-              ? 'border-cyan-300/40 bg-cyan-400/10 text-cyan-100'
-              : 'border-white/[0.1] bg-black/10 text-white/80'
-          }`}
-        >
-          <Repeat className="h-3.5 w-3.5" />
-          {effectiveLoopLabel}
-        </button>
-      </div>
+      {/* Speed button */}
+      <button
+        type="button"
+        onClick={cycleSpeed}
+        className="rounded-md border border-white/10 px-1.5 py-1 text-[10px] tabular-nums text-white/60 transition hover:border-white/20 hover:text-white/80"
+        title="Playback speed"
+      >
+        {playbackRate.toFixed(2)}x
+      </button>
 
-      {playbackError && <p className="text-[11px] text-rose-200/80">{playbackError}</p>}
+      {/* Loop */}
+      <button
+        type="button"
+        onClick={handleRepeat}
+        className={`rounded-md border p-1.5 transition ${
+          loopMode !== 'off'
+            ? 'border-cyan-300/40 bg-cyan-400/10 text-cyan-100'
+            : 'border-white/10 text-white/50 hover:border-white/20 hover:text-white/70'
+        }`}
+        aria-label={loopMode === 'off' ? 'Enable loop' : 'Disable loop'}
+        title={loopMode === 'off' ? 'Loop off' : loopMode === 'track' ? 'Loop ayah' : 'Loop queue'}
+      >
+        <Repeat className="h-3.5 w-3.5" />
+      </button>
+
+      {/* Next */}
+      <button
+        type="button"
+        onClick={handleNext}
+        className="rounded-md border border-white/10 p-1.5 text-white/50 transition hover:border-white/20 hover:text-white/70"
+        aria-label="Next"
+      >
+        <SkipForward className="h-3.5 w-3.5" />
+      </button>
 
       <audio ref={audioRef} preload="none" className="hidden" />
     </div>

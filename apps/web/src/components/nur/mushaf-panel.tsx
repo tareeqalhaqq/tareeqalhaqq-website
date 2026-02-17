@@ -96,7 +96,7 @@ export function MushafPanel({ profile, onSaveSettings, isFullScreen = false, onC
   const [viewMode, setViewMode] = useState<MushafViewMode>(profile.mushaf_view_mode ?? 'page');
   const [position, setPosition] = useState<MushafPosition>(initialPosition);
   const [selectedReciterId, setSelectedReciterId] = useState<ReciterId>(getReciterById(profile.selected_reciter_id).id);
-  const [playbackMode, setPlaybackMode] = useState<MushafPlaybackMode>('single_ayah');
+  const [playbackMode, setPlaybackMode] = useState<MushafPlaybackMode>((profile.mushaf_view_mode ?? 'page') === 'page' ? 'page' : 'single_ayah');
   const [playbackRate, setPlaybackRate] = useState(Math.min(Math.max(profile.mushaf_playback_rate ?? 1, 0.75), 1.25));
   const [options, setOptions] = useState<MushafReaderOptions>({
     tajweedEnabled: profile.mushaf_tajweed_enabled ?? true,
@@ -379,7 +379,9 @@ export function MushafPanel({ profile, onSaveSettings, isFullScreen = false, onC
   const handlePlayAyah = (surah: number, ayah: number) => {
     const matched = getAyah(surah, ayah);
     setPosition(prev => ({ ...prev, surah, ayah, page: matched?.page ?? prev.page }));
-    setPlaybackMode('single_ayah');
+    // Don't override the playback mode – respect the user's current selection.
+    // If mode is 'page', the queue will build from the full page.
+    // If mode is 'single_ayah', only that verse plays.
     setRange(null);
     setActivePlaybackAyah({ surah, ayah });
     setAutoPlayRequest(prev => prev + 1);
@@ -551,12 +553,7 @@ export function MushafPanel({ profile, onSaveSettings, isFullScreen = false, onC
         {/* Main content */}
         <div className="flex flex-1 overflow-hidden">
           {/* Mushaf area */}
-          <div className="flex-1 overflow-hidden flex flex-col px-2 py-2 sm:px-4 lg:px-6">
-            <div className="mb-2 flex items-center justify-between rounded-lg border border-white/[0.08] bg-black/20 px-3 py-2 text-xs text-white/60">
-              <p>{viewMode === 'page' ? `Page ${position.page}` : `Surah ${position.surah}, Ayah ${position.ayah}`}</p>
-              <p>{options.pagePairMode === 'spread' ? 'Two-page mushaf' : 'Single-page mushaf'}</p>
-            </div>
-
+          <div className="flex-1 overflow-hidden flex flex-col px-2 py-1 sm:px-4 lg:px-6">
             <div className="flex-1 overflow-hidden">
               <MushafReader
                 viewMode={viewMode}
@@ -718,8 +715,8 @@ export function MushafPanel({ profile, onSaveSettings, isFullScreen = false, onC
           )}
         </div>
 
-        {/* Floating playback bar */}
-        <div className="border-t border-white/[0.08] bg-black/60 backdrop-blur px-4 py-2.5">
+        {/* Compact playback bar */}
+        <div className="border-t border-white/[0.08] bg-black/60 backdrop-blur px-1 py-0.5">
           <PlaybackControls {...playbackControlsProps} />
         </div>
       </div>

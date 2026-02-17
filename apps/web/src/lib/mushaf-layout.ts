@@ -11,7 +11,7 @@ type LineSegment = {
   text?: string;
 };
 
-export type MushafLayoutLine = { index: number; segments: LineSegment[] };
+export type MushafLayoutLine = { index: number; segments: LineSegment[]; isLast: boolean };
 
 const PAGES = new Map<number, LayoutPage>((layoutData.pages as LayoutPage[]).map(page => [page.page, page]));
 
@@ -34,7 +34,7 @@ export function buildMushafLayoutLines(page: number, verses: QuranVerse[]): Mush
     ayah: verse.verse_number,
   }]));
 
-  const lines: MushafLayoutLine[] = pageLayout.lineWidths.map((_, index) => ({ index, segments: [] }));
+  const lines: MushafLayoutLine[] = pageLayout.lineWidths.map((_, index) => ({ index, segments: [], isLast: false }));
   let tokenIndex = 0;
 
   for (let lineIndex = 0; lineIndex < pageLayout.lineWidths.length; lineIndex += 1) {
@@ -53,6 +53,14 @@ export function buildMushafLayoutLines(page: number, verses: QuranVerse[]): Mush
 
   if (tokenIndex < tokens.length) {
     lines[lines.length - 1].segments.push(...tokens.slice(tokenIndex));
+  }
+
+  // Mark the last line that actually has content as the "last" line (for centered styling)
+  for (let i = lines.length - 1; i >= 0; i--) {
+    if (lines[i].segments.length > 0) {
+      lines[i].isLast = true;
+      break;
+    }
   }
 
   return lines;
