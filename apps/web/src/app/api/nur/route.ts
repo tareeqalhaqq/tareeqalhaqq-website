@@ -79,7 +79,6 @@ export async function POST(request: Request) {
         selected_reciter_id: DEFAULT_RECITER_ID,
         mushaf_view_mode: 'page',
         mushaf_tajweed_enabled: true,
-        mushaf_mutashabihat_enabled: false,
         setup_completed: true,
       })
       .select()

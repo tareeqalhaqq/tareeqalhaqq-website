@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300..800&family=Sora:wght@400..800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300..800&family=Sora:wght@400..800&family=Amiri+Quran&family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -187,6 +187,137 @@
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
+}
+
+/* ── Mushaf page styles ── */
+.mushaf-page {
+  font-family: "Amiri Quran", "Noto Naskh Arabic", "Amiri", serif;
+  direction: rtl;
+  text-align: justify;
+  line-height: 2.4;
+  font-size: 1.65rem;
+  color: #1a1a1a;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.mushaf-page-dark {
+  color: #e8e0d4;
+}
+
+.mushaf-frame {
+  background: linear-gradient(135deg, #faf6ef 0%, #f5edd8 50%, #faf6ef 100%);
+  border: 2px solid #d4c5a0;
+  box-shadow:
+    inset 0 0 40px rgba(180, 160, 120, 0.12),
+    0 4px 20px rgba(0, 0, 0, 0.15),
+    0 0 0 1px rgba(180, 160, 120, 0.3);
+  position: relative;
+}
+
+.mushaf-frame-dark {
+  background: linear-gradient(135deg, #1a1915 0%, #1f1d18 50%, #1a1915 100%);
+  border-color: #3d3828;
+  box-shadow:
+    inset 0 0 40px rgba(40, 35, 20, 0.3),
+    0 4px 20px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(60, 50, 30, 0.4);
+}
+
+.mushaf-frame::before,
+.mushaf-frame::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+}
+
+.mushaf-frame::before {
+  inset: 6px;
+  border: 1px solid rgba(180, 160, 120, 0.25);
+  border-radius: 2px;
+}
+
+.mushaf-frame-dark::before {
+  border-color: rgba(80, 70, 50, 0.35);
+}
+
+.mushaf-frame::after {
+  inset: 10px;
+  border: 1px solid rgba(180, 160, 120, 0.12);
+  border-radius: 2px;
+}
+
+.mushaf-frame-dark::after {
+  border-color: rgba(80, 70, 50, 0.2);
+}
+
+.mushaf-ayah-marker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2em;
+  height: 2em;
+  font-size: 0.48em;
+  font-family: "Noto Naskh Arabic", serif;
+  color: #7a6b40;
+  position: relative;
+  vertical-align: middle;
+  margin: 0 0.15em;
+}
+
+.mushaf-ayah-marker-dark {
+  color: #b8a870;
+}
+
+.mushaf-ayah-marker::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+  opacity: 0.6;
+}
+
+.mushaf-surah-header {
+  text-align: center;
+  padding: 0.75rem 2rem;
+  margin: 0.5rem 0;
+  border-top: 1px solid rgba(180, 160, 120, 0.3);
+  border-bottom: 1px solid rgba(180, 160, 120, 0.3);
+  background: linear-gradient(90deg, transparent, rgba(180, 160, 120, 0.08), transparent);
+  font-family: "Amiri Quran", "Noto Naskh Arabic", serif;
+  font-size: 1.1rem;
+  color: #6b5c35;
+}
+
+.mushaf-surah-header-dark {
+  border-color: rgba(80, 70, 50, 0.4);
+  background: linear-gradient(90deg, transparent, rgba(80, 70, 50, 0.15), transparent);
+  color: #b8a870;
+}
+
+.mushaf-bismillah {
+  text-align: center;
+  font-family: "Amiri Quran", "Noto Naskh Arabic", serif;
+  font-size: 1.35rem;
+  color: #4a3f25;
+  padding: 0.4rem 0;
+  margin-bottom: 0.25rem;
+}
+
+.mushaf-bismillah-dark {
+  color: #c8b880;
+}
+
+.mushaf-highlight-active {
+  background: rgba(56, 189, 248, 0.12);
+  border-radius: 4px;
+  padding: 2px 4px;
+  transition: background 0.3s ease;
+}
+
+.mushaf-highlight-active-dark {
+  background: rgba(56, 189, 248, 0.18);
 }
 
 /* Auth page gradient */

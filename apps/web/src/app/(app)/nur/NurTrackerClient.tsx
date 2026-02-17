@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { BookOpen, RefreshCw, Loader2 } from 'lucide-react';
+import { BookOpen, RefreshCw, Loader2, Maximize2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuthProfile } from '@/hooks/use-auth-profile';
 import { SetupWizard } from '@/components/nur/setup-wizard';
@@ -32,6 +32,7 @@ export default function NurTrackerClient() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [mushafOpen, setMushafOpen] = useState(false);
 
   const [state, setState] = useState<NurState>({
     profile: null,
@@ -274,6 +275,18 @@ export default function NurTrackerClient() {
   // Main tracker view
   const selectedLog = state.logs.find(l => l.date === selectedDate) ?? null;
 
+  // Full-screen mushaf overlay
+  if (mushafOpen) {
+    return (
+      <NativeMushafPanel
+        profile={state.profile}
+        onSaveSettings={handleSaveSettings}
+        isFullScreen
+        onClose={() => setMushafOpen(false)}
+      />
+    );
+  }
+
   return (
     <section className="page-section">
       <div className="page-section__inner space-y-6">
@@ -289,6 +302,15 @@ export default function NurTrackerClient() {
             </p>
           </div>
           <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setMushafOpen(true)}
+              className="text-cyan-300/70 hover:text-cyan-200"
+            >
+              <Maximize2 className="mr-1.5 h-3.5 w-3.5" />
+              Open Mushaf
+            </Button>
             <Button
               variant="ghost"
               size="sm"
@@ -348,10 +370,20 @@ export default function NurTrackerClient() {
             goals={state.goals}
             onApplySuggestion={handleApplySuggestion}
           />
-          <NativeMushafPanel
-            profile={state.profile}
-            onSaveSettings={handleSaveSettings}
-          />
+          <div className="glass-panel space-y-4 p-4 text-white md:p-6 cursor-pointer hover:border-cyan-300/20 transition" onClick={() => setMushafOpen(true)}>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="eyebrow text-cyan-300/60">Read & Listen</p>
+                <h3 className="mt-1 text-lg font-headline font-semibold">Open Mushaf</h3>
+              </div>
+              <Maximize2 className="h-5 w-5 text-cyan-300/60" />
+            </div>
+            <p className="text-xs text-white/50">Full Quran reader with 4 reciters, Uthmani text, spaced repetition, and session tracking.</p>
+            <NativeMushafPanel
+              profile={state.profile}
+              onSaveSettings={handleSaveSettings}
+            />
+          </div>
         </div>
 
         {/* Error display */}
