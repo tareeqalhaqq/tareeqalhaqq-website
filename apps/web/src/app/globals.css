@@ -193,12 +193,26 @@
 .mushaf-page {
   font-family: "Amiri Quran", "Noto Naskh Arabic", "Amiri", serif;
   direction: rtl;
-  text-align: justify;
-  line-height: 2.28;
+  text-align: right;
+  line-height: 2.1;
   font-size: clamp(1.22rem, 2.1vw, 1.46rem);
   color: #1a1a1a;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.mushaf-book-page {
+  aspect-ratio: 3 / 4.2;
+}
+
+.mushaf-layout-line {
+  min-height: 1.9em;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.14em;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .mushaf-page-dark {
@@ -222,12 +236,13 @@
 }
 
 .mushaf-ayah-marker {
-  display: inline-flex;
+  display: inline-grid;
+  place-items: center;
   align-items: center;
   justify-content: center;
-  width: 1.8em;
-  height: 1.8em;
-  font-size: 0.43em;
+  width: 1.9em;
+  height: 1.9em;
+  font-size: 0.5em;
   font-family: "Noto Naskh Arabic", serif;
   color: #7a6b40;
   position: relative;
@@ -240,12 +255,13 @@
 }
 
 .mushaf-ayah-marker::before {
-  content: "";
+  content: none;
+}
+
+.mushaf-ayah-marker-number {
   position: absolute;
-  inset: 0;
-  border: 1.5px solid currentColor;
-  border-radius: 50%;
-  opacity: 0.6;
+  line-height: 1;
+  font-size: 0.88em;
 }
 
 .mushaf-surah-header {
