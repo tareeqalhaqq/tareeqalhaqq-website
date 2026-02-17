@@ -1,10 +1,12 @@
 import { getSurahByNumber } from './quran-data';
 
-export const PLAYBACK_MODES = ['single_ayah', 'ayah_range', 'surah', 'page'] as const;
+export const PLAYBACK_MODES = ['single_ayah', 'ayah_range', 'surah', 'page', 'playlist'] as const;
 
 export type PlaybackMode = (typeof PLAYBACK_MODES)[number];
 
-export type ReciterId = 'husary' | 'minshawi' | 'abdul-basit' | 'ahmed-neana';
+export type LoopMode = 'off' | 'track' | 'queue';
+
+export type ReciterId = 'husary' | 'minshawi' | 'abdul-basit' | 'ahmad-al-nufais';
 
 export type QuranReciter = {
   id: ReciterId;
@@ -36,18 +38,22 @@ const RECITER_CATALOG: Record<ReciterId, QuranReciter> = {
     sourceUrlPattern: 'https://everyayah.com/data/Abdul_Basit_Murattal_64kbps/{track}.mp3',
     sourceName: 'Abdul_Basit',
   },
-  'ahmed-neana': {
-    id: 'ahmed-neana',
-    displayName: 'Ahmed Neana',
+  'ahmad-al-nufais': {
+    id: 'ahmad-al-nufais',
+    displayName: 'Ahmad Al-Nufais',
     bitrateKbps: 32,
     sourceUrlPattern: 'https://everyayah.com/data/Ahmed_Neana_32kbps/{track}.mp3',
-    sourceName: 'Ahmed_Neana',
+    sourceName: 'Ahmad_Al_Nufais',
   },
 };
 
 export const QURAN_RECITER_CATALOG = Object.freeze(Object.values(RECITER_CATALOG));
 
 export const DEFAULT_RECITER_ID: ReciterId = 'husary';
+
+const LEGACY_RECITER_ALIASES: Record<string, ReciterId> = {
+  'ahmed-neana': 'ahmad-al-nufais',
+};
 
 function normalizeName(value: string): string {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, '');
@@ -71,7 +77,8 @@ export function getReciterById(reciterId: string | null | undefined): QuranRecit
     return RECITER_CATALOG[DEFAULT_RECITER_ID];
   }
 
-  return RECITER_CATALOG[reciterId as ReciterId] ?? RECITER_CATALOG[DEFAULT_RECITER_ID];
+  const normalized = LEGACY_RECITER_ALIASES[reciterId] ?? (reciterId as ReciterId);
+  return RECITER_CATALOG[normalized] ?? RECITER_CATALOG[DEFAULT_RECITER_ID];
 }
 
 export function formatAyahTrack(surah: number, ayah: number): string {
@@ -84,6 +91,22 @@ export function buildAyahAudioUrl(reciterId: ReciterId, surah: number, ayah: num
   return reciter.sourceUrlPattern.replace('{track}', track);
 }
 
+export type AudioQueueItem = {
+  url: string;
+  surah: number;
+  ayah: number;
+  verseKey: string;
+};
+
+function toQueueItem(reciterId: ReciterId, surah: number, ayah: number): AudioQueueItem {
+  return {
+    url: buildAyahAudioUrl(reciterId, surah, ayah),
+    surah,
+    ayah,
+    verseKey: `${surah}:${ayah}`,
+  };
+}
+
 export function buildAudioQueue(
   mode: PlaybackMode,
   reciterId: ReciterId,
@@ -91,12 +114,16 @@ export function buildAudioQueue(
   options?: {
     range?: { startAyah: number; endAyah: number };
     pageAyahs?: Array<{ surah: number; ayah: number }>;
+    playlistAyahs?: Array<{ surah: number; ayah: number }>;
   },
-): string[] {
+): AudioQueueItem[] {
   if (mode === 'surah') {
     const surah = getSurahByNumber(position.surah);
     const maxAyah = surah?.verses ?? position.ayah;
-    return Array.from({ length: maxAyah }, (_, index) => buildAyahAudioUrl(reciterId, position.surah, index + 1));
+    const startAyah = Math.min(Math.max(position.ayah, 1), maxAyah);
+    return Array.from({ length: maxAyah - startAyah + 1 }, (_, index) =>
+      toQueueItem(reciterId, position.surah, startAyah + index),
+    );
   }
 
   if (mode === 'ayah_range') {
@@ -106,47 +133,77 @@ export function buildAudioQueue(
     const rangeEnd = Math.min(options?.range?.endAyah ?? position.ayah + 4, maxAyah);
 
     return Array.from({ length: Math.max(1, rangeEnd - rangeStart + 1) }, (_, index) =>
-      buildAyahAudioUrl(reciterId, position.surah, rangeStart + index),
+      toQueueItem(reciterId, position.surah, rangeStart + index),
     );
   }
 
   if (mode === 'page') {
     const pageAyahs = options?.pageAyahs ?? [];
     if (!pageAyahs.length) {
-      return [buildAyahAudioUrl(reciterId, position.surah, position.ayah)];
+      return [toQueueItem(reciterId, position.surah, position.ayah)];
     }
 
-    return pageAyahs.map(item => buildAyahAudioUrl(reciterId, item.surah, item.ayah));
+    return pageAyahs.map(item => toQueueItem(reciterId, item.surah, item.ayah));
   }
 
-  return [buildAyahAudioUrl(reciterId, position.surah, position.ayah)];
+  if (mode === 'playlist') {
+    const playlistAyahs = options?.playlistAyahs ?? [];
+    if (!playlistAyahs.length) {
+      return [toQueueItem(reciterId, position.surah, position.ayah)];
+    }
+
+    return playlistAyahs.map(item => toQueueItem(reciterId, item.surah, item.ayah));
+  }
+
+  return [toQueueItem(reciterId, position.surah, position.ayah)];
 }
 
+type QuranAudioPlayerCallbacks = {
+  onTrackChange?: (item: AudioQueueItem | null, index: number) => void;
+};
+
 export type QuranAudioPlayer = {
-  playQueue: (queue: string[]) => Promise<void>;
+  playQueue: (queue: AudioQueueItem[], startIndex?: number) => Promise<void>;
   play: () => Promise<void>;
   pause: () => void;
   next: () => Promise<void>;
-  setRepeat: (enabled: boolean) => void;
+  setLoopMode: (mode: LoopMode) => void;
+  getLoopMode: () => LoopMode;
+  setPlaybackRate: (rate: number) => void;
+  getPlaybackRate: () => number;
+  getCurrentItem: () => AudioQueueItem | null;
   isPaused: () => boolean;
 };
 
-export function createQuranAudioPlayer(audio: HTMLAudioElement): QuranAudioPlayer {
-  let queue: string[] = [];
+export function createQuranAudioPlayer(audio: HTMLAudioElement, callbacks?: QuranAudioPlayerCallbacks): QuranAudioPlayer {
+  let queue: AudioQueueItem[] = [];
   let index = 0;
-  let repeat = false;
+  let loopMode: LoopMode = 'off';
+
+  const clampRate = (rate: number) => Math.min(Math.max(rate, 0.75), 1.25);
+
+  const emitTrackChange = () => {
+    callbacks?.onTrackChange?.(queue[index] ?? null, index);
+  };
 
   const loadTrack = async () => {
-    if (!queue[index]) {
+    const item = queue[index];
+    if (!item) {
       return;
     }
 
-    audio.src = queue[index];
+    audio.src = item.url;
     await audio.play();
+    emitTrackChange();
   };
 
   audio.onended = async () => {
     if (!queue.length) {
+      return;
+    }
+
+    if (loopMode === 'track') {
+      await loadTrack();
       return;
     }
 
@@ -156,27 +213,31 @@ export function createQuranAudioPlayer(audio: HTMLAudioElement): QuranAudioPlaye
       return;
     }
 
-    if (repeat) {
+    if (loopMode === 'queue') {
       index = 0;
       await loadTrack();
+      return;
     }
+
+    emitTrackChange();
   };
 
   return {
-    async playQueue(nextQueue: string[]) {
+    async playQueue(nextQueue: AudioQueueItem[], startIndex = 0) {
       queue = nextQueue;
-      index = 0;
+      index = Math.min(Math.max(startIndex, 0), Math.max(nextQueue.length - 1, 0));
       await loadTrack();
     },
     async play() {
       await audio.play();
+      emitTrackChange();
     },
     pause() {
       audio.pause();
     },
     async next() {
       if (index >= queue.length - 1) {
-        if (repeat) {
+        if (loopMode === 'queue') {
           index = 0;
           await loadTrack();
         }
@@ -186,8 +247,20 @@ export function createQuranAudioPlayer(audio: HTMLAudioElement): QuranAudioPlaye
       index += 1;
       await loadTrack();
     },
-    setRepeat(enabled: boolean) {
-      repeat = enabled;
+    setLoopMode(mode: LoopMode) {
+      loopMode = mode;
+    },
+    getLoopMode() {
+      return loopMode;
+    },
+    setPlaybackRate(rate: number) {
+      audio.playbackRate = clampRate(rate);
+    },
+    getPlaybackRate() {
+      return clampRate(audio.playbackRate || 1);
+    },
+    getCurrentItem() {
+      return queue[index] ?? null;
     },
     isPaused() {
       return audio.paused;

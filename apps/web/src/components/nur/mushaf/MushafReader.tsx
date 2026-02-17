@@ -1,6 +1,7 @@
 'use client';
 
 import { BookOpenText, ChevronLeft, ChevronRight, Play, TimerReset } from 'lucide-react';
+import { useEffect, useRef } from 'react';
 import {
   clampAyahToSurah,
   findMostRelevantPageForSurah,
@@ -19,10 +20,14 @@ type MushafReaderProps = {
   viewMode: MushafViewMode;
   position: MushafPosition;
   options: MushafReaderOptions;
+  activePlaybackAyah: { surah: number; ayah: number } | null;
+  scrollTop: number;
+  scrollRestoreKey: string;
   onPositionChange: (position: MushafPosition) => void;
   onPlayAyah: (surah: number, ayah: number) => void;
   onRangeChange: (range: AyahRange | null) => void;
   onSelectionChange: (selection: MushafReaderSelection) => void;
+  onScrollPositionChange: (scrollTop: number) => void;
 };
 
 const tajweedClassMap: Record<TajweedRule, string> = {
@@ -85,16 +90,44 @@ export function MushafReader({
   viewMode,
   position,
   options,
+  activePlaybackAyah,
+  scrollTop,
+  scrollRestoreKey,
   onPositionChange,
   onPlayAyah,
   onRangeChange,
   onSelectionChange,
+  onScrollPositionChange,
 }: MushafReaderProps) {
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+  const restoredScrollTopRef = useRef(scrollTop);
   const pageAyahs = getAyahsForPage(position.page);
   const surahAyahs = getAyahsForSurah(position.surah);
   const activeAyahs = viewMode === 'page' ? pageAyahs : surahAyahs;
   const mutashabihStats = getMutashabihStats(activeAyahs);
   const coverageMessage = getDataCoverageMessage();
+
+  useEffect(() => {
+    restoredScrollTopRef.current = scrollTop;
+  }, [scrollTop]);
+
+  useEffect(() => {
+    if (!scrollContainerRef.current) {
+      return;
+    }
+    scrollContainerRef.current.scrollTop = Math.max(0, restoredScrollTopRef.current);
+  }, [scrollRestoreKey]);
+
+  useEffect(() => {
+    if (!options.followPlayback || !activePlaybackAyah || !scrollContainerRef.current) {
+      return;
+    }
+
+    const target = scrollContainerRef.current.querySelector<HTMLDivElement>(
+      `[data-verse-key="${activePlaybackAyah.surah}:${activePlaybackAyah.ayah}"]`,
+    );
+    target?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, [activePlaybackAyah, options.followPlayback]);
 
   const applySurah = (surah: number) => {
     const clampedAyah = clampAyahToSurah(surah, 1);
@@ -107,20 +140,49 @@ export function MushafReader({
     onRangeChange(null);
   };
 
-  const handleAyahSelection = (ayah: number) => {
-    onPositionChange({ ...position, ayah });
-    const activeAyah = activeAyahs.find(item => item.ayah === ayah) ?? null;
+  const handleAyahSelection = (ayah: { surah: number; ayah: number; page: number }) => {
+    onPositionChange({
+      ...position,
+      surah: ayah.surah,
+      ayah: ayah.ayah,
+      page: ayah.page,
+    });
+    const activeAyah = activeAyahs.find(item => item.ayah === ayah.ayah && item.surah === ayah.surah) ?? null;
     onSelectionChange({ activeAyah, range: null });
     onRangeChange(null);
   };
 
-  const toggleRangeAtAyah = (ayah: number) => {
-    const start = Math.min(position.ayah, ayah);
-    const end = Math.max(position.ayah, ayah);
+  const toggleRangeAtAyah = (ayah: { surah: number; ayah: number; page: number }) => {
+    if (ayah.surah !== position.surah) {
+      onPositionChange({
+        ...position,
+        surah: ayah.surah,
+        ayah: ayah.ayah,
+        page: ayah.page,
+      });
+      onRangeChange(null);
+      return;
+    }
+
+    const start = Math.min(position.ayah, ayah.ayah);
+    const end = Math.max(position.ayah, ayah.ayah);
     const range: AyahRange = { startAyah: start, endAyah: end };
     onRangeChange(range);
-    const activeAyah = activeAyahs.find(item => item.ayah === ayah) ?? null;
+    const activeAyah = activeAyahs.find(item => item.ayah === ayah.ayah && item.surah === ayah.surah) ?? null;
     onSelectionChange({ activeAyah, range });
+  };
+
+  const jumpToPage = (page: number) => {
+    const targetPage = Math.min(Math.max(page, availablePages[0]), availablePages[availablePages.length - 1]);
+    const firstAyah = getAyahsForPage(targetPage)[0];
+
+    onPositionChange({
+      ...position,
+      page: targetPage,
+      surah: firstAyah?.surah ?? position.surah,
+      ayah: firstAyah?.ayah ?? position.ayah,
+    });
+    onRangeChange(null);
   };
 
   return (
@@ -140,7 +202,7 @@ export function MushafReader({
         <div className="flex items-center justify-between rounded-lg border border-white/[0.08] bg-black/20 p-2">
           <button
             type="button"
-            onClick={() => onPositionChange({ ...position, page: getPrevious(availablePages, position.page, availablePages[0]), surah: 1, ayah: 1 })}
+            onClick={() => jumpToPage(getPrevious(availablePages, position.page, availablePages[0]))}
             className="rounded-md border border-white/10 p-2 text-white/80"
           >
             <ChevronLeft className="h-4 w-4" />
@@ -148,7 +210,7 @@ export function MushafReader({
           <p className="text-sm text-white/80">Page {position.page}</p>
           <button
             type="button"
-            onClick={() => onPositionChange({ ...position, page: getNext(availablePages, position.page, availablePages[availablePages.length - 1]), surah: 114, ayah: 1 })}
+            onClick={() => jumpToPage(getNext(availablePages, position.page, availablePages[availablePages.length - 1]))}
             className="rounded-md border border-white/10 p-2 text-white/80"
           >
             <ChevronRight className="h-4 w-4" />
@@ -166,13 +228,19 @@ export function MushafReader({
         </div>
       )}
 
-      <div className="max-h-[24rem] space-y-3 overflow-y-auto pr-1">
+      <div
+        ref={scrollContainerRef}
+        onScroll={event => onScrollPositionChange(event.currentTarget.scrollTop)}
+        className="max-h-[24rem] space-y-3 overflow-y-auto pr-1"
+      >
         {activeAyahs.map(ayah => {
           const isActive = position.surah === ayah.surah && position.ayah === ayah.ayah;
+          const isPlaybackAyah = activePlaybackAyah?.surah === ayah.surah && activePlaybackAyah.ayah === ayah.ayah;
           return (
             <article
               key={ayah.key}
-              className={`rounded-xl border p-3 ${isActive ? 'border-cyan-300/40 bg-cyan-400/10' : 'border-white/[0.08] bg-black/20'}`}
+              data-verse-key={ayah.key}
+              className={`rounded-xl border p-3 ${isActive ? 'border-cyan-300/40 bg-cyan-400/10' : 'border-white/[0.08] bg-black/20'} ${isPlaybackAyah ? 'ring-1 ring-emerald-300/50' : ''}`}
             >
               <div className="mb-2 flex items-center justify-between">
                 <p className="text-xs text-cyan-100/70">{ayah.surah}:{ayah.ayah}</p>
@@ -181,13 +249,13 @@ export function MushafReader({
                     <Play className="h-3 w-3" />
                     Play
                   </button>
-                  <button type="button" onClick={() => toggleRangeAtAyah(ayah.ayah)} className="inline-flex items-center gap-1 rounded-md border border-white/15 px-2 py-1 text-[11px] text-white/80">
+                  <button type="button" onClick={() => toggleRangeAtAyah(ayah)} className="inline-flex items-center gap-1 rounded-md border border-white/15 px-2 py-1 text-[11px] text-white/80">
                     <TimerReset className="h-3 w-3" />
                     Range
                   </button>
                 </div>
               </div>
-              <button type="button" onClick={() => handleAyahSelection(ayah.ayah)} className="w-full text-left">
+              <button type="button" onClick={() => handleAyahSelection(ayah)} className="w-full text-left">
                 <AyahText text={ayah.text} tokens={ayah.tokens} options={options} mutashabihStats={mutashabihStats} />
               </button>
             </article>
