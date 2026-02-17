@@ -497,7 +497,7 @@ export function MushafPanel({ profile, onSaveSettings, isFullScreen = false, onC
   // ──────────────────────────────────────────────
   if (isFullScreen) {
     return (
-      <div className="fixed inset-0 z-50 flex flex-col bg-[hsl(220,20%,4%)]">
+      <div className="fixed inset-0 z-50 flex flex-col bg-[#0b1018]">
         {/* Top bar */}
         <header className="flex items-center justify-between border-b border-white/[0.08] bg-black/40 px-4 py-2.5 backdrop-blur">
           <div className="flex items-center gap-3">
@@ -508,22 +508,7 @@ export function MushafPanel({ profile, onSaveSettings, isFullScreen = false, onC
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1.5 text-[11px] text-white/50">
-              <ListChecks className="h-3.5 w-3.5 text-cyan-200/60" />
-              Due: {dashboard.dueReviews.length}
-            </div>
-            {offlineQueueCount > 0 && (
-              <span className="inline-flex items-center gap-1 rounded-md border border-amber-300/30 bg-amber-400/10 px-2 py-0.5 text-[11px] text-amber-100">
-                <AlertCircle className="h-3 w-3" />Offline: {offlineQueueCount}
-              </span>
-            )}
-            <button
-              type="button"
-              onClick={() => setShowSidebar(prev => !prev)}
-              className="rounded-lg border border-white/10 px-3 py-1.5 text-xs text-white/70 transition hover:bg-white/5"
-            >
-              {showSidebar ? 'Hide Panel' : 'Tools'}
-            </button>
+            <p className="text-xs text-white/50">{options.pagePairMode === 'spread' ? 'Double page' : 'Single page'}</p>
             <button
               type="button"
               onClick={onClose}
@@ -537,7 +522,7 @@ export function MushafPanel({ profile, onSaveSettings, isFullScreen = false, onC
         {/* Main content */}
         <div className="flex flex-1 overflow-hidden">
           {/* Mushaf area */}
-          <div className="flex-1 overflow-hidden flex flex-col px-4 py-3 lg:px-8">
+          <div className="flex-1 overflow-hidden flex flex-col px-2 py-2 sm:px-4 lg:px-6">
             <MushafToolbar
               viewMode={viewMode}
               playbackMode={playbackMode}

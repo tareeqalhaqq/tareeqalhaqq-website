@@ -44,19 +44,19 @@ export function MushafToolbar({
   }, [position.ayah, position.page, position.surah]);
 
   return (
-    <div className="space-y-2.5 rounded-xl border border-white/[0.06] bg-white/[0.02] p-2.5">
-      <div className="flex items-center justify-between">
-        <p className="text-[11px] uppercase tracking-[0.16em] text-white/40">View mode</p>
+    <div className="space-y-2 rounded-lg border border-white/10 bg-black/20 p-2">
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-[10px] uppercase tracking-[0.16em] text-white/45">Reading Mode</p>
         <button type="button" onClick={onReset} className="text-[11px] text-cyan-200/80 transition hover:text-cyan-100">
           Reset
         </button>
       </div>
 
-      <div className="grid grid-cols-2 gap-1.5">
+      <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-5">
         <button
           type="button"
           onClick={() => onViewModeChange('page')}
-          className={`inline-flex items-center justify-center gap-1.5 rounded-lg border px-2 py-1.5 text-[11px] transition ${
+          className={`inline-flex items-center justify-center gap-1.5 rounded-md border px-2 py-1.5 text-[11px] transition ${
             viewMode === 'page'
               ? 'border-cyan-300/40 bg-cyan-400/10 text-cyan-100'
               : 'border-white/[0.1] bg-black/10 text-white/70 hover:border-white/[0.2]'
@@ -68,7 +68,7 @@ export function MushafToolbar({
         <button
           type="button"
           onClick={() => onViewModeChange('ayah')}
-          className={`inline-flex items-center justify-center gap-1.5 rounded-lg border px-2 py-1.5 text-[11px] transition ${
+          className={`inline-flex items-center justify-center gap-1.5 rounded-md border px-2 py-1.5 text-[11px] transition ${
             viewMode === 'ayah'
               ? 'border-cyan-300/40 bg-cyan-400/10 text-cyan-100'
               : 'border-white/[0.1] bg-black/10 text-white/70 hover:border-white/[0.2]'
@@ -77,13 +77,10 @@ export function MushafToolbar({
           <ScrollText className="h-3.5 w-3.5" />
           Ayah
         </button>
-      </div>
-
-      <div className="grid gap-1.5 sm:grid-cols-3">
         <button
           type="button"
           onClick={() => onOptionsChange({ ...options, tajweedEnabled: !options.tajweedEnabled })}
-          className={`inline-flex items-center justify-center gap-1 rounded-lg border px-2 py-1.5 text-[11px] transition ${
+          className={`inline-flex items-center justify-center gap-1 rounded-md border px-2 py-1.5 text-[11px] transition ${
             options.tajweedEnabled
               ? 'border-emerald-300/50 bg-emerald-400/10 text-emerald-100'
               : 'border-white/[0.1] bg-black/10 text-white/70'
@@ -94,7 +91,7 @@ export function MushafToolbar({
         <button
           type="button"
           onClick={() => onOptionsChange({ ...options, followPlayback: !options.followPlayback })}
-          className={`inline-flex items-center justify-center gap-1 rounded-lg border px-2 py-1.5 text-[11px] transition ${
+          className={`inline-flex items-center justify-center gap-1 rounded-md border px-2 py-1.5 text-[11px] transition ${
             options.followPlayback
               ? 'border-cyan-300/50 bg-cyan-400/10 text-cyan-100'
               : 'border-white/[0.1] bg-black/10 text-white/70'
@@ -105,7 +102,7 @@ export function MushafToolbar({
         <button
           type="button"
           onClick={() => onOptionsChange({ ...options, pagePairMode: options.pagePairMode === 'single' ? 'spread' : 'single' })}
-          className={`inline-flex items-center justify-center gap-1 rounded-lg border px-2 py-1.5 text-[11px] transition ${
+          className={`inline-flex items-center justify-center gap-1 rounded-md border px-2 py-1.5 text-[11px] transition ${
             options.pagePairMode === 'spread'
               ? 'border-amber-300/50 bg-amber-400/10 text-amber-100'
               : 'border-white/[0.1] bg-black/10 text-white/70'
@@ -115,6 +112,7 @@ export function MushafToolbar({
           {options.pagePairMode === 'spread' ? '2 Pages' : '1 Page'}
         </button>
       </div>
+
       {showNavigationControls && (
         <div className="grid gap-1.5 sm:grid-cols-3">
           <form className="flex items-center gap-2 rounded-lg border border-white/[0.1] bg-black/10 px-2 py-1" onSubmit={e => { e.preventDefault(); onJumpToPage(Number(pageInput)); }}>
