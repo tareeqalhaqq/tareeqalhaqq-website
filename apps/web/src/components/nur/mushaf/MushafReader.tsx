@@ -72,65 +72,70 @@ function MushafPageView({
 }) {
   const lines = buildMushafLayoutLines(page, verses);
   const verseByKey = new Map(verses.map(verse => [verse.verse_key, verse]));
+  const pageWidthClasses = compact
+    ? 'max-w-[16rem] sm:max-w-[18rem] lg:max-w-[20rem]'
+    : 'max-w-[20rem] sm:max-w-[24rem] lg:max-w-[29rem]';
 
   return (
-    <div className="mushaf-frame mushaf-book-page rounded-lg overflow-hidden">
-      <div className={`px-4 py-4 sm:px-6 sm:py-5 ${compact ? 'min-h-[430px]' : 'min-h-[520px]'} flex flex-col`}>
-        {/* Surah headers at top of page */}
-        {(() => {
-          const headers: React.ReactNode[] = [];
-          let prevSurah = 0;
-          for (const verse of verses) {
-            if (verse.chapter_id !== prevSurah) {
-              headers.push(
-                <SurahHeader key={`hdr-${verse.chapter_id}`} surahNumber={verse.chapter_id} />
-              );
-              if (!NO_BISMILLAH.has(verse.chapter_id) && verse.verse_number === 1) {
+    <div className={`mushaf-frame mushaf-book-page mx-auto w-full ${pageWidthClasses} overflow-hidden rounded-lg`}>
+      <div className="relative aspect-[3/4] h-full w-full">
+        <div className="flex h-full flex-col px-4 pb-12 pt-6 sm:px-6 sm:pb-14 sm:pt-8 lg:px-7">
+          {/* Surah headers at top of page */}
+          {(() => {
+            const headers: React.ReactNode[] = [];
+            let prevSurah = 0;
+            for (const verse of verses) {
+              if (verse.chapter_id !== prevSurah) {
                 headers.push(
-                  <div key={`bis-${verse.chapter_id}`} className="mushaf-bismillah">
-                    {BISMILLAH}
-                  </div>
+                  <SurahHeader key={`hdr-${verse.chapter_id}`} surahNumber={verse.chapter_id} />
                 );
-              }
-              prevSurah = verse.chapter_id;
-            }
-          }
-          return headers;
-        })()}
-
-        {/* Fixed layout lines (no browser wrapping) */}
-        <div className="mushaf-page flex-1" dir="rtl">
-          {lines.map(line => (
-            <div key={`line-${line.index}`} className="mushaf-layout-line" role="presentation">
-              {line.segments.map((segment, segmentIndex) => {
-                const isActive = activePlaybackAyah?.surah === segment.surah && activePlaybackAyah?.ayah === segment.ayah;
-                const isSelected = selectedAyahKey === segment.verseKey;
-                if (segment.type === 'marker') {
-                  return <AyahNumberMarker key={`m-${segment.verseKey}-${segmentIndex}`} number={segment.ayah} />;
+                if (!NO_BISMILLAH.has(verse.chapter_id) && verse.verse_number === 1) {
+                  headers.push(
+                    <div key={`bis-${verse.chapter_id}`} className="mushaf-bismillah">
+                      {BISMILLAH}
+                    </div>
+                  );
                 }
+                prevSurah = verse.chapter_id;
+              }
+            }
+            return headers;
+          })()}
 
-                const verse = verseByKey.get(segment.verseKey);
-                if (!verse || !segment.text) return null;
+          {/* Fixed layout lines (no browser wrapping) */}
+          <div className="mushaf-page flex-1 overflow-hidden" dir="rtl">
+            {lines.map(line => (
+              <div key={`line-${line.index}`} className="mushaf-layout-line" role="presentation">
+                {line.segments.map((segment, segmentIndex) => {
+                  const isActive = activePlaybackAyah?.surah === segment.surah && activePlaybackAyah?.ayah === segment.ayah;
+                  const isSelected = selectedAyahKey === segment.verseKey;
+                  if (segment.type === 'marker') {
+                    return <AyahNumberMarker key={`m-${segment.verseKey}-${segmentIndex}`} number={segment.ayah} />;
+                  }
 
-                return (
-                  <span
-                    key={`w-${segment.verseKey}-${segmentIndex}`}
-                    data-verse-key={segment.verseKey}
-                    className={`cursor-pointer transition-colors duration-200 px-[0.05em] ${isActive ? 'mushaf-highlight-active' : ''} ${isSelected ? 'bg-cyan-400/15 rounded' : ''}`}
-                    onClick={() => onAyahTap(verse)}
-                    onDoubleClick={() => onPlayAyah(verse.chapter_id, verse.verse_number)}
-                  >
-                    {segment.text}
-                  </span>
-                );
-              })}
-            </div>
-          ))}
+                  const verse = verseByKey.get(segment.verseKey);
+                  if (!verse || !segment.text) return null;
+
+                  return (
+                    <span
+                      key={`w-${segment.verseKey}-${segmentIndex}`}
+                      data-verse-key={segment.verseKey}
+                      className={`cursor-pointer transition-colors duration-200 px-[0.05em] ${isActive ? 'mushaf-highlight-active' : ''} ${isSelected ? 'bg-cyan-400/15 rounded' : ''}`}
+                      onClick={() => onAyahTap(verse)}
+                      onDoubleClick={() => onPlayAyah(verse.chapter_id, verse.verse_number)}
+                    >
+                      {segment.text}
+                    </span>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Page number */}
-        <div className="mt-4 text-center">
-          <span className="text-xs text-[#8a7b55] font-sans tabular-nums">{page}</span>
+        <div className="pointer-events-none absolute bottom-4 left-1/2 -translate-x-1/2 text-center sm:bottom-5">
+          <span className="font-sans text-xs tabular-nums text-[#8a7b55]">{page}</span>
         </div>
       </div>
     </div>
