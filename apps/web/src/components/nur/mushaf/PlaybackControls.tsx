@@ -1,6 +1,6 @@
 'use client';
 
-import { Gauge, Pause, Play, Repeat, SkipForward } from 'lucide-react';
+import { Pause, Play, Repeat, SkipForward } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { buildAudioQueue, createQuranAudioPlayer } from '@/lib/quran-audio';
 import type { AyahRange, MushafLoopMode, MushafPlaybackMode, MushafPosition, Reciter } from './types';
@@ -20,46 +20,11 @@ type PlaybackControlsProps = {
   onLoopModeChange: (mode: MushafLoopMode) => void;
 };
 
-const playbackModes: { value: MushafPlaybackMode; label: string }[] = [
-  { value: 'single_ayah', label: 'Single Ayah' },
-  { value: 'ayah_range', label: 'Ayah Range' },
-  { value: 'surah', label: 'Surah' },
-  { value: 'page', label: 'Page' },
-  { value: 'playlist', label: 'Playlist' },
-];
-
 function clampRate(value: number) {
   return Number(Math.min(Math.max(value, 0.75), 1.25).toFixed(2));
 }
 
-async function warmAudioCache(queue: Array<{ url: string }>) {
-  if (typeof window === 'undefined' || !('caches' in window) || !navigator.onLine) {
-    return;
-  }
-
-  try {
-    const cache = await caches.open('mushaf-audio-v1');
-    await Promise.all(
-      queue.slice(0, 4).map(async track => {
-        try {
-          const existing = await cache.match(track.url);
-          if (existing) {
-            return;
-          }
-
-          const response = await fetch(track.url, { mode: 'cors' });
-          if (response.ok) {
-            await cache.put(track.url, response.clone());
-          }
-        } catch {
-          // Ignore individual cache failures.
-        }
-      }),
-    );
-  } catch {
-    // Best-effort cache.
-  }
-}
+const SPEED_STEPS = [0.75, 0.85, 1.0, 1.1, 1.25];
 
 export function PlaybackControls({
   playbackMode,
@@ -82,103 +47,75 @@ export function PlaybackControls({
   const [isPlaying, setIsPlaying] = useState(false);
   const [loopMode, setLoopMode] = useState<MushafLoopMode>('off');
 
-  useEffect(() => {
-    onActiveAyahChangeRef.current = onActiveAyahChange;
-  }, [onActiveAyahChange]);
+  useEffect(() => { onActiveAyahChangeRef.current = onActiveAyahChange; }, [onActiveAyahChange]);
+  useEffect(() => { onPlayStateChangeRef.current = onPlayStateChange; }, [onPlayStateChange]);
 
+  // Create audio player
   useEffect(() => {
-    onPlayStateChangeRef.current = onPlayStateChange;
-  }, [onPlayStateChange]);
-
-  useEffect(() => {
-    if (!audioRef.current) {
-      return;
-    }
-
+    if (!audioRef.current) return;
     setPlayer(
       createQuranAudioPlayer(audioRef.current, {
         onTrackChange: item => {
-          if (item) {
-            onActiveAyahChangeRef.current(item.surah, item.ayah);
-          }
+          if (item) onActiveAyahChangeRef.current(item.surah, item.ayah);
         },
       }),
     );
   }, []);
 
+  // Listen for play/pause state
   useEffect(() => {
-    if (!audioRef.current) {
-      return;
-    }
-
+    if (!audioRef.current) return;
     const audio = audioRef.current;
     const handleStateChange = () => {
       const nextPlaying = !audio.paused;
       setIsPlaying(nextPlaying);
       onPlayStateChangeRef.current(nextPlaying);
     };
-
     audio.addEventListener('play', handleStateChange);
     audio.addEventListener('pause', handleStateChange);
-
     return () => {
       audio.removeEventListener('play', handleStateChange);
       audio.removeEventListener('pause', handleStateChange);
     };
   }, []);
 
+  // Sync playback rate
   useEffect(() => {
-    if (!player) {
-      return;
-    }
-    player.setPlaybackRate(clampRate(playbackRate));
+    if (player) player.setPlaybackRate(clampRate(playbackRate));
   }, [player, playbackRate]);
 
+  // Sync loop mode
   useEffect(() => {
-    if (!player) {
-      return;
+    if (player) {
+      player.setLoopMode(loopMode);
+      onLoopModeChange(loopMode);
     }
-    player.setLoopMode(loopMode);
-    onLoopModeChange(loopMode);
   }, [loopMode, onLoopModeChange, player]);
 
   const playQueue = async () => {
-    if (!player) {
-      return;
-    }
-
+    if (!player) return;
     const queue = buildAudioQueue(playbackMode, selectedReciter.id, position, {
       range: range ?? undefined,
       pageAyahs,
       playlistAyahs,
     });
-    await warmAudioCache(queue);
-    await player.playQueue(queue);
+    if (queue.length > 0) {
+      await player.playQueue(queue);
+    }
   };
 
   const togglePlayPause = async () => {
-    if (!player) {
-      return;
-    }
-
+    if (!player) return;
     if (player.isPaused()) {
-      if (audioRef.current?.src) {
-        await player.play();
-      } else {
-        await playQueue();
-      }
+      if (audioRef.current?.src) await player.play();
+      else await playQueue();
       return;
     }
-
     player.pause();
   };
 
   const handleNext = async () => {
-    if (!player) {
-      return;
-    }
-
-    await player.next();
+    if (player) await player.next();
   };
 
   const handleRepeat = () => {
@@ -186,93 +123,76 @@ export function PlaybackControls({
     setLoopMode(current => (current === 'off' ? queueLoop : 'off'));
   };
 
-  const effectiveLoopLabel = loopMode === 'off'
-    ? 'Loop Off'
-    : loopMode === 'track'
-      ? 'Loop Ayah'
-      : playbackMode === 'surah'
-        ? 'Loop Surah'
-        : playbackMode === 'ayah_range'
-          ? 'Loop Range'
-          : 'Loop Queue';
-
-  const handleSpeedChange = (nextRate: number) => {
-    const clamped = clampRate(nextRate);
-    onPlaybackRateChange(clamped);
-    player?.setPlaybackRate(clamped);
+  const cycleSpeed = () => {
+    const idx = SPEED_STEPS.findIndex(s => Math.abs(s - playbackRate) < 0.03);
+    const next = SPEED_STEPS[(idx + 1) % SPEED_STEPS.length];
+    onPlaybackRateChange(next);
   };
 
   return (
-    <div className="space-y-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
-      <p className="text-xs uppercase tracking-[0.16em] text-white/40">Playback</p>
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-        {playbackModes.map(mode => (
-          <button
-            key={mode.value}
-            type="button"
-            onClick={() => onPlaybackModeChange(mode.value)}
-            disabled={mode.value === 'playlist' && playlistAyahs.length === 0}
-            className={`rounded-lg border px-2 py-2 text-xs transition ${
-              playbackMode === mode.value
-                ? 'border-cyan-300/40 bg-cyan-400/10 text-cyan-100'
-                : 'border-white/[0.1] bg-black/10 text-white/70 hover:border-white/[0.2]'
-            } ${mode.value === 'playlist' && playlistAyahs.length === 0 ? 'cursor-not-allowed opacity-40' : ''}`}
-            title={mode.value === 'playlist' && playlistAyahs.length === 0 ? 'Load a playlist first' : undefined}
-          >
-            {mode.label}
-          </button>
-        ))}
-      </div>
+    <div className="flex items-center gap-1.5 sm:gap-2.5">
+      {/* Play / Pause */}
+      <button
+        type="button"
+        onClick={togglePlayPause}
+        className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-cyan-500/20 border border-cyan-400/30 text-cyan-100 transition hover:bg-cyan-500/30 shrink-0"
+        aria-label={isPlaying ? 'Pause' : 'Play'}
+      >
+        {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4 ml-0.5" />}
+      </button>
 
-      <div className="space-y-1 rounded-lg border border-white/[0.08] bg-black/15 px-3 py-2">
-        <div className="flex items-center justify-between">
-          <p className="inline-flex items-center gap-1 text-[11px] uppercase tracking-[0.16em] text-white/45">
-            <Gauge className="h-3.5 w-3.5" />
-            Speed
-          </p>
-          <p className="text-xs text-cyan-100">{playbackRate.toFixed(2)}x</p>
-        </div>
-        <input
-          type="range"
-          min={0.75}
-          max={1.25}
-          step={0.05}
-          value={playbackRate}
-          onChange={event => handleSpeedChange(Number(event.target.value))}
-          className="w-full accent-cyan-300"
-        />
-      </div>
+      {/* Next */}
+      <button
+        type="button"
+        onClick={handleNext}
+        className="inline-flex items-center justify-center w-7 h-7 rounded-full border border-white/10 text-white/50 transition hover:text-white/80 hover:border-white/20 shrink-0"
+        aria-label="Next"
+      >
+        <SkipForward className="h-3 w-3" />
+      </button>
 
-      <div className="flex flex-wrap items-center gap-2">
-        <button
-          type="button"
-          onClick={togglePlayPause}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-cyan-300/40 bg-cyan-400/10 px-3 py-2 text-xs text-cyan-100"
-        >
-          {isPlaying ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
-          {isPlaying ? 'Pause' : 'Play'}
-        </button>
-        <button
-          type="button"
-          onClick={handleNext}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-white/[0.1] bg-black/10 px-3 py-2 text-xs text-white/80"
-        >
-          <SkipForward className="h-3.5 w-3.5" />
-          Next
-        </button>
-        <button
-          type="button"
-          onClick={handleRepeat}
-          className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs ${
-            loopMode !== 'off'
-              ? 'border-cyan-300/40 bg-cyan-400/10 text-cyan-100'
-              : 'border-white/[0.1] bg-black/10 text-white/80'
-          }`}
-        >
-          <Repeat className="h-3.5 w-3.5" />
-          {effectiveLoopLabel}
-        </button>
-      </div>
+      {/* Loop */}
+      <button
+        type="button"
+        onClick={handleRepeat}
+        className={`inline-flex items-center justify-center w-7 h-7 rounded-full border transition shrink-0 ${
+          loopMode !== 'off'
+            ? 'border-cyan-400/40 text-cyan-200 bg-cyan-500/10'
+            : 'border-white/10 text-white/35 hover:text-white/60'
+        }`}
+        aria-label={loopMode === 'off' ? 'Enable loop' : 'Disable loop'}
+      >
+        <Repeat className="h-3 w-3" />
+      </button>
+
+      <div className="w-px h-5 bg-white/[0.08] mx-0.5 hidden sm:block" />
+
+      {/* Playback mode */}
+      <select
+        value={playbackMode}
+        onChange={e => onPlaybackModeChange(e.target.value as MushafPlaybackMode)}
+        className="bg-transparent border border-white/[0.08] rounded px-1.5 py-1 text-[11px] text-white/60 outline-none cursor-pointer hover:border-white/15 transition"
+      >
+        <option value="single_ayah" className="bg-slate-900">Ayah</option>
+        <option value="ayah_range" className="bg-slate-900">Range</option>
+        <option value="surah" className="bg-slate-900">Surah</option>
+        <option value="page" className="bg-slate-900">Page</option>
+        <option value="playlist" className="bg-slate-900" disabled={!playlistAyahs.length}>Playlist</option>
+      </select>
+
+      {/* Speed */}
+      <button
+        type="button"
+        onClick={cycleSpeed}
+        className="text-[11px] text-white/45 border border-white/[0.08] rounded px-1.5 py-1 hover:text-white/70 transition tabular-nums hidden sm:block"
+      >
+        {playbackRate.toFixed(2)}x
+      </button>
+
+      {/* Position indicator */}
+      <span className="text-[11px] text-white/30 ml-auto tabular-nums hidden md:block">
+        {position.surah}:{position.ayah}
+      </span>
 
       <audio ref={audioRef} preload="none" className="hidden" />
     </div>
