@@ -6,6 +6,7 @@ import { getSurahByNumber } from '@/lib/quran-data';
 import type { MushafPlaybackMode, MushafPosition, MushafReaderOptions, MushafViewMode } from './types';
 
 type MushafToolbarProps = {
+  showNavigationControls?: boolean;
   viewMode: MushafViewMode;
   playbackMode: MushafPlaybackMode;
   options: MushafReaderOptions;
@@ -29,6 +30,7 @@ export function MushafToolbar({
   onJumpToSurahAyah,
   onReset,
   position,
+  showNavigationControls = true,
 }: MushafToolbarProps) {
   const [pageInput, setPageInput] = useState(String(position.page));
   const [juzInput, setJuzInput] = useState('30');
@@ -113,29 +115,30 @@ export function MushafToolbar({
           {options.pagePairMode === 'spread' ? '2 Pages' : '1 Page'}
         </button>
       </div>
-
-      <div className="grid gap-1.5 sm:grid-cols-3">
-        <form className="flex items-center gap-2 rounded-lg border border-white/[0.1] bg-black/10 px-2 py-1" onSubmit={e => { e.preventDefault(); onJumpToPage(Number(pageInput)); }}>
-          <p className="text-[10px] uppercase tracking-[0.1em] text-white/45">Page</p>
-          <input inputMode="numeric" value={pageInput} onChange={e => setPageInput(e.target.value)} className="w-full bg-transparent text-right text-[11px] text-white/80 outline-none" />
-        </form>
-        <form className="flex items-center gap-2 rounded-lg border border-white/[0.1] bg-black/10 px-2 py-1" onSubmit={e => { e.preventDefault(); onJumpToJuz(Number(juzInput)); }}>
-          <p className="text-[10px] uppercase tracking-[0.1em] text-white/45">Juz</p>
-          <input inputMode="numeric" value={juzInput} onChange={e => setJuzInput(e.target.value)} className="w-full bg-transparent text-right text-[11px] text-white/80 outline-none" />
-        </form>
-        <form className="flex items-center gap-1 rounded-lg border border-white/[0.1] bg-black/10 px-2 py-1" onSubmit={e => {
-          e.preventDefault();
-          const surah = Number(surahInput);
-          const maxAyah = getSurahByNumber(surah)?.verses ?? 1;
-          const ayah = Math.max(1, Math.min(Number(ayahInput) || 1, maxAyah));
-          onJumpToSurahAyah(Math.max(1, Math.min(surah || 1, 114)), ayah);
-        }}>
-          <p className="text-[10px] uppercase tracking-[0.1em] text-white/45">S:A</p>
-          <input inputMode="numeric" value={surahInput} onChange={e => setSurahInput(e.target.value)} className="w-full bg-transparent text-right text-[11px] text-white/80 outline-none" />
-          <span className="text-white/30">:</span>
-          <input inputMode="numeric" value={ayahInput} onChange={e => setAyahInput(e.target.value)} className="w-full bg-transparent text-right text-[11px] text-white/80 outline-none" />
-        </form>
-      </div>
+      {showNavigationControls && (
+        <div className="grid gap-1.5 sm:grid-cols-3">
+          <form className="flex items-center gap-2 rounded-lg border border-white/[0.1] bg-black/10 px-2 py-1" onSubmit={e => { e.preventDefault(); onJumpToPage(Number(pageInput)); }}>
+            <p className="text-[10px] uppercase tracking-[0.1em] text-white/45">Page</p>
+            <input inputMode="numeric" value={pageInput} onChange={e => setPageInput(e.target.value)} className="w-full bg-transparent text-right text-[11px] text-white/80 outline-none" />
+          </form>
+          <form className="flex items-center gap-2 rounded-lg border border-white/[0.1] bg-black/10 px-2 py-1" onSubmit={e => { e.preventDefault(); onJumpToJuz(Number(juzInput)); }}>
+            <p className="text-[10px] uppercase tracking-[0.1em] text-white/45">Juz</p>
+            <input inputMode="numeric" value={juzInput} onChange={e => setJuzInput(e.target.value)} className="w-full bg-transparent text-right text-[11px] text-white/80 outline-none" />
+          </form>
+          <form className="flex items-center gap-1 rounded-lg border border-white/[0.1] bg-black/10 px-2 py-1" onSubmit={e => {
+            e.preventDefault();
+            const surah = Number(surahInput);
+            const maxAyah = getSurahByNumber(surah)?.verses ?? 1;
+            const ayah = Math.max(1, Math.min(Number(ayahInput) || 1, maxAyah));
+            onJumpToSurahAyah(Math.max(1, Math.min(surah || 1, 114)), ayah);
+          }}>
+            <p className="text-[10px] uppercase tracking-[0.1em] text-white/45">S:A</p>
+            <input inputMode="numeric" value={surahInput} onChange={e => setSurahInput(e.target.value)} className="w-full bg-transparent text-right text-[11px] text-white/80 outline-none" />
+            <span className="text-white/30">:</span>
+            <input inputMode="numeric" value={ayahInput} onChange={e => setAyahInput(e.target.value)} className="w-full bg-transparent text-right text-[11px] text-white/80 outline-none" />
+          </form>
+        </div>
+      )}
 
       <p className="text-[11px] text-white/45">
         {viewMode === 'page'

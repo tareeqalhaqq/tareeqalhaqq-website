@@ -11,7 +11,7 @@ import {
   X,
 } from 'lucide-react';
 import { DEFAULT_RECITER_ID, QURAN_RECITER_CATALOG, getReciterById, type ReciterId } from '@/lib/quran-audio';
-import { getSurahsByJuz } from '@/lib/quran-data';
+import { getSurahByNumber, getSurahsByJuz } from '@/lib/quran-data';
 import { findMostRelevantPageForSurah, getAyah, getAyahsForPage, getAyahsForSurah } from '@/lib/quran-text';
 import type { NurProfile } from '@/lib/nur-types';
 import { MushafReader } from './mushaf/MushafReader';
@@ -121,6 +121,18 @@ export function MushafPanel({ profile, onSaveSettings, isFullScreen = false, onC
   const [playlistJuz, setPlaylistJuz] = useState(30);
   const [customRange, setCustomRange] = useState({ surah: 1, startAyah: 1, endAyah: 5 });
   const [playlistAyahs, setPlaylistAyahs] = useState<Array<{ surah: number; ayah: number }>>([]);
+
+  const [toolsPageInput, setToolsPageInput] = useState(String(position.page));
+  const [toolsJuzInput, setToolsJuzInput] = useState('30');
+  const [toolsSurahInput, setToolsSurahInput] = useState(String(position.surah));
+  const [toolsAyahInput, setToolsAyahInput] = useState(String(position.ayah));
+
+
+  useEffect(() => {
+    setToolsPageInput(String(position.page));
+    setToolsSurahInput(String(position.surah));
+    setToolsAyahInput(String(position.ayah));
+  }, [position.ayah, position.page, position.surah]);
 
   const selectedReciter = useMemo(() => getReciterById(selectedReciterId), [selectedReciterId]);
   const pageAyahs = useMemo(() => getAyahsForPage(position.page).map(item => ({ surah: item.surah, ayah: item.ayah })), [position.page]);
@@ -558,6 +570,7 @@ export function MushafPanel({ profile, onSaveSettings, isFullScreen = false, onC
                 setViewMode('ayah');
                 setPosition(prev => ({ ...prev, surah, ayah, page: matched?.page ?? findMostRelevantPageForSurah(surah) }));
               }}
+              showNavigationControls={!isFullScreen}
               onReset={() => {
                 setViewMode('page');
                 setPosition(initialPosition);
@@ -591,6 +604,26 @@ export function MushafPanel({ profile, onSaveSettings, isFullScreen = false, onC
           {showSidebar && (
             <aside className="w-80 border-l border-white/[0.08] bg-black/20 overflow-y-auto p-4 space-y-4 hidden lg:block">
               <ReciterSelector reciters={QURAN_RECITER_CATALOG} selectedReciterId={selectedReciter.id} onReciterChange={handleReciterChange} />
+
+              <div className="space-y-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
+                <p className="text-xs uppercase tracking-[0.16em] text-white/40">Reader Tools</p>
+                <div className="grid gap-1.5">
+                  <form className="flex items-center gap-2 rounded-lg border border-white/[0.1] bg-black/10 px-2 py-1" onSubmit={e => { e.preventDefault(); const targetPage = clamp(Number(toolsPageInput), 1, 604); setViewMode('page'); setPosition(prev => ({ ...prev, page: targetPage })); }}>
+                    <p className="text-[10px] uppercase tracking-[0.1em] text-white/45">Page</p>
+                    <input inputMode="numeric" value={toolsPageInput} onChange={e => setToolsPageInput(e.target.value)} className="w-full bg-transparent text-right text-[11px] text-white/80 outline-none" />
+                  </form>
+                  <form className="flex items-center gap-2 rounded-lg border border-white/[0.1] bg-black/10 px-2 py-1" onSubmit={e => { e.preventDefault(); const firstSurah = getSurahsByJuz(clamp(Number(toolsJuzInput), 1, 30))[0]; if (!firstSurah) return; setViewMode('ayah'); setPosition(prev => ({ ...prev, surah: firstSurah.number, ayah: 1, page: findMostRelevantPageForSurah(firstSurah.number) })); }}>
+                    <p className="text-[10px] uppercase tracking-[0.1em] text-white/45">Juz</p>
+                    <input inputMode="numeric" value={toolsJuzInput} onChange={e => setToolsJuzInput(e.target.value)} className="w-full bg-transparent text-right text-[11px] text-white/80 outline-none" />
+                  </form>
+                  <form className="flex items-center gap-1 rounded-lg border border-white/[0.1] bg-black/10 px-2 py-1" onSubmit={e => { e.preventDefault(); const surah = clamp(Number(toolsSurahInput) || 1, 1, 114); const maxAyah = getSurahByNumber(surah)?.verses ?? 1; const ayah = clamp(Number(toolsAyahInput) || 1, 1, maxAyah); const matched = getAyah(surah, ayah); setViewMode('ayah'); setPosition(prev => ({ ...prev, surah, ayah, page: matched?.page ?? findMostRelevantPageForSurah(surah) })); }}>
+                    <p className="text-[10px] uppercase tracking-[0.1em] text-white/45">S:A</p>
+                    <input inputMode="numeric" value={toolsSurahInput} onChange={e => setToolsSurahInput(e.target.value)} className="w-full bg-transparent text-right text-[11px] text-white/80 outline-none" />
+                    <span className="text-white/30">:</span>
+                    <input inputMode="numeric" value={toolsAyahInput} onChange={e => setToolsAyahInput(e.target.value)} className="w-full bg-transparent text-right text-[11px] text-white/80 outline-none" />
+                  </form>
+                </div>
+              </div>
 
               {/* Quick actions */}
               <div className="space-y-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
@@ -695,7 +728,6 @@ export function MushafPanel({ profile, onSaveSettings, isFullScreen = false, onC
         {viewMode === 'page' ? `Page ${position.page}` : `Surah ${position.surah}`} &middot; {selectedReciter.displayName}
       </p>
 
-      <ReciterSelector reciters={QURAN_RECITER_CATALOG} selectedReciterId={selectedReciter.id} onReciterChange={handleReciterChange} />
 
       {/* Stats grid */}
       <div className="grid grid-cols-2 gap-2">
