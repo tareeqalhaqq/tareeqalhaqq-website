@@ -1,4 +1,4 @@
-import MushafViewer from "@/components/MushafViewer";
+import StandaloneMushafViewer from './StandaloneMushafViewer';
 
 export default async function Page({
   params,
@@ -10,5 +10,5 @@ export default async function Page({
   const initialPage =
     Number.isInteger(page) && page >= 1 && page <= 604 ? page : 1;
 
-  return <MushafViewer initialPage={initialPage} />;
+  return <StandaloneMushafViewer initialPage={initialPage} />;
 }

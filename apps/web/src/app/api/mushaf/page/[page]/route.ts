@@ -29,6 +29,8 @@ export async function GET(
           v2_page: w.v2_page,
           line_number: w.line_number,
           char_type_name: w.char_type_name,
+          verse_key: w.verse_key,
+          position: w.position,
         })),
       })),
     };

@@ -1,5 +1,6 @@
 // src/lib/mushafBuilder.ts
 // Groups QCF v2 words by line_number (1..15) for Mushaf page rendering.
+// Propagates verse_key from parent verse to each word for client-side interactivity.
 
 import type { QfWord, QfVerse } from "./qfApi";
 
@@ -14,7 +15,13 @@ export type MushafPageModel = {
 };
 
 export function buildMushafPageModel(pageNumber: number, verses: QfVerse[]): MushafPageModel {
-  const words: QfWord[] = verses.flatMap((v) => v.words ?? []);
+  // Flatten words and ensure each has verse_key from parent verse
+  const words: QfWord[] = verses.flatMap((v) =>
+    (v.words ?? []).map((w) => ({
+      ...w,
+      verse_key: w.verse_key || v.verse_key,
+    }))
+  );
 
   const buckets: QfWord[][] = Array.from({ length: 15 }, () => []);
 
