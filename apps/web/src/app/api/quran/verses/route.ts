@@ -7,14 +7,19 @@ function parsePositiveInt(value: string | null) {
   return Number.isNaN(parsed) || parsed < 1 ? null : parsed;
 }
 
+function parseBoolean(value: string | null) {
+  return value === '1' || value === 'true';
+}
+
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const page = parsePositiveInt(searchParams.get('page'));
     const surah = parsePositiveInt(searchParams.get('surah'));
+    const words = parseBoolean(searchParams.get('words'));
 
     if (page) {
-      const data = await fetchQuranComVersesByPage(page);
+      const data = await fetchQuranComVersesByPage(page, { words });
       return NextResponse.json(data);
     }
 

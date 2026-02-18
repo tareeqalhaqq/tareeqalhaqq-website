@@ -7,6 +7,12 @@ type TokenState = {
   expiresAt: number;
 };
 
+type VerseApiWord = {
+  text_uthmani?: string;
+  line_number?: number;
+  position?: number;
+};
+
 type VerseApiResponse = {
   verses?: Array<{
     verse_key: string;
@@ -14,6 +20,7 @@ type VerseApiResponse = {
     chapter_id: number;
     verse_number: number;
     page_number: number;
+    words?: VerseApiWord[];
   }>;
 };
 
@@ -37,13 +44,8 @@ function canReuseToken() {
 }
 
 async function requestAccessToken(): Promise<string> {
-  if (canReuseToken()) {
-    return tokenState!.token;
-  }
-
-  if (inFlightTokenRequest) {
-    return inFlightTokenRequest;
-  }
+  if (canReuseToken()) return tokenState!.token;
+  if (inFlightTokenRequest) return inFlightTokenRequest;
 
   inFlightTokenRequest = (async () => {
     const { clientId, clientSecret } = getClientCredentials();
@@ -70,9 +72,7 @@ async function requestAccessToken(): Promise<string> {
     const accessToken = data.access_token;
     const expiresIn = typeof data.expires_in === 'number' ? data.expires_in : 300;
 
-    if (!accessToken) {
-      throw new Error('Quran.com token response did not include access_token.');
-    }
+    if (!accessToken) throw new Error('Quran.com token response did not include access_token.');
 
     tokenState = {
       token: accessToken,
@@ -105,14 +105,8 @@ async function fetchWithRetry(endpoint: string) {
         cache: 'no-store',
       });
 
-      if (res.status === 401) {
-        tokenState = null;
-      }
-
-      if (res.ok) {
-        return res;
-      }
-
+      if (res.status === 401) tokenState = null;
+      if (res.ok) return res;
       if (res.status < 500 && res.status !== 429) {
         throw new Error(`Quran.com API request failed (${res.status}).`);
       }
@@ -129,8 +123,11 @@ async function fetchWithRetry(endpoint: string) {
   throw lastError instanceof Error ? lastError : new Error('Quran.com API request failed after retries.');
 }
 
-export async function fetchQuranComVersesByPage(page: number): Promise<VerseApiResponse> {
-  const endpoint = `/verses/by_page/${page}?language=en&words=false&fields=text_uthmani,chapter_id,verse_number,page_number,verse_key&per_page=50`;
+export async function fetchQuranComVersesByPage(page: number, options?: { words?: boolean }): Promise<VerseApiResponse> {
+  const wordsEnabled = options?.words ?? false;
+  const endpoint = wordsEnabled
+    ? `/verses/by_page/${page}?language=en&words=true&word_fields=text_uthmani,line_number,position&fields=text_uthmani,chapter_id,verse_number,page_number,verse_key&per_page=50`
+    : `/verses/by_page/${page}?language=en&words=false&fields=text_uthmani,chapter_id,verse_number,page_number,verse_key&per_page=50`;
   const res = await fetchWithRetry(endpoint);
   return (await res.json()) as VerseApiResponse;
 }

@@ -209,6 +209,26 @@
 
 /* ── Mushaf page styles ── */
 
+
+
+.mushaf-page-canvas {
+  aspect-ratio: 0.71;
+  border-radius: 0.35rem;
+}
+
+.mushaf-page-canvas-inner {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  height: 100%;
+  padding: 0.8rem 1.1rem 2.1rem;
+}
+
+@media (min-width: 640px) {
+  .mushaf-page-canvas-inner {
+    padding: 0.9rem 1.35rem 2.35rem;
+  }
+}
 /* The main mushaf text container – proper Uthmanic script with justified RTL */
 .mushaf-page {
   font-family: "KFGQPC Hafs", "UthmanTN", serif;
@@ -216,12 +236,23 @@
   unicode-bidi: embed;
   text-align: justify;
   text-align-last: justify;
-  line-height: 2.2;
-  font-size: clamp(1.15rem, 2.5vw, 1.55rem);
-  color: #1e1712;
+  line-height: 1;
+  font-size: clamp(1.08rem, 2.15vw, 1.42rem);
+  color: #17120e;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   word-spacing: 0.06em;
+  display: grid;
+  grid-template-rows: repeat(15, minmax(0, 1fr));
+  gap: 0;
+}
+
+.mushaf-layout-line-shell {
+  width: 100%;
+  margin-inline: auto;
+  min-width: 78%;
+  display: flex;
+  align-items: center;
 }
 
 /* Each line in the mushaf page – text-based justified layout */
@@ -229,10 +260,10 @@
   display: block;
   text-align: justify;
   text-align-last: justify;
-  min-height: 1.8em;
-  line-height: inherit;
+  line-height: 1.95;
   overflow: hidden;
   white-space: nowrap;
+  width: 100%;
 }
 
 /* Last line of a surah should be centered, not justified */
@@ -243,12 +274,11 @@
 
 /* Mushaf page frame – cream parchment look like a real printed mushaf */
 .mushaf-frame {
-  background: linear-gradient(175deg, #faf6eb 0%, #f5eed8 40%, #f0e8ce 100%);
-  border: 1.5px solid rgba(160, 130, 70, 0.32);
+  background: #faf7ef;
+  border: 1px solid #b7a57a;
   box-shadow:
-    0 2px 8px rgba(25, 20, 12, 0.1),
-    0 8px 32px rgba(25, 20, 12, 0.06),
-    inset 0 0 0 1px rgba(255, 248, 225, 0.6);
+    0 2px 8px rgba(23, 18, 10, 0.12),
+    inset 0 0 0 1px rgba(255, 250, 232, 0.75);
   position: relative;
 }
 
@@ -256,8 +286,8 @@
 .mushaf-frame::before {
   content: "";
   position: absolute;
-  inset: 6px;
-  border: 1px solid rgba(160, 130, 70, 0.18);
+  inset: 8px;
+  border: 1px solid rgba(138, 117, 70, 0.38);
   border-radius: inherit;
   pointer-events: none;
 }
@@ -311,12 +341,12 @@
 .mushaf-page-top-rule {
   width: 100%;
   height: 1px;
-  background: linear-gradient(90deg, rgba(160, 130, 70, 0.1), rgba(160, 130, 70, 0.35), rgba(160, 130, 70, 0.1));
+  background: linear-gradient(90deg, rgba(125, 102, 58, 0.12), rgba(125, 102, 58, 0.42), rgba(125, 102, 58, 0.12));
 }
 
 .mushaf-page-top-rule-accent {
   height: 1.5px;
-  background: linear-gradient(90deg, rgba(160, 130, 70, 0.15), rgba(160, 130, 70, 0.5), rgba(160, 130, 70, 0.15));
+  background: linear-gradient(90deg, rgba(125, 102, 58, 0.22), rgba(125, 102, 58, 0.62), rgba(125, 102, 58, 0.22));
 }
 
 /* Ayah end marker – the decorative verse number circle */
@@ -353,7 +383,7 @@
 .mushaf-page-bottom-rule {
   width: 100%;
   height: 1.5px;
-  background: linear-gradient(90deg, rgba(160, 130, 70, 0.1), rgba(160, 130, 70, 0.4), rgba(160, 130, 70, 0.1));
+  background: linear-gradient(90deg, rgba(125, 102, 58, 0.14), rgba(125, 102, 58, 0.48), rgba(125, 102, 58, 0.14));
   margin-top: auto;
 }
 
