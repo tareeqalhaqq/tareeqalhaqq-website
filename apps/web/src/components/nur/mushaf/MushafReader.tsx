@@ -17,6 +17,11 @@ import {
   useMushafAudioHooks,
   useMushafPageData,
 } from './page-layers';
+import {
+  QcfMushafPageCanvas,
+  QcfMushafPageSpreadCanvas,
+  useQcfPageData,
+} from './qcf-page-layers';
 
 type MushafReaderProps = {
   viewMode: MushafViewMode;
@@ -157,7 +162,28 @@ export function MushafReader({
   const [selectedAyahKey, setSelectedAyahKey] = useState<string | null>(null);
   const [rangeStart, setRangeStart] = useState<number | null>(null);
   const { onAudioPageFlip } = useMushafAudioHooks();
-  const { pageVerses, spreadPageVerses, loading: pageLoading, spread } = useMushafPageData(position.page, options.pagePairMode, viewMode);
+
+  // QCF v2 glyph data (preferred: pixel-perfect Mushaf rendering)
+  const {
+    data: qcfData,
+    spreadData: qcfSpreadData,
+    loading: qcfLoading,
+    failed: qcfFailed,
+    spread: qcfSpread,
+  } = useQcfPageData(position.page, options.pagePairMode, viewMode);
+
+  // Text fallback data (used when QCF credentials are missing or API fails)
+  const {
+    pageVerses,
+    spreadPageVerses,
+    loading: textLoading,
+    spread: textSpread,
+  } = useMushafPageData(position.page, options.pagePairMode, viewMode);
+
+  // Determine which rendering path to use
+  const useQcf = !qcfFailed && qcfData !== null;
+  const spread = useQcf ? qcfSpread : textSpread;
+  const isPageLoading = qcfLoading || (qcfFailed && textLoading);
 
   // Fetch surah verses
   useEffect(() => {
@@ -281,6 +307,64 @@ export function MushafReader({
     selectedAyahKey ? null : null
   );
 
+  // ── Page view content renderer ──
+
+  function renderPageView() {
+    // QCF v2 glyph rendering (preferred — pixel-perfect Mushaf)
+    if (useQcf && qcfData) {
+      if (options.pagePairMode === 'spread' && qcfSpreadData) {
+        return (
+          <QcfMushafPageSpreadCanvas
+            rightData={qcfData}
+            leftData={qcfSpreadData}
+            rightPage={spread.rightPage}
+            leftPage={spread.leftPage}
+            activePlaybackAyah={activePlaybackAyah}
+            onPlayAyah={onPlayAyah}
+            onAyahTap={handleAyahTap}
+            selectedAyahKey={selectedAyahKey}
+          />
+        );
+      }
+      return (
+        <QcfMushafPageCanvas
+          data={qcfData}
+          page={position.page}
+          activePlaybackAyah={activePlaybackAyah}
+          onPlayAyah={onPlayAyah}
+          onAyahTap={handleAyahTap}
+          selectedAyahKey={selectedAyahKey}
+        />
+      );
+    }
+
+    // Text fallback (Uthmanic script with heuristic line breaks)
+    if (options.pagePairMode === 'spread') {
+      return (
+        <MushafPageSpreadCanvas
+          rightPageVerses={pageVerses}
+          leftPageVerses={spreadPageVerses}
+          rightPage={textSpread.rightPage}
+          leftPage={textSpread.leftPage}
+          activePlaybackAyah={activePlaybackAyah}
+          onPlayAyah={onPlayAyah}
+          onAyahTap={handleAyahTap}
+          selectedAyahKey={selectedAyahKey}
+        />
+      );
+    }
+    return (
+      <MushafPageCanvas
+        verses={pageVerses}
+        page={position.page}
+        activePlaybackAyah={activePlaybackAyah}
+        onPlayAyah={onPlayAyah}
+        onAyahTap={handleAyahTap}
+        selectedAyahKey={selectedAyahKey}
+      />
+    );
+  }
+
   return (
     <div className="flex h-full flex-col">
       {/* Compact navigation bar */}
@@ -336,33 +420,13 @@ export function MushafReader({
         onScroll={e => onScrollPositionChange(e.currentTarget.scrollTop)}
         className="flex-1 overflow-y-auto overflow-x-hidden px-1"
       >
-        {(viewMode === 'page' ? pageLoading : surahLoading) ? (
+        {(viewMode === 'page' ? isPageLoading : surahLoading) ? (
           <div className="flex flex-col items-center justify-center py-20">
             <Loader2 className="h-6 w-6 animate-spin text-cyan-300/40 mb-2" />
             <p className="text-xs text-white/40">Loading Quran text...</p>
           </div>
         ) : viewMode === 'page' ? (
-          options.pagePairMode === 'spread' ? (
-            <MushafPageSpreadCanvas
-              rightPageVerses={pageVerses}
-              leftPageVerses={spreadPageVerses}
-              rightPage={spread.rightPage}
-              leftPage={spread.leftPage}
-              activePlaybackAyah={activePlaybackAyah}
-              onPlayAyah={onPlayAyah}
-              onAyahTap={handleAyahTap}
-              selectedAyahKey={selectedAyahKey}
-            />
-          ) : (
-            <MushafPageCanvas
-              verses={pageVerses}
-              page={position.page}
-              activePlaybackAyah={activePlaybackAyah}
-              onPlayAyah={onPlayAyah}
-              onAyahTap={handleAyahTap}
-              selectedAyahKey={selectedAyahKey}
-            />
-          )
+          renderPageView()
         ) : (
           <MushafAyahView
             verses={surahVerses}

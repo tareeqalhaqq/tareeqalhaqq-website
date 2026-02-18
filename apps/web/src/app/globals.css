@@ -1,5 +1,4 @@
 @import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300..800&family=Sora:wght@400..800&display=swap");
-@import "../styles/mushaf.css";
 
 /* KFGQPC Uthmanic Hafs Script – the official Madinah Mushaf font */
 @font-face {
@@ -386,6 +385,57 @@
   height: 1.5px;
   background: linear-gradient(90deg, rgba(125, 102, 58, 0.14), rgba(125, 102, 58, 0.48), rgba(125, 102, 58, 0.14));
   margin-top: auto;
+}
+
+/* ── QCF v2 glyph-based Mushaf rendering ── */
+
+.mushaf-qcf-inner {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  height: 100%;
+  padding: 0.6rem 0.8rem 2.1rem;
+}
+
+@media (min-width: 640px) {
+  .mushaf-qcf-inner {
+    padding: 0.75rem 1rem 2.35rem;
+  }
+}
+
+.mushaf-qcf-page {
+  direction: rtl;
+  unicode-bidi: embed;
+  display: grid;
+  grid-template-rows: repeat(15, minmax(0, 1fr));
+  gap: 0;
+  font-size: clamp(1.05rem, 2.2vw, 1.55rem);
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.mushaf-qcf-line {
+  direction: rtl;
+  unicode-bidi: isolate;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  white-space: nowrap;
+  overflow: hidden;
+  line-height: 1;
+}
+
+.mushaf-qcf-word {
+  display: inline-block;
+  white-space: pre;
+  color: #17120e;
+  transition: background 0.15s ease;
+}
+
+.mushaf-qcf-word--selected {
+  background: rgba(56, 189, 248, 0.12);
+  border-radius: 3px;
 }
 
 /* Auth page gradient */
