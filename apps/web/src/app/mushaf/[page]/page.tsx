@@ -1,4 +1,4 @@
-import TarteelMushafViewer from './TarteelMushafViewer';
+import MushafPageReader from './MushafPageReader';
 
 export default async function Page({
   params,
@@ -10,5 +10,5 @@ export default async function Page({
   const initialPage =
     Number.isInteger(page) && page >= 1 && page <= 604 ? page : 1;
 
-  return <TarteelMushafViewer initialPage={initialPage} />;
+  return <MushafPageReader initialPage={initialPage} />;
 }
